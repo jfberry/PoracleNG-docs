@@ -1,9 +1,9 @@
 site_name: PoracleNG Documentation
 site_description: Documentation for PoracleNG - Pokemon Go notification system
-site_url: https://muckelba.github.io/poracleWiki/
+site_url: https://jfberry.github.io/PoracleNG-docs/
 
-repo_url: https://github.com/muckelba/poracleWiki
-repo_name: muckelba/poracleWiki
+repo_url: https://github.com/jfberry/PoracleNG-docs
+repo_name: jfberry/PoracleNG-docs
 edit_uri: edit/main/docs/
 
 theme:
