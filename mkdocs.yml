@@ -9,7 +9,7 @@ edit_uri: edit/main/docs/
 theme:
   name: material
   favicon: assets/favicon.ico
-  logo: assets/PoracleJSWiki.png
+  logo: assets/PoracleNG.png
   features:
     - navigation.tabs
     - navigation.sections

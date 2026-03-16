@@ -1,6 +1,6 @@
 # PoracleNG Documentation
 
-![PoracleNG](assets/PoracleJSWiki.png)
+![PoracleNG](assets/PoracleNG.png)
 
 PoracleNG is a high-performance Pokemon Go notification system that sends configurable alerts about wild spawns, raids, quests, invasions, lures, nests, and more to Discord and Telegram.
 
