@@ -133,13 +133,13 @@ These options are available across most tracking commands:
 
 | Command | Description |
 |---------|-------------|
-| `!test pokemon` | Send a test pokemon alert |
-| `!test raid` | Send a test raid alert |
-| `!test egg` | Send a test egg alert |
-| `!test quest` | Send a test quest alert |
-| `!test invasion` | Send a test invasion alert |
-| `!test lure` | Send a test lure alert |
-| `!test weather` | Send a test weather alert |
+| `!poracle-test pokemon` | Send a test pokemon alert |
+| `!poracle-test raid` | Send a test raid alert |
+| `!poracle-test egg` | Send a test egg alert |
+| `!poracle-test quest` | Send a test quest alert |
+| `!poracle-test invasion` | Send a test invasion alert |
+| `!poracle-test lure` | Send a test lure alert |
+| `!poracle-test weather` | Send a test weather alert |
 
 ## Discord-Specific
 

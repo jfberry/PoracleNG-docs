@@ -480,16 +480,16 @@ Time left: {{> remainingTime}}
 
 ## Template Testing
 
-Test your templates with the `!test` command:
+Test your templates with the `!poracle-test` command:
 
 ```
-!test pokemon
-!test raid
-!test egg
-!test quest
-!test invasion
-!test lure
-!test weather
+!poracle-test pokemon
+!poracle-test raid
+!poracle-test egg
+!poracle-test quest
+!poracle-test invasion
+!poracle-test lure
+!poracle-test weather
 ```
 
 This sends a test alert using sample data from `config/testdata.json` (or the bundled fallback).

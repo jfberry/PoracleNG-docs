@@ -46,7 +46,7 @@ Some features use JSON data files loaded from `config/` with automatic fallback 
 | `dts.json` | Discord/Telegram message templates | Yes (`fallbacks/dts.json`) |
 | `pokemonAlias.json` | Pokemon name aliases for commands | Yes |
 | `partials.json` | Handlebars template partials | Yes |
-| `testdata.json` | Test webhook data for `!test` command | Yes |
+| `testdata.json` | Test webhook data for `!poracle-test` command | Yes |
 | `geofences/*.json` | Geofence definitions | Yes |
 | `dts/` | Additional DTS files (merged with dts.json) | No |
 | `broadcast.json` | Broadcast message templates | No |

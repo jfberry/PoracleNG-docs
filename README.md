@@ -1,6 +1,6 @@
 # PoracleNG Documentation
 
-Documentation for [PoracleNG](https://github.com/UnPokemon/PoracleNG), built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/).
+Documentation for [PoracleNG](https://github.com/jfberry/PoracleNG). View the docs at [jfberry.github.io/PoracleNG-docs](https://jfberry.github.io/PoracleNG-docs/). Built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/).
 
 ## Local Development
 

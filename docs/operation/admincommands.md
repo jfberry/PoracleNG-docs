@@ -131,13 +131,13 @@ Send test alerts to verify configuration:
 === "Discord"
 
     ```
-    !test pokemon
-    !test raid
-    !test egg
-    !test quest
-    !test invasion
-    !test lure
-    !test weather
+    !poracle-test pokemon
+    !poracle-test raid
+    !poracle-test egg
+    !poracle-test quest
+    !poracle-test invasion
+    !poracle-test lure
+    !poracle-test weather
     ```
 
 === "Telegram"

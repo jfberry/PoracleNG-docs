@@ -75,7 +75,7 @@ port = 3031
 
 ### Test command works but real alerts don't
 
-- The `!test` command uses sample data, not real webhooks
+- The `!poracle-test` command uses sample data, not real webhooks
 - Verify your scanner is sending webhooks to port 3030
 - Check `logs/processor.log` for webhook processing activity
 

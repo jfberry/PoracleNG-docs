@@ -98,7 +98,7 @@ curl http://localhost:3030/health
 curl http://localhost:3031/health
 ```
 
-Test that alerts are working by sending a `!test pokemon` command in Discord (or `/test pokemon` in Telegram).
+Test that alerts are working by sending a `!poracle-test pokemon` command in Discord (or `/test pokemon` in Telegram).
 
 ## Step 7: Update External Tools
 

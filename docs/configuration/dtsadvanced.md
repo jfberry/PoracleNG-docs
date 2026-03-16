@@ -282,7 +282,7 @@ Telegram templates support these extra fields:
 
 ## Tips
 
-- Always test templates after changes with `!test`
+- Always test templates after changes with `!poracle-test`
 - Use `{{{triple braces}}}` for URLs and any content with special characters
 - Use `{{round iv}}` instead of raw `{{iv}}` to avoid long decimal numbers
 - Use `{{#if field}}` to handle optional fields that may be empty
