@@ -7,40 +7,50 @@ PoracleNG receives Pokemon Go data via webhooks from a scanner. **Golbat** is th
 
 ## Golbat (Recommended)
 
-[Golbat](https://github.com/UnownHash/Golbat) is the default scanner type. Configure it to send webhooks to the **PoracleNG processor**:
+[Golbat](https://github.com/UnownHash/Golbat) is the default scanner type. Golbat uses a TOML config file (`config.toml`). Add a `[[webhooks]]` section pointing at the **PoracleNG processor**:
 
-In your Golbat configuration, add a webhook destination:
+```toml
+[[webhooks]]
+url = "http://<poracle-host>:3030/raw"
+```
 
-```json
-{
-  "webhooks": [
-    {
-      "url": "http://<poracle-host>:3030/",
-      "types": ["pokemon", "pokemon_iv", "raid", "quest", "invasion", "pokestop", "gym", "gym_details", "weather", "nest"]
-    }
-  ]
-}
+By default, Golbat sends all webhook types. To limit to specific types, add a `types` filter:
+
+```toml
+[[webhooks]]
+url = "http://<poracle-host>:3030/raw"
+types = ["pokemon", "pokemon_iv", "gym", "invasion", "quest", "pokestop", "raid", "weather", "fort_update"]
+```
+
+You can also restrict webhooks to specific areas and add custom headers:
+
+```toml
+[[webhooks]]
+url = "http://<poracle-host>:3030/raw"
+types = ["pokemon_iv", "raid", "quest", "invasion", "pokestop", "weather"]
+areas = ["MyArea"]
+headers = ["X-Custom-Header:value"]
 ```
 
 !!! important
-    Point webhooks at the **processor** on port **3030**, not the alerter on port 3031.
+    Point webhooks at the **processor** on port **3030**, not the alerter on port 3031. The webhook endpoint is `/raw`.
 
 ### Webhook Types
 
-Golbat sends the following webhook types that PoracleNG processes:
+Golbat can send the following webhook types that PoracleNG processes:
 
 | Type | Description |
 |------|-------------|
-| `pokemon` | Wild pokemon without IV data |
-| `pokemon_iv` | Wild pokemon with IV/CP/level data |
+| `pokemon` | All pokemon (with and without IVs) |
+| `pokemon_iv` | Only encountered pokemon with IV/CP/level data |
+| `pokemon_no_iv` | Only nearby pokemon without encounter data |
 | `raid` | Raids and eggs |
 | `quest` | Field research quests |
 | `invasion` | Team Rocket invasions |
 | `pokestop` | Pokestop updates (lures) |
 | `gym` | Gym team/details changes |
-| `gym_details` | Gym name/photo updates |
 | `weather` | In-game weather changes |
-| `nest` | Nest pokemon changes |
+| `fort_update` | Fort (gym/pokestop) metadata changes |
 
 ## RDM
 
