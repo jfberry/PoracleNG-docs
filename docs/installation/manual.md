@@ -28,7 +28,7 @@ FLUSH PRIVILEGES;
 ## Step 2: Clone the Repository
 
 ```sh
-git clone https://github.com/UnPokemon/PoracleNG.git
+git clone https://github.com/jfberry/PoracleNG.git
 cd PoracleNG
 ```
 

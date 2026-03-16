@@ -12,7 +12,7 @@ This guide walks you through migrating an existing PoracleJS installation to Por
 ## Step 1: Clone and Build PoracleNG
 
 ```sh
-git clone https://github.com/UnPokemon/PoracleNG.git
+git clone https://github.com/jfberry/PoracleNG.git
 cd PoracleNG
 make build
 ```
