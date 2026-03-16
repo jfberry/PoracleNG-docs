@@ -42,33 +42,10 @@ Golbat ──webhook──▶ Processor (Go :3030) ──matched──▶ Alerte
 
 ## Getting Started
 
-<div class="grid cards" markdown>
-
--   :material-swap-horizontal:{ .lg .middle } **Migrating from PoracleJS?**
-
-    ---
-
-    Follow the [Migration Guide](migration/guide.md) to convert your existing setup.
-
--   :material-download:{ .lg .middle } **New Installation**
-
-    ---
-
-    Start with the [Installation Guide](installation/index.md) to get PoracleNG running.
-
--   :material-cog:{ .lg .middle } **Configuration**
-
-    ---
-
-    See the [Configuration Reference](configuration/config_file.md) for all settings.
-
--   :material-account:{ .lg .middle } **User Guide**
-
-    ---
-
-    Learn how to [set up tracking](userguide/index.md) as an end user.
-
-</div>
+- **Migrating from PoracleJS?** — Follow the [Migration Guide](migration/guide.md) to convert your existing setup.
+- **New Installation** — Start with the [Installation Guide](installation/index.md) to get PoracleNG running.
+- **Configuration** — See the [Configuration Reference](configuration/config_file.md) for all settings.
+- **User Guide** — Learn how to [set up tracking](userguide/index.md) as an end user.
 
 ## Quick Start
 
