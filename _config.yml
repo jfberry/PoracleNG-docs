@@ -1,0 +1,38 @@
+title: Poracle Documentation
+description: Documentation for Poracle
+url: "https://muckelba.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "/poracleWiki" # the subpath of your site, e.g. /blog
+show_downloads: false
+color_scheme: "poracle" # Use "dark" for darkmode
+footer_content: "Copyright &copy; 2022."
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub."
+gh_edit_repository: https://github.com/muckelba/poracleWiki
+gh_edit_branch: "master"
+gh_edit_view_mode: "tree"
+
+aux_links:
+  "PoracleWiki on GitHub":
+    - "https://github.com/muckelba/poracleWiki"
+aux_links_new_tab: true
+
+# Build settings
+markdown: kramdown
+#theme: just-the-docs
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-feed
+  - jemoji
+
+
+# Exclude from processing.
+# The following items will not be processed, by default. Create a custom list
+# to override the default setting.
+# exclude:
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/

@@ -1,0 +1,6 @@
+Gemfile.lock
+_site/
+.sass-cache
+.jekyll-cache
+npm-debug.log
+.idea
