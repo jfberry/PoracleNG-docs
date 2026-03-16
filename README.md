@@ -1,21 +1,24 @@
-![logo](https://raw.githubusercontent.com/muckelba/poracleWiki/master/assets/PoracleJSWiki.png)
-# Poracle Documentation
+# PoracleNG Documentation
 
-## Introduction
+Documentation for [PoracleNG](https://github.com/UnPokemon/PoracleNG), built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/).
 
-This project is meant to serve as a WIKI page source for [PoracleJS](https://github.com/KartulUdus/PoracleJS/).  
+## Local Development
 
-## Links
+```sh
+pip install -r requirements.txt
+mkdocs serve
+```
 
-- [WIKI](https://muckelba.github.io/poracleWiki/) - Live version  
-- [Discord](https://discord.gg/AathPCp) - Place to Discuss stuff   
+Then open http://localhost:8000 to preview.
 
-## Install
+## Building
 
-Have a look at the official GitHub Documentation about a [local Jekyll environment](https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/testing-your-github-pages-site-locally-with-jekyll)
-After Jekyll has been installed make sure to install the required packages. This can be accomplished by running `bundle install`.
-To run the server run `bundle exec jekyll serve` and you can access the running instance on `localhost:4000`. If you are running on WSL you will need to add the parameter `--host <IP_OF_WSL>`.
-And when you are happy with your changes, commit them to your fork and open a PR against original.  
+```sh
+mkdocs build
+```
 
+Output is in the `site/` directory.
 
-Many thanks
+## Deployment
+
+Pushes to `main` automatically build and deploy to GitHub Pages via GitHub Actions.

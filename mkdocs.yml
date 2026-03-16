@@ -1,0 +1,112 @@
+site_name: PoracleNG Documentation
+site_description: Documentation for PoracleNG - Pokemon Go notification system
+site_url: https://muckelba.github.io/poracleWiki/
+
+repo_url: https://github.com/muckelba/poracleWiki
+repo_name: muckelba/poracleWiki
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  favicon: assets/favicon.ico
+  logo: assets/PoracleJSWiki.png
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - scheme: default
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Migration:
+    - migration/index.md
+    - Migration Guide: migration/guide.md
+  - Installation:
+    - installation/index.md
+    - Manual Install: installation/manual.md
+    - Docker: installation/docker.md
+    - Discord Bot: installation/discord.md
+    - Telegram Bot: installation/telegram.md
+    - Scanner Setup: installation/scanner.md
+  - Configuration:
+    - configuration/index.md
+    - Config File Reference: configuration/config_file.md
+    - Geofences: configuration/geofence.md
+    - Discord: configuration/discord.md
+    - Telegram: configuration/telegram.md
+    - Geocoding: configuration/geocoding.md
+    - Static Maps: configuration/staticmaps.md
+    - Alert Templates (DTS): configuration/dts.md
+    - Advanced DTS: configuration/dtsadvanced.md
+    - Weather: configuration/weather.md
+    - Multi-Language: configuration/multilang.md
+    - Area Security: configuration/areasecurity.md
+    - Advanced: configuration/advanced.md
+  - User Guide:
+    - userguide/index.md
+    - Registration: userguide/registration.md
+    - Pokemon Tracking: userguide/pokemon.md
+    - Raids & Eggs: userguide/raids.md
+    - PVP Tracking: userguide/pvp.md
+    - Quests: userguide/quests.md
+    - Invasions: userguide/invasions.md
+    - Lures: userguide/lures.md
+    - Nests: userguide/nests.md
+    - Gyms & Forts: userguide/gyms.md
+    - Areas & Location: userguide/areas.md
+    - Profiles: userguide/profiles.md
+    - Command Reference: userguide/commands.md
+  - Operation:
+    - operation/index.md
+    - Admin Commands: operation/admincommands.md
+    - Discord Admin: operation/discord.md
+    - Telegram Admin: operation/telegram.md
+    - Monitoring: operation/monitoring.md
+    - Rate Limits: operation/ratelimits.md
+    - FAQ: operation/faq.md
+  - API:
+    - api/index.md
+    - Config API: api/config.md
+    - Geofence API: api/geofence.md
+    - Humans API: api/humans.md
+  - PoracleWeb:
+    - poracleWeb/index.md
+    - Installation: poracleWeb/install.md
