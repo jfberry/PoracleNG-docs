@@ -20,7 +20,7 @@ paths = ["geofences/areas.json", "geofences/parks.json", "geofences/custom.geojs
 
 ## Poracle JSON Format
 
-The traditional Poracle format, a JSON array of fences created at [geo.jasparke.net](http://geo.jasparke.net/):
+The traditional Poracle format, a JSON array of fences:
 
 ```json
 [
@@ -83,7 +83,7 @@ The fence name is taken from `properties.name` in each feature.
 
 ## Koji Integration
 
-[Koji](https://github.com/TurtIeSern/Koji) is a geofence management tool. PoracleNG can download geofences directly from a Koji instance:
+[Koji](https://github.com/TurtIeSocks/Koji) is a geofence management tool. PoracleNG can download geofences directly from a Koji instance:
 
 ```toml
 [geofence.koji]
@@ -101,6 +101,14 @@ paths = ["koji://project-name", "geofences/local-extra.json"]
 ```
 
 You can mix Koji sources with local files.
+
+## Creating Geofences
+
+There are several tools available for creating geofences:
+
+- **[Koji](https://github.com/TurtIeSocks/Koji)** — a full geofence management tool that integrates directly with PoracleNG (see [Koji Integration](#koji-integration) above)
+- **[Poracle Geofence Editor](https://wolscyrajdownicy.waw.pl/geo/)** — a web-based editor that outputs Poracle JSON format directly
+- **[geojson.io](https://geojson.io/)** — a general-purpose GeoJSON editor. After drawing your geofence, you will need to manually add a `"name"` property to each feature in the JSON for PoracleNG to recognise it
 
 ## Area Names in Commands
 
