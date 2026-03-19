@@ -18,7 +18,7 @@ Not on the same database simultaneously. However, you can switch between them as
 
 ### Does PoracleNG support Docker?
 
-Docker support is planned but not yet available. Use the [Manual Installation](../installation/manual.md) method.
+Yes. A pre-built image is available at `ghcr.io/jfberry/poracleng:latest`. See the [Docker Installation](../installation/docker.md) guide.
 
 ## Startup Issues
 
