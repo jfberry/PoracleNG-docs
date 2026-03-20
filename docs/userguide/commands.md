@@ -84,6 +84,31 @@ Quick reference for all PoracleNG user commands. Discord uses `!` prefix, Telegr
 
 `level<n>`, `ex`, `d<n>`, team names (`instinct`/`valor`/`mystic`/`harmony`), `move:<name>`, `template<n>`, `clean`, `everything`, `remove`
 
+## MAX Battle Tracking
+
+| Command | Description |
+|---------|-------------|
+| `!maxbattle level<n> [options]` | Track MAX Battles by level (1-5) |
+| `!maxbattle <pokemon> [options]` | Track MAX Battles for a specific pokemon |
+| `!maxbattle everything [options]` | Track all MAX Battle levels |
+| `!maxbattle remove <target>` | Remove MAX Battle tracking |
+| `!maxbattle remove everything` | Remove all MAX Battle tracking |
+
+### MAX Battle Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `level<n>` | MAX Battle level | `level5` |
+| `gmax` | Gigantamax variant only | `gmax` |
+| `d<n>` | Distance (meters) | `d500` |
+| `move/<name>` | Filter by move | `move/flamethrower` |
+| `gen<n>` | Generation filter | `gen1` |
+| `form:<name>` | Form filter | `form:alolan` |
+| `template<n>` | Template number | `template2` |
+| `clean` | Auto-delete expired | `clean` |
+
+For more details see [MAX Battle Tracking](maxbattle.md).
+
 ## Other Tracking
 
 | Command | Description |
@@ -98,7 +123,7 @@ Quick reference for all PoracleNG user commands. Discord uses `!` prefix, Telegr
 | `!nest remove <pokemon>` | Remove nest tracking |
 | `!gym <team> [options]` | Track gym changes |
 | `!gym remove <team>` | Remove gym tracking |
-| `!fort [options]` | Track fort updates |
+| `!fort [options]` | Track fort updates (new/removed/renamed stops and gyms) |
 | `!weather` | Track weather changes |
 
 ## Profiles
@@ -135,11 +160,12 @@ These options are available across most tracking commands:
 |---------|-------------|
 | `!poracle-test pokemon` | Send a test pokemon alert |
 | `!poracle-test raid` | Send a test raid alert |
-| `!poracle-test egg` | Send a test egg alert |
+| `!poracle-test pokestop` | Send a test pokestop alert |
+| `!poracle-test gym` | Send a test gym alert |
+| `!poracle-test nest` | Send a test nest alert |
 | `!poracle-test quest` | Send a test quest alert |
-| `!poracle-test invasion` | Send a test invasion alert |
-| `!poracle-test lure` | Send a test lure alert |
-| `!poracle-test weather` | Send a test weather alert |
+| `!poracle-test fort-update` | Send a test fort update alert |
+| `!poracle-test max-battle` | Send a test MAX Battle alert |
 
 ## Discord-Specific
 

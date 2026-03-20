@@ -485,11 +485,12 @@ Test your templates with the `!poracle-test` command:
 ```
 !poracle-test pokemon
 !poracle-test raid
-!poracle-test egg
+!poracle-test pokestop
+!poracle-test gym
+!poracle-test nest
 !poracle-test quest
-!poracle-test invasion
-!poracle-test lure
-!poracle-test weather
+!poracle-test fort-update
+!poracle-test max-battle
 ```
 
 This sends a test alert using sample data from `config/testdata.json` (or the bundled fallback).

@@ -133,11 +133,12 @@ Send test alerts to verify configuration:
     ```
     !poracle-test pokemon
     !poracle-test raid
-    !poracle-test egg
+    !poracle-test pokestop
+    !poracle-test gym
+    !poracle-test nest
     !poracle-test quest
-    !poracle-test invasion
-    !poracle-test lure
-    !poracle-test weather
+    !poracle-test fort-update
+    !poracle-test max-battle
     ```
 
 === "Telegram"
