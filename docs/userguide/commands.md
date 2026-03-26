@@ -13,7 +13,7 @@ Quick reference for all PoracleNG user commands. Discord uses `!` prefix, Telegr
 | `!tracked` | Show all your tracking subscriptions |
 | `!version` | Show bot version |
 | `!help` | Show help |
-| `!help <command>` | Show help for specific command |
+| `!help <command>` | Show help for a specific command |
 
 ## Location & Areas
 
