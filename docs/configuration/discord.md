@@ -51,7 +51,7 @@ When `user_role` is set, users with those roles are automatically registered wit
 
 ## Delegated Admins
 
-Grant admin access over specific channels, guilds, or categories:
+Grant admin access to specific channels, guilds, or categories:
 
 ```toml
 [[discord.delegated_admins]]
@@ -65,7 +65,7 @@ admins = ["user_id_3"]
 
 ## Webhook Admins
 
-Grant users admin access over specific Discord webhooks:
+Grant users admin access to specific Discord webhooks:
 
 ```toml
 [[discord.webhook_admins]]

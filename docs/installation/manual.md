@@ -106,7 +106,7 @@ You can also use `make start` which builds first then runs `start.sh`.
 
 ## Step 6: Verify
 
-Check both components are running:
+Check that both components are running:
 
 ```sh
 curl http://localhost:3030/health   # Processor
