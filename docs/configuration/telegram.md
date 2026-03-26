@@ -26,7 +26,7 @@ The `{user}` placeholder in `group_welcome_text` is replaced with the user's nam
 
 ## Delegated Admins
 
-Grant users admin access over specific groups or channels:
+Grant users admin access to specific groups or channels:
 
 ```toml
 [[telegram.delegated_admins]]
