@@ -125,7 +125,21 @@ These variables are available across most alert types:
 | `{{tths}}` | Seconds remaining |
 | `{{now}}` | Current time |
 | `{{nowISO}}` | Current time in ISO format |
-| `{{disappear_time}}` | Unix timestamp (for Discord `<t:{{disappear_time}}:R>`) |
+
+#### Discord Countdown Timers
+
+Discord supports dynamic countdown timestamps using the `<t:UNIX:R>` format. Each alert type exposes the right Unix timestamp field:
+
+| Alert Type | Field | Snippet |
+|---|---|---|
+| Pokemon | `{{despawnTimestamp}}` | `<t:{{despawnTimestamp}}:R>` |
+| Raid | `{{endTimestamp}}` | `<t:{{endTimestamp}}:R>` |
+| Egg | `{{hatchTimestamp}}` | `<t:{{hatchTimestamp}}:R>` |
+| Invasion | `{{expirationTimestamp}}` | `<t:{{expirationTimestamp}}:R>` |
+| Lure | `{{expirationTimestamp}}` | `<t:{{expirationTimestamp}}:R>` |
+| MAX Battle | `{{endTimestamp}}` | `<t:{{endTimestamp}}:R>` |
+
+These render as live countdowns in Discord (e.g. "in 12 minutes") that update automatically on the client. Paste the snippet directly into your DTS embed `description` or `title`.
 
 ### Other
 

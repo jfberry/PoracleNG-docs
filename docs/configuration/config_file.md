@@ -3,36 +3,23 @@
 Complete reference for `config/config.toml`. All settings are shown with their default values.
 
 !!! tip
-    You only need to include settings you want to override. See `config/config.example.toml` in the PoracleNG repository for the full annotated reference.
+    You only need to include settings you want to override. See `config/config.example.toml` in the PoracleNG repository for the full annotated reference, or use the **[Poracle Config UI](https://jfberry.github.io/poracle-config/)** to build your config visually.
 
 ## Processor
 
-Network settings for the Go processor component.
+Network settings for the processor binary. PoracleNG is a single Go binary — there is no separate alerter component, so this is the only network section.
 
 ```toml
 [processor]
 host = "0.0.0.0"                        # Listen address (0.0.0.0 = all interfaces)
-port = 3030                              # Listen port (receives webhooks from scanner)
-alerter_url = "http://localhost:3031"    # URL where the alerter is listening
+port = 3030                              # Listen port (receives webhooks and serves the API)
 ip_whitelist = []                        # Restrict webhook sources (empty = allow all)
-```
-
-## Alerter
-
-Network settings for the Node.js alerter component.
-
-```toml
-[alerter]
-host = "127.0.0.1"                      # Listen address
-port = 3031                              # Listen port
-ip_whitelist = []                        # Restrict access (empty = allow all)
 ip_blacklist = []                        # Block specific IPs
-api_secret = ""                          # API secret for PoracleWeb (blank = API disabled)
-processor_url = "http://localhost:3030"  # URL where the processor is listening
+api_secret = ""                          # API secret for /api/* (blank = authenticated API disabled)
 ```
 
 !!! note
-    The `api_secret` must be set for external API access (e.g. PoracleWeb). Leave blank to disable the API.
+    The `api_secret` is required for external API access (e.g. PoracleWeb). The public endpoints (`POST /`, `GET /health`, `GET /metrics`) remain accessible regardless. Older configs that placed `api_secret` under `[alerter]` are still read for backward compatibility but should be migrated to `[processor]`.
 
 ## Database
 
@@ -45,12 +32,11 @@ port = 3306
 user = "poracleuser"
 password = "poraclepassword"
 database = "poracle"
-# scanner_type = "golbat"               # golbat (default) or rdm
 ```
 
 ### Scanner Database
 
-If using RDM for quest/pokestop name lookups, configure the scanner database:
+If using RDM for quest/pokestop name lookups, configure the scanner database. The scanner type (`golbat` or `rdm`) lives here under the `type` key:
 
 ```toml
 [database.scanner]
@@ -59,7 +45,11 @@ port = 3306
 user = "scanneruser"
 password = "scannerpassword"
 database = "scannerdb"
+type = "golbat"                          # "golbat" (default) or "rdm"
 ```
+
+!!! note
+    Older configs may set `scanner_type` directly under `[database]`. That spelling is still accepted as a back-compat alias, but the canonical location is `[database.scanner].type`.
 
 ## Geofence
 
@@ -69,7 +59,6 @@ See [Geofences](geofence.md) for detailed configuration.
 [geofence]
 paths = ["geofences/geofence.json"]     # Geofence file paths
 default_name = "city"                    # Default fence name
-default_color = "#3399ff"               # Default fence color for maps
 
 [geofence.koji]
 bearer_token = ""                        # Koji API token for geofence downloads
@@ -245,13 +234,15 @@ Performance tuning parameters.
 !!! warning
     Do not change these settings without consulting the Poracle community on Discord.
 
+See the [`[tuning]`](../config/tuning.md) reference page for the full field list and the tileserver section.
+
 ```toml
 [tuning]
 # Processor
 reload_interval_secs = 60               # How often to reload tracking data from DB
 encounter_cache_ttl = 3600               # Seconds to cache encounter data
 worker_pool_size = 4                     # Number of matching worker goroutines
-batch_size = 50                          # Matched results per batch to alerter
+batch_size = 50                          # Items per batch
 flush_interval_millis = 100              # Max time before flushing partial batch
 
 # Alerter
@@ -262,6 +253,8 @@ concurrent_discord_destinations = 10     # Concurrent Discord sends per bot
 concurrent_telegram_destinations = 10    # Concurrent Telegram sends per bot
 concurrent_discord_webhooks = 10         # Concurrent Discord webhook sends
 ```
+
+The "Alerter" subheading above is historical — these are sender-side concurrency limits inside the single processor binary.
 
 ## Alert Limits
 
@@ -362,25 +355,20 @@ pokestop_url = "https://raw.githubusercontent.com/KartulUdus/PoracleJS/images/fa
 ```toml
 [logging]
 level = "verbose"                        # silly, debug, verbose, info, warn
-timing_stats = false                     # Elevate timing stats to verbose level
-max_age = 7                              # Days to keep log files
+file_logging_enabled = true              # Write logs to file
+filename = "logs/processor.log"          # Log file path
 max_size = 50                            # Max log file size in MB
+max_age = 7                              # Days to keep log files
 max_backups = 5                          # Old log files to keep
-compress = false                         # Gzip compress rotated logs
-webhook_log_limit = 12                   # Hours to keep hourly webhook logs
+compress = true                          # Gzip compress rotated logs
 
-[logging.enable_logs]
-webhooks = false                         # Matched webhook log (can be large)
-discord = true                           # Discord message delivery
-telegram = true                          # Telegram message delivery
-pvp = false                              # PVP calculations (verbose)
-
-# Raw webhook logging (processor only)
+# Raw webhook logging
 [webhookLogging]
 enabled = false
 filename = "logs/webhooks.log"
-max_size = 100
-max_age = 1
-max_backups = 3
-compress = false
+max_size = 100                           # MB (also rotates on rotate_interval)
+max_age = 1                              # Days
+max_backups = 12
+compress = true
+rotate_interval = 60                     # Minutes between forced rotations (0 = size-based only)
 ```

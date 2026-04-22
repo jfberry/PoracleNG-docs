@@ -1,43 +1,27 @@
 # Scanner Setup
 
-PoracleNG receives Pokemon Go data via webhooks from a scanner. **Golbat** is the default and recommended scanner. **RDM** is also supported.
+PoracleNG receives Pokemon Go data via webhooks from a scanner. **[Golbat](https://github.com/UnownHash/Golbat)** is the main and recommended source. **RDM** is supported for setups that already use it.
 
 !!! warning "MAD Not Supported"
     MAD scanner support has been removed in PoracleNG. If you currently use MAD, you'll need to switch to Golbat.
 
-## Golbat (Recommended)
+## Golbat (recommended)
 
-[Golbat](https://github.com/UnownHash/Golbat) is the default scanner type. Golbat uses a TOML config file (`config.toml`). Add a `[[webhooks]]` section pointing at the **PoracleNG processor**:
+[Golbat](https://github.com/UnownHash/Golbat) is the default scanner and where most webhook traffic for PoracleNG comes from. Webhooks are configured in Golbat's own `config.toml`, not in PoracleNG — see Golbat's example config in its repository for the full set of options (filters by `types`, `areas`, custom `headers`, multiple endpoints, etc.).
 
-```toml
-[[webhooks]]
-url = "http://<poracle-host>:3030/raw"
-```
-
-By default, Golbat sends all webhook types. To limit to specific types, add a `types` filter:
+All you need to tell Golbat is where PoracleNG is listening:
 
 ```toml
+# In Golbat's config.toml
 [[webhooks]]
-url = "http://<poracle-host>:3030/raw"
-types = ["pokemon", "pokemon_iv", "gym", "invasion", "quest", "pokestop", "raid", "weather", "fort_update"]
+url = "http://<poracle-host>:3030/"
 ```
 
-You can also restrict webhooks to specific areas and add custom headers:
+The webhook endpoint is the processor's **root path `/` on port 3030** (or whatever you've set in PoracleNG's `[processor]` host/port).
 
-```toml
-[[webhooks]]
-url = "http://<poracle-host>:3030/raw"
-types = ["pokemon_iv", "raid", "quest", "invasion", "pokestop", "weather"]
-areas = ["MyArea"]
-headers = ["X-Custom-Header:value"]
-```
+### Webhook types PoracleNG processes
 
-!!! important
-    Point webhooks at the **processor** on port **3030**, not the alerter on port 3031. The webhook endpoint is `/raw`.
-
-### Webhook Types
-
-Golbat can send the following webhook types that PoracleNG processes:
+Golbat can filter which webhook types it sends. PoracleNG processes these:
 
 | Type | Description |
 |------|-------------|
@@ -52,16 +36,17 @@ Golbat can send the following webhook types that PoracleNG processes:
 | `weather` | In-game weather changes |
 | `fort_update` | Fort (gym/pokestop) metadata changes |
 
+By default Golbat sends all of these; restrict with a `types = [...]` filter in the `[[webhooks]]` entry if you want to narrow the stream. Refer to Golbat's docs for the exact syntax and any additional filters they've added.
+
 ## RDM
 
-If you use RDM, set the scanner type in your config:
+If your webhook source is RDM, point its webhook configuration at the same endpoint:
 
-```toml
-[database]
-scanner_type = "rdm"
+```
+http://<poracle-host>:3030/
 ```
 
-And configure the scanner database connection:
+To enable RDM-specific features on the PoracleNG side (pokestop name lookups, some quest enrichment), also configure the scanner database connection and set the type:
 
 ```toml
 [database.scanner]
@@ -70,13 +55,11 @@ port = 3306
 user = "scanneruser"
 password = "scannerpassword"
 database = "scannerdb"
+type = "rdm"          # "golbat" (default) or "rdm"
 ```
 
-RDM webhooks should also be pointed at the processor:
-
-```
-http://<poracle-host>:3030/
-```
+!!! note "Back-compat alias"
+    Older configs set `scanner_type` under `[database]` instead. PoracleNG still reads that spelling for backward compatibility, but the canonical location is `[database.scanner].type`.
 
 ## Verifying Webhooks
 
@@ -94,7 +77,7 @@ You can also check `logs/processor.log` for incoming webhook activity.
 
 ## Disabling Webhook Types
 
-If you want to disable processing of specific webhook types, use the `disable_*` settings in `config.toml`:
+If you want to disable processing of specific webhook types on the PoracleNG side (regardless of what the scanner sends), use the `disable_*` settings in `config.toml`:
 
 ```toml
 [general]

@@ -142,6 +142,27 @@ For more details see [MAX Battle Tracking](maxbattle.md).
 |---------|-------------|
 | `!language <code>` | Switch language (e.g. `en`, `de`, `fr`) |
 
+## Natural Language
+
+| Command | Description |
+|---------|-------------|
+| `!ask <question>` | Describe what you want to track in plain English; the bot suggests the equivalent tracking command |
+
+`!ask` is available only when the operator has enabled it in `config.toml`:
+
+```toml
+[ai]
+enabled = true
+```
+
+Example:
+
+```
+!ask track any shiny pokemon within 2km of me
+```
+
+The bot replies with a suggested `!track` command you can copy, edit, and send — it doesn't run the command for you. Operators can also enable `suggest_on_dm` in `[ai]` to have unrecognised DMs silently parsed as `!ask` queries.
+
 ## Common Options
 
 These options are available across most tracking commands:

@@ -69,6 +69,7 @@ nav:
   - Configuration:
     - configuration/index.md
     - Config File Reference: configuration/config_file.md
+    - Poracle Config UI: configuration/config-ui.md
     - Geofences: configuration/geofence.md
     - Discord: configuration/discord.md
     - Telegram: configuration/telegram.md
@@ -108,6 +109,26 @@ nav:
     - Config API: api/config.md
     - Geofence API: api/geofence.md
     - Humans API: api/humans.md
+  - Config Reference:
+    - general: config/general.md
+    - locale: config/locale.md
+    - discord: config/discord.md
+    - telegram: config/telegram.md
+    - geofence: config/geofence.md
+    - pvp: config/pvp.md
+    - weather: config/weather.md
+    - area_security: config/area_security.md
+    - geocoding: config/geocoding.md
+    - tuning: config/tuning.md
+    - alert_limits: config/alert_limits.md
+    - tracking: config/tracking.md
+    - reconciliation.discord: config/reconciliation-discord.md
+    - reconciliation.telegram: config/reconciliation-telegram.md
+    - stats: config/stats.md
+    - fallbacks: config/fallbacks.md
+    - logging: config/logging.md
+    - webhookLogging: config/webhookLogging.md
+    - ai: config/ai.md
   - PoracleWeb:
     - poracleWeb/index.md
     - Installation: poracleWeb/install.md

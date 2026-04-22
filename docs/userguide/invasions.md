@@ -2,6 +2,9 @@
 
 Track Team Rocket invasions by grunt type, leader, or pokemon type.
 
+!!! note
+    The command is named `!incident` (Discord) / `/incident` (Telegram) — "incident" is the in-game term for what players call a Team Rocket invasion.
+
 ## Basic Usage
 
 === "Discord"

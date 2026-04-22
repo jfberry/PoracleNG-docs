@@ -19,9 +19,7 @@ prefix = "!"                             # Command prefix
 
 ```toml
 [discord]
-activity = "PoracleJS"                   # Bot activity status text
-worker_status = "invisible"              # available, dnd, idle, invisible
-worker_activity = "PoracleJS Helper"     # Worker bot activity text
+activity = "PoracleNG"                   # Bot activity status text
 ```
 
 ## Multiple Bots

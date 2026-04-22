@@ -6,26 +6,26 @@ PoracleNG is a high-performance Pokemon Go notification system that sends config
 
 ## Architecture
 
-PoracleNG splits the workload into two components:
+PoracleNG runs as a single Go binary (the **processor**) that receives webhooks from a scanner, matches them against in-memory tracking rules, and delivers alerts to Discord and Telegram directly.
 
 ```
-Golbat ──webhook──▶ Processor (Go :3030) ──matched──▶ Alerter (Node.js :3031) ──▶ Discord / Telegram
-                         │                                │
-                         │◀──── POST /api/reload ──────────│
-                         │                                │
-                         ▼                                ▼
-                    MySQL (read)                     MySQL (read/write)
+Golbat ──webhook──▶ Processor (Go :3030) ──▶ Discord / Telegram
+                         │
+                         ▼
+                       MySQL
 ```
 
-- **Processor** (Go) — receives raw webhooks from Golbat, matches them against all user tracking rules in memory, and forwards only matched results to the alerter. Exposes Prometheus metrics and weather/rarity APIs.
-- **Alerter** (Node.js) — receives pre-matched results, renders alert templates (DTS), performs geocoding and static map generation, and delivers messages to Discord and Telegram. Handles all user commands.
+The processor handles webhook ingestion, in-memory matching, alert template rendering (DTS), geocoding and static map generation, message delivery, user commands, and the REST API used by [PoracleWeb](poracleWeb/index.md). It exposes Prometheus metrics and a health check on the same port.
+
+!!! note "PoracleJS users"
+    Earlier Poracle releases split the workload between a Go processor and a Node.js alerter on a separate port. PoracleNG has merged everything into the single processor binary — there is no alerter component to run, and no second port to monitor. See the [Migration Guide](migration/guide.md).
 
 ## Key Features
 
 - **Discord and Telegram** support simultaneously — DMs, channel posting, webhooks, and groups
 - **Golbat** scanner integration (default), with RDM support
 - **Web interface** via [PoracleWeb](poracleWeb/index.md) for end-user tracking configuration
-- **High performance** — Go processor handles millions of events per day with in-memory matching
+- **High performance** — handles millions of events per day with in-memory matching
 - **Rate management** with per-route back-off and automatic user suspension for overly broad tracking
 - **Flexible tracking** — by area, distance from location, or both, with multiple subscription categories
 - **PVP tracking** — Great League, Ultra League, Little League rank-based alerts
@@ -43,17 +43,16 @@ Golbat ──webhook──▶ Processor (Go :3030) ──matched──▶ Alerte
 ## Getting Started
 
 - **Migrating from PoracleJS?** — Follow the [Migration Guide](migration/guide.md) to convert your existing setup.
-- **New Installation** — Start with the [Installation Guide](installation/index.md) to get PoracleNG running.
-- **Configuration** — See the [Configuration Reference](configuration/config_file.md) for all settings.
+- **New Installation** — Start with the [Installation Guide](installation/index.md).
+- **Configuration** — See the [Config File Reference](configuration/config_file.md), the per-section [Config Reference](config/general.md), or use the [Poracle Config UI](https://jfberry.github.io/poracle-config/) to build your config visually.
 - **User Guide** — Learn how to [set up tracking](userguide/index.md) as an end user.
 
 ## Quick Start
 
 ### Prerequisites
 
-- Go 1.21+ (processor)
-- Node.js 18+ (alerter)
-- MySQL 8.0+ or MariaDB
+- Go 1.25+
+- MySQL 8.0+ or MariaDB 10.6+
 - A Golbat instance sending webhooks
 
 ### 1. Configure
@@ -91,9 +90,9 @@ make build
 ./start.sh
 ```
 
-### 4. Point Golbat at the Processor
+### 4. Point Golbat at the processor
 
-Configure Golbat to send webhooks to the **processor** (not the alerter):
+Configure Golbat to send webhooks to:
 
 ```
 http://<your-host>:3030/

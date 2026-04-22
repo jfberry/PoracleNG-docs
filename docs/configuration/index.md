@@ -1,6 +1,6 @@
 # Configuration
 
-PoracleNG uses a single shared TOML config file at `config/config.toml` for both the processor and alerter. Both components read from the same file, eliminating the need to keep settings in sync.
+PoracleNG uses a single TOML config file at `config/config.toml`. You can also use the **[Poracle Config UI](https://jfberry.github.io/poracle-config/)** — a web-based editor for building and validating your config.
 
 ## Configuration Files
 
@@ -20,8 +20,7 @@ config/
 
 | Section | Description | Page |
 |---------|-------------|------|
-| `[processor]` | Processor networking | [Config Reference](config_file.md#processor) |
-| `[alerter]` | Alerter networking and API | [Config Reference](config_file.md#alerter) |
+| `[processor]` | Networking and API secret | [Config Reference](config_file.md#processor) |
 | `[database]` | Database connections | [Config Reference](config_file.md#database) |
 | `[discord]` | Discord bot settings | [Discord](discord.md) |
 | `[telegram]` | Telegram bot settings | [Telegram](telegram.md) |

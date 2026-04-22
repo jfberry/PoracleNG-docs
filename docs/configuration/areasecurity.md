@@ -26,32 +26,26 @@ Each community defines:
 
 ### Example: Two Communities
 
+Communities are defined as a TOML array of tables (`[[area_security.communities]]`). Each entry has a `name`, an `allowed_areas` array, a `location_fence` array, and inline `discord` / `telegram` tables.
+
 ```toml
 [area_security]
 enabled = true
 strict_locations = false
 
-[area_security.communities.newyork]
+[[area_security.communities]]
+name = "newyork"
 allowed_areas = ["manhattan", "bronx", "brooklyn", "queens"]
-location_fence = "wholenewyork"
+location_fence = ["wholenewyork"]
+discord = { channels = ["1234567890123456"], user_role = ["9876543210987654"] }
+telegram = { channels = ["-100123456789"] }
 
-[area_security.communities.newyork.discord]
-channels = ["1234567890123456"]
-user_role = ["9876543210987654"]
-
-[area_security.communities.newyork.telegram]
-channels = ["-100123456789"]
-
-[area_security.communities.chicago]
+[[area_security.communities]]
+name = "chicago"
 allowed_areas = ["northwest", "southside", "central"]
-location_fence = "wholechicago"
-
-[area_security.communities.chicago.discord]
-channels = ["1111111111111111"]
-user_role = ["2222222222222222"]
-
-[area_security.communities.chicago.telegram]
-channels = ["-100987654321"]
+location_fence = ["wholechicago"]
+discord = { channels = ["1111111111111111"], user_role = ["2222222222222222"] }
+telegram = { channels = ["-100987654321"] }
 ```
 
 ### How It Works
@@ -75,9 +69,11 @@ For each community, specify:
 - `user_role` — Discord role IDs that grant automatic access
 
 ```toml
-[area_security.communities.mytown.discord]
-channels = ["registration-channel-id"]
-user_role = ["member-role-id", "another-role-id"]
+[[area_security.communities]]
+name = "mytown"
+allowed_areas = ["downtown"]
+location_fence = ["mytown"]
+discord = { channels = ["registration-channel-id"], user_role = ["member-role-id", "another-role-id"] }
 ```
 
 ## Telegram Setup
@@ -85,6 +81,9 @@ user_role = ["member-role-id", "another-role-id"]
 For each community, specify the groups whose membership grants access:
 
 ```toml
-[area_security.communities.mytown.telegram]
-channels = ["-100groupid"]
+[[area_security.communities]]
+name = "mytown"
+allowed_areas = ["downtown"]
+location_fence = ["mytown"]
+telegram = { channels = ["-100groupid"] }
 ```

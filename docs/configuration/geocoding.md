@@ -50,15 +50,6 @@ Customize how addresses are constructed for the `{{addr}}` DTS variable:
 address_format = "{{{streetName}}} {{streetNumber}}"
 ```
 
-### Street Intersections
-
-For street intersection lookups using [GeoNames](http://www.geonames.org/):
-
-```toml
-[geocoding]
-intersection_users = ["geonames_username_1", "geonames_username_2"]
-```
-
 ## Static Maps
 
 ### Provider

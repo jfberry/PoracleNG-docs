@@ -65,13 +65,13 @@ To only receive alerts for Gigantamax variants, add `gmax`:
 ### By Move
 
 ```
-!maxbattle everything move/flamethrower
+!maxbattle everything move:flamethrower
 ```
 
 You can also filter by move and type together:
 
 ```
-!maxbattle everything move/hidden-power/dragon
+!maxbattle everything move:hidden-power/dragon
 ```
 
 ## Other Options

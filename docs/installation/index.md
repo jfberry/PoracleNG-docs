@@ -4,8 +4,8 @@ This section covers installing PoracleNG from scratch. If you're migrating from 
 
 ## Installation Methods
 
-- **[Manual Install](manual.md)** — recommended; build from source with Go and Node.js
-- **[Docker](docker.md)** — planned but not yet available
+- **[Manual Install](manual.md)** — build the processor from source with Go
+- **[Docker](docker.md)** — run the processor in a container
 
 ## Additional Setup
 
@@ -19,7 +19,6 @@ After installation, you'll also need:
 
 | Component | Minimum Version |
 |-----------|----------------|
-| Go | 1.21+ |
-| Node.js | 18+ |
+| Go | 1.25+ (manual install only) |
 | MySQL / MariaDB | 8.0+ / 10.6+ |
 | Scanner | Golbat (recommended) or RDM |
