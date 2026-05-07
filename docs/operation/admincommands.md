@@ -114,6 +114,24 @@ Get IDs for the current channel/group/user:
     /identify
     ```
 
+## Auto-create Channels
+
+Build Discord channels (and optional categories, threads, and click-to-join pickers) from a template, either one area at a time or in bulk across every matching geofence.
+
+=== "Discord"
+
+    ```
+    !autocreate <template> <args...>            # Interactive: create one set of channels
+    !autocreate sync                            # Bulk: run all configured rules
+    !autocreate sync <rule>                     # Run one rule by name
+    !autocreate sync <rule> dryrun              # Preview without changing anything
+    !autocreate sync <rule> reset               # Re-apply commands on reused channels
+    !autocreate sync <rule> removals            # Delete orphaned channels
+    !autocreate sync <rule> removals force      # Bypass the safety threshold
+    ```
+
+See [Channel Auto-create](../configuration/autocreate.md) for the template format, rule configuration, and exactly what each keyword does. The same operations are available over HTTP via the [Auto-create API](../api/autocreate.md).
+
 ## Community Management (Area Security)
 
 When area security is enabled:

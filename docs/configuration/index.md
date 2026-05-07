@@ -35,6 +35,7 @@ config/
 | `[tracking]` | Tracking restrictions | [Config Reference](config_file.md#tracking) |
 | `[logging]` | Log levels and rotation | [Config Reference](config_file.md#logging) |
 | `[alert_limits]` | Rate limiting | [Config Reference](config_file.md#alert-limits) |
+| `[autocreate]` | Discord channel auto-creation rules | [Channel Auto-create](autocreate.md) |
 
 ## Data Files
 

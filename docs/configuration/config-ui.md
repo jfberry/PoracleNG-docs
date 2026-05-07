@@ -9,6 +9,7 @@ The **[Poracle Config UI](https://jfberry.github.io/poracle-config/)** is a web-
 
 - **Edit `config.toml`** through typed form fields with inline validation, instead of hand-writing TOML
 - **Edit DTS templates** with a form-based field editor, a live Discord preview pane, and test webhook data you can pipe through the template to see the rendered output
+- **Edit channel auto-create templates** (`channelTemplate.json`) through a typed editor for categories, channels, threads, and thread pickers
 - **Import / view template files offline** without connecting to PoracleNG — useful for reading a community-shared template before deciding whether to install it
 
 ## Prerequisites
@@ -76,6 +77,24 @@ Top-right actions:
 
 !!! tip "See the full DTS reference"
     The Config UI helps you edit templates, but it doesn't replace the field reference. See [Alert Templates (DTS)](dts.md) for how DTS templates work and what fields are available in each webhook type, and [Advanced DTS](dtsadvanced.md) for partials, per-platform overrides, and helpers.
+
+## The auto-create editor
+
+![Auto-create editor showing the template tree on the left and channel form fields on the right](../assets/config-autocreate-edit.png)
+
+Switch to the **Autocreate** tab (top-left, alongside **Templates** and **Config**) to edit `channelTemplate.json`. The left pane lists every named template in the file — pick one with the dropdown, **+ New** to add a template, **Delete** to remove it. Below the dropdown, the selected template renders as a tree of channel nodes, each summarising its role count, command count, threads, and picker. Click a channel to open it in the form on the right.
+
+The right pane is a typed editor for every property documented on the [Channel Auto-create](autocreate.md) page — `channelType`, `controlType`, `topic`, role permission flags, `commands`, `threads` (with their button labels and styles), and the thread `picker`. Tabs in the top-right toggle between the **Form** view and the raw **JSON** view of the same template.
+
+A footer status line shows ● **No issues** when the current template lints clean, and the right-hand **No changes** / **Save** indicator tracks unsaved edits.
+
+The editor uses the [auto-create REST API](../api/autocreate.md) to load, validate, and save:
+
+- **Validate** — runs the same lint as `POST /api/autocreate/templates/validate` and surfaces errors inline before you save.
+- **Save** — writes back through `POST /api/autocreate/templates`. The previous version is snapshotted into `config/backups/` automatically.
+- **Delete a template** — removes a single named template via `DELETE /api/autocreate/templates/:name` without rewriting the whole array.
+
+Templates edited here can be applied via Discord (`!autocreate <name> ...`) or driven in bulk through `[[autocreate.rules]]` in `config.toml`. The Config UI does not currently trigger a sync from the editor — run `!autocreate sync` (or call `POST /api/autocreate/run`) once your template is saved.
 
 ## The config editor
 

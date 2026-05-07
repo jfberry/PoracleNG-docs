@@ -77,6 +77,7 @@ nav:
     - Static Maps: configuration/staticmaps.md
     - Alert Templates (DTS): configuration/dts.md
     - Advanced DTS: configuration/dtsadvanced.md
+    - Channel Auto-create: configuration/autocreate.md
     - Weather: configuration/weather.md
     - Multi-Language: configuration/multilang.md
     - Area Security: configuration/areasecurity.md
@@ -109,6 +110,7 @@ nav:
     - Config API: api/config.md
     - Geofence API: api/geofence.md
     - Humans API: api/humans.md
+    - Auto-create API: api/autocreate.md
   - Config Reference:
     - general: config/general.md
     - locale: config/locale.md

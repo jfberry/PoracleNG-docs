@@ -81,3 +81,13 @@ These endpoints back PoracleWeb's user-facing functionality. See [Humans API](hu
 | `/api/tracking/*` | Per-user tracking rules |
 | `/api/profiles/*` | Profile CRUD |
 | `/api/config/*` | Configuration queries used by PoracleWeb |
+
+### Auto-create
+
+See [Auto-create API](autocreate.md) for the full capability outline.
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` / `POST` / `DELETE` | `/api/autocreate/templates*` | Read, validate, write, and delete channel templates |
+| `GET` | `/api/autocreate/templates/schema` | Schema metadata for editor UIs |
+| `POST` | `/api/autocreate/run` | Trigger a bulk sync of one or all rules |

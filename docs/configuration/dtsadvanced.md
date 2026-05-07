@@ -266,7 +266,7 @@ Define reusable broadcast message templates in `config/broadcast.json` for admin
 
 ## Channel Templates
 
-Auto-create Discord channels from templates in `config/channelTemplate.json`.
+Auto-create Discord channels — and optionally categories, private threads, and a "click to join" picker post — from templates in `config/channelTemplate.json`. See [Channel Auto-create](autocreate.md) for the template format, bulk sync rules, and the `!autocreate` admin command.
 
 ## Telegram-Specific Options
 
