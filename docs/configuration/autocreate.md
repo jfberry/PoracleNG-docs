@@ -62,7 +62,7 @@ If a category with the same name already exists in the guild, auto-create reuses
     "controlType": "bot",
     "webhookName": "",
     "roles": [ ],
-    "commands": [ "track 25 great5", "area add {0}" ],
+    "commands": [ "area add {0}", "track 25 great5" ],
     "threads": [ ],
     "threadPicker": { }
   }
@@ -95,10 +95,9 @@ Each entry runs through Poracle's command parser as if the channel/webhook targe
 
 ```json
 "commands": [
-  "track 25 great5 ultra15",
   "area add downtown",
-  "track raid 5",
-  "untrack pikachu"
+  "track 25 great5 ultra15",
+  "raid level5"
 ]
 ```
 
@@ -121,7 +120,7 @@ Optional. Each entry is one private thread under the parent channel.
     "name": "iv100-{{name}}",
     "buttonLabel": "100% IVs",
     "buttonStyle": "success",
-    "commands": [ "track 0 100 great5", "area add {0}" ]
+    "commands": [ "area add {0}", "track everything iv100" ]
   }
 ]
 ```
