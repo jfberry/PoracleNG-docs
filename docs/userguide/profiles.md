@@ -90,7 +90,39 @@ Copy all tracking from one profile to another:
 
 ## Auto-Switching
 
-Profiles can be configured to auto-switch based on time of day and day of week. Contact your admin for auto-switching setup.
+Profiles can switch automatically based on day of week and time of day. The processor activates the matching profile at each scheduled time and leaves it active until another scheduled time fires.
+
+### Setting Times
+
+=== "Discord"
+
+    ```
+    !profile settime mon09:00 tue18:30 weekday09:00 weekend10:00
+    !profile settime every08:00          # Switch to this profile at 08:00 every day
+    ```
+
+=== "Telegram"
+
+    ```
+    /profile settime mon09:00 weekday09:00 weekend10:00
+    /profile settime every08:00
+    ```
+
+Times mark **when this profile becomes active**. List as many as you like — they replace any existing schedule on this profile.
+
+### Day Prefixes
+
+| Prefix | Days |
+|---|---|
+| `mon` `tue` `wed` `thu` `fri` `sat` `sun` | A single day |
+| `weekday` | Mon – Fri |
+| `weekend` | Sat – Sun |
+| `every` (or `everyday`) | All seven days |
+
+**Format:** `<prefix><HH>:<MM>` — e.g. `mon09:00`, `every08:30`. The colon and minutes are optional: `mon9` is treated as `mon09:00`.
+
+!!! tip
+    The same day-prefix syntax (`mon`, `weekday`, `every`, etc.) is used by `!summary settime` for [scheduled alert summaries](summaries.md#setting-a-delivery-schedule).
 
 ## Example: Home and Work Setup
 

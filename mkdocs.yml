@@ -96,6 +96,7 @@ nav:
     - Gyms & Forts: userguide/gyms.md
     - Areas & Location: userguide/areas.md
     - Profiles: userguide/profiles.md
+    - Alert Summaries: userguide/summaries.md
     - Command Reference: userguide/commands.md
   - Operation:
     - operation/index.md

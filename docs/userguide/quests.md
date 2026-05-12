@@ -116,8 +116,39 @@ Track specific item rewards:
 | `d<n>` | Distance in meters | `d500` |
 | `template<n>` | Alert template | `template2` |
 | `clean` | Auto-delete expired alerts | `clean` |
+| `summary` | Buffer matches for grouped delivery on a schedule | `summary` |
 | `everything` | All quest rewards | `everything` |
 | `remove` | Remove tracking | `remove` |
+
+## Buffered Summary Delivery
+
+Instead of receiving a separate message for every matched quest, you can opt a rule into **summary delivery**: matched quests are held in memory and dispatched as grouped messages on a schedule you set (e.g. one digest at 07:30 each weekday morning, grouped by reward).
+
+Add `summary` to any `!quest` rule:
+
+=== "Discord"
+
+    ```
+    !quest pikachu summary              # Pikachu quests, summary delivery
+    !quest rare candy summary           # Rare Candy quests, summary delivery
+    !quest stardust1000 summary         # Stardust ≥ 1000, summary delivery
+    ```
+
+=== "Telegram"
+
+    ```
+    /quest pikachu summary
+    /quest rare candy summary
+    ```
+
+`!tracked` shows `summary` next to each rule that uses it.
+
+A grouped message lists every pokestop with the same reward in one embed, with a multi-pin static map showing all of them. Large groups split into multiple messages automatically so they stay under Discord's embed limits.
+
+Schedule when those grouped messages fire — and flush the buffer on demand — with the [`!summary` command](summaries.md). Without a schedule, matched quests accumulate but are never dispatched until you either run `!summary quest now` or set a delivery time.
+
+!!! note
+    Summary delivery is currently supported only for **quest** tracking. Other alert types (raids, invasions, etc.) may gain summary support in future releases.
 
 ## Removing Tracks
 

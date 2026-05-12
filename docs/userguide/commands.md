@@ -135,6 +135,19 @@ For more details see [MAX Battle Tracking](maxbattle.md).
 | `!profile name <name>` | Name current profile |
 | `!profile copy <n>` | Copy current to profile N |
 | `!profile delete <n>` | Delete profile N |
+| `!profile settime <times>` | Set auto-switch schedule (e.g. `weekday09:00 weekend10:00`, `every08:00`) |
+
+## Alert Summaries
+
+Buffer matched events and deliver them grouped on a schedule. See [Alert Summaries](summaries.md).
+
+| Command | Description |
+|---------|-------------|
+| `!quest <reward> summary` | Opt a quest tracking rule into summary delivery |
+| `!summary quest` | Show current schedule and buffer count |
+| `!summary quest settime <times>` | Set delivery schedule (e.g. `weekday07:30 weekend10:00`, `every08:00`) |
+| `!summary quest cleartime` | Remove the schedule (events still buffer) |
+| `!summary quest now` | Flush the buffer immediately |
 
 ## Language
 
