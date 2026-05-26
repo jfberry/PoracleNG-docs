@@ -2,6 +2,9 @@
 
 Track field research quests by their rewards — pokemon encounters, items, stardust, mega energy, and candy.
 
+!!! tip "Filter syntax"
+    Filters use `key:value` form — `d:500`, `area:downtown`, `template:2`, `stardust:1000`, `energy:charizard`. Legacy `d500` / `stardust500` are still accepted. Multi-word item names use **underscores**: `rare_candy`, `golden_razz_berry`. See [Pokemon Tracking — Filter Syntax](pokemon.md#filter-syntax).
+
 ## Pokemon Encounter Rewards
 
 === "Discord"
@@ -10,6 +13,7 @@ Track field research quests by their rewards — pokemon encounters, items, star
     !quest spinda                       # Quests rewarding Spinda
     !quest pikachu                      # Quests rewarding Pikachu
     !quest everything                   # All quest rewards
+    !quest pikachu charmander d:500     # Either pokemon as reward, within 500m
     ```
 
 === "Telegram"
@@ -24,13 +28,13 @@ Track field research quests by their rewards — pokemon encounters, items, star
 === "Discord"
 
     ```
-    !quest spinda shiny                 # Spinda quests (shiny possible)
+    !quest shiny spinda                 # Spinda quests (shiny possible)
     ```
 
 === "Telegram"
 
     ```
-    /quest spinda shiny
+    /quest shiny spinda
     ```
 
 ## Stardust Rewards
@@ -39,15 +43,15 @@ Track field research quests by their rewards — pokemon encounters, items, star
 
     ```
     !quest stardust                     # Any stardust reward
-    !quest stardust500                  # Stardust rewards >= 500
-    !quest stardust1000                 # Stardust rewards >= 1000
+    !quest stardust:500                 # Stardust reward >= 500
+    !quest stardust:1000                # Stardust reward >= 1000
     ```
 
 === "Telegram"
 
     ```
     /quest stardust
-    /quest stardust500
+    /quest stardust:500
     ```
 
 ## Mega Energy Rewards
@@ -56,15 +60,15 @@ Track field research quests by their rewards — pokemon encounters, items, star
 
     ```
     !quest energy                       # All mega energy rewards
-    !quest energycharizard              # Charizard mega energy specifically
-    !quest energyblastoise              # Blastoise mega energy
+    !quest energy:charizard             # Charizard mega energy specifically
+    !quest energy:blastoise             # Blastoise mega energy
     ```
 
 === "Telegram"
 
     ```
     /quest energy
-    /quest energycharizard
+    /quest energy:charizard
     ```
 
 ## Candy Rewards
@@ -73,52 +77,78 @@ Track field research quests by their rewards — pokemon encounters, items, star
 
     ```
     !quest candy                        # All candy rewards
-    !quest candypikachu                 # Pikachu candy specifically
+    !quest candy:pikachu                # Pikachu candy specifically
+    !quest candy:lapras                 # Lapras candy
     ```
 
 === "Telegram"
 
     ```
     /quest candy
-    /quest candypikachu
+    /quest candy:pikachu
     ```
 
 ## Item Rewards
 
-Track specific item rewards:
+Track specific item rewards. **Multi-word names use underscores**:
 
 === "Discord"
 
     ```
-    !quest rare candy                   # Rare candy rewards
-    !quest silver pinap berry           # Silver Pinap Berry rewards
+    !quest rare_candy                   # Rare candy rewards
+    !quest silver_pinap_berry           # Silver Pinap Berry
+    !quest golden_razz_berry            # Golden Razz Berry
+    !quest fast_tm charged_tm           # Multiple items, OR-matched
     ```
 
 === "Telegram"
 
     ```
-    /quest rare candy
+    /quest rare_candy
+    /quest silver_pinap_berry
     ```
+
+Use `!info items` to see every item name the bot recognises — the list it prints is the exact token to use (with spaces replaced by underscores).
+
+## Distance and Areas
+
+=== "Discord"
+
+    ```
+    !quest pikachu d:500                # Pikachu reward within 500m
+    !quest rare_candy area:city_centre  # Rare candy quests in one area
+    !quest pikachu d:500 location:Work  # Within 500m of "Work" named location
+    ```
+
+=== "Telegram"
+
+    ```
+    /quest pikachu d:500
+    /quest rare_candy area:city_centre
+    ```
+
+See [Areas & Locations](areas.md#per-rule-overrides) for the full `area:` / `location:` rules.
 
 ## All Quest Options
 
 | Option | Description | Example |
 |--------|-------------|---------|
-| `<pokemon>` | Quest rewarding pokemon encounter | `spinda` |
-| `stardust` | Any stardust reward | `stardust` |
-| `stardust<n>` | Stardust reward >= amount | `stardust500` |
-| `energy` | All mega energy rewards | `energy` |
-| `energy<pokemon>` | Specific mega energy | `energycharizard` |
-| `candy` | All candy rewards | `candy` |
-| `candy<pokemon>` | Specific candy | `candypikachu` |
-| `<item_name>` | Specific item reward | `rare candy` |
+| `<pokemon>` | Quest rewarding a pokemon encounter | `spinda` |
+| `stardust` / `stardust:<n>` | Stardust reward (any, or minimum amount) | `stardust:500` |
+| `energy` / `energy:<pokemon>` | Mega energy (all, or specific) | `energy:charizard` |
+| `candy` / `candy:<pokemon>` | Candy (all, or specific) | `candy:lapras` |
+| `<item_name>` | Specific item reward (underscores for multi-word) | `rare_candy` |
 | `shiny` | Shiny-eligible encounters | `shiny` |
-| `d<n>` | Distance in meters | `d500` |
-| `template<n>` | Alert template | `template2` |
+| `d:<n>` | Distance in metres | `d:500` |
+| `location:<name>` | Distance from a named location (requires `d:`) | `location:Home` |
+| `area:<name>[,<name>]` | Restrict to specific areas | `area:downtown` |
+| `template:<n>` | Alert template | `template:2` |
 | `clean` | Auto-delete expired alerts | `clean` |
+| `edit` | Single message, edited in place | `edit` |
 | `summary` | Buffer matches for grouped delivery on a schedule | `summary` |
 | `everything` | All quest rewards | `everything` |
-| `remove` | Remove tracking | `remove` |
+
+Legacy no-colon forms (`stardust500`, `energycharizard`, `candypikachu`, `d500`) still work.
 
 ## Buffered Summary Delivery
 
@@ -130,15 +160,15 @@ Add `summary` to any `!quest` rule:
 
     ```
     !quest pikachu summary              # Pikachu quests, summary delivery
-    !quest rare candy summary           # Rare Candy quests, summary delivery
-    !quest stardust1000 summary         # Stardust ≥ 1000, summary delivery
+    !quest rare_candy summary           # Rare Candy quests, summary delivery
+    !quest stardust:1000 summary        # Stardust >= 1000, summary delivery
     ```
 
 === "Telegram"
 
     ```
     /quest pikachu summary
-    /quest rare candy summary
+    /quest rare_candy summary
     ```
 
 `!tracked` shows `summary` next to each rule that uses it.
@@ -157,7 +187,10 @@ Schedule when those grouped messages fire — and flush the buffer on demand —
     ```
     !quest remove spinda                # Stop tracking Spinda quests
     !quest remove stardust              # Stop tracking stardust quests
+    !quest remove all_items             # Every item-reward rule
+    !quest remove all_pokemon           # Every pokemon-reward rule
     !quest remove everything            # Remove all quest tracking
+    !untrack id:<N>                     # Remove by UID (see !tracked)
     ```
 
 === "Telegram"
@@ -165,4 +198,5 @@ Schedule when those grouped messages fire — and flush the buffer on demand —
     ```
     /quest remove spinda
     /quest remove everything
+    /untrack id:12
     ```

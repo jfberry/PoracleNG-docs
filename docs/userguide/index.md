@@ -5,16 +5,19 @@ Welcome to the PoracleNG user guide. This section explains how to set up and use
 ## Getting Started
 
 1. **[Register](registration.md)** — register with the bot on Discord or Telegram
-2. **[Set your location](areas.md)** — add areas or set a location for tracking
+2. **[Set your areas and location](areas.md)** — add areas, set a default location, and optionally save named locations for per-rule overrides
 3. **Start tracking** — subscribe to alerts for what you want:
    - [Pokemon](pokemon.md) — wild spawns, IV filters, level, rarity
    - [Raids & Eggs](raids.md) — raid bosses and eggs by tier
    - [PVP](pvp.md) — Great/Ultra/Little League rank tracking
-   - [Quests](quests.md) — field research rewards
-   - [Invasions](invasions.md) — Team Rocket grunts and leaders
+   - [Quests](quests.md) — field research rewards (with optional summary delivery)
+   - [Invasions](invasions.md) — Team Rocket grunts and leaders, Kecleon, Gold Pokéstops
    - [Lures](lures.md) — lure modules on pokestops
    - [Nests](nests.md) — nest pokemon
-   - [Gyms](gyms.md) — gym team changes, EX raids
+   - [Gyms & Forts](gyms.md) — gym team changes, EX raids, fort updates
+   - [MAX Battles](maxbattle.md) — Dynamax / Gigantamax raids
+4. **Refine** — [mute](mute.md) noisy alerts, set up [profiles](profiles.md) to switch tracking configurations, or use [`!info`](info.md) to look up pokemon and game data
+5. **(Discord)** — if your operator has enabled them, the same commands are available as [slash commands](slash.md) with autocomplete
 
 ## Command Syntax
 
@@ -49,7 +52,8 @@ Use [Profiles](profiles.md) to save and switch between different tracking config
 ## Tips
 
 - You must set at least one area or location before you'll receive alerts
-- Use `!tracked` to see all your current tracking subscriptions
-- Use `!stop` to temporarily pause all alerts, `!start` to resume
+- Use `!tracked` to see all your current tracking subscriptions and active mutes
+- Use `!stop` to indefinitely pause all alerts, `!start` to resume; for time-bounded silence use [`!mute`](mute.md) instead
 - Most tracking commands support the `remove` keyword to delete a subscription
+- Filter options use `key:value` form — `iv:90-100`, `cp:2000-3000`, `d:500`. Ranges (`low-high`) are preferred over `miniv:`/`maxiv:` pairs; bare-minimum-with-colon (`iv:99`) is fine when you only want a floor
 - Commands are case-insensitive

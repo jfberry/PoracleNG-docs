@@ -2,6 +2,9 @@
 
 PoracleNG provides a REST API for external tools (e.g. PoracleWeb) to manage users, tracking, geofences, and configuration. The processor is a single binary — there is no separate alerter component, and the entire API is served from the processor on its configured port (default `3030`).
 
+!!! tip "Canonical endpoint reference"
+    This page summarises the API surface for the documentation site. For the **authoritative, always-up-to-date** endpoint reference — including request/response payloads, the new `/api/humans/{id}/locations/*` named-location endpoints, the DTS editor (`/api/dts/templates`, `/api/dts/reload`, `/api/dts/actions`), and the auto-create surface — see [`API.md`](https://github.com/jfberry/PoracleNG/blob/main/API.md) in the PoracleNG repo. It tracks the source code more closely than these per-page summaries.
+
 ## Authentication
 
 API access requires setting an `api_secret` in the `[processor]` section of `config.toml`:

@@ -1,6 +1,10 @@
 # Command Reference
 
-Quick reference for all PoracleNG user commands. Discord uses `!` prefix, Telegram uses `/`.
+Quick reference for all PoracleNG user commands. Discord uses `!` prefix, Telegram uses `/`. Most commands are also available as Discord slash commands — see [Slash Commands](slash.md).
+
+## Filter Syntax — Colon Form
+
+Filter options use `key:value` form: `iv:90`, `iv:90-100`, `cp:2000-3000`, `level:25-35`, `d:500`, `team:valor`. Ranges (`low-high`) are preferred over `miniv:`/`maxiv:` pairs. Bare-minimum-with-colon (`iv:99`) is fine when you only need a floor. Legacy no-colon forms (`iv90`, `d500`, etc.) are still accepted.
 
 ## Registration & Status
 
@@ -8,125 +12,115 @@ Quick reference for all PoracleNG user commands. Discord uses `!` prefix, Telegr
 |---------|-------------|
 | `!poracle` | Register with the bot |
 | `!unregister` | Remove your registration and all data |
-| `!start` | Resume alerts (after stop) |
-| `!stop` | Pause all alerts |
-| `!tracked` | Show all your tracking subscriptions |
+| `!start` | Resume alerts (after `!stop`) |
+| `!stop` | Pause all alerts indefinitely |
+| `!tracked` | Show all your tracking subscriptions and active mutes |
 | `!version` | Show bot version |
-| `!help` | Show help |
+| `!help` | Show help index |
 | `!help <command>` | Show help for a specific command |
 
-## Location & Areas
+## Areas & Locations
+
+See [Areas & Locations](areas.md) for the full surface.
 
 | Command | Description |
 |---------|-------------|
-| `!location <lat>,<lon>` | Set your location |
-| `!location <place>` | Set location by place name |
-| `!location remove` | Remove your location |
 | `!area list` | List available areas |
-| `!area add <name>` | Add one or more areas |
+| `!area` | Show your current areas |
+| `!area add <name> [<name>...]` | Add one or more areas |
 | `!area remove <name>` | Remove an area |
-| `!area remove everything` | Remove all areas |
+| `!area clear` | Remove all areas |
+| `!location` | Show your default location |
+| `!location <lat>,<lon>` | Set default by coords |
+| `!location <place>` | Set default by address (requires geocoder) |
+| `!location remove default` | Clear your default location |
+| `!location list` | List default + all saved (named) locations |
+| `!location add <name> <coords-or-place>` | Save a named location |
+| `!location show <name>` | Show a named location |
+| `!location remove <name>` | Delete a named location (refused if any rule references it) |
 
 ## Pokemon Tracking
+
+See [Pokemon Tracking](pokemon.md).
 
 | Command | Description |
 |---------|-------------|
 | `!track <pokemon> [options]` | Track a pokemon |
-| `!track everything [options]` | Track all pokemon (with filters) |
+| `!track everything [options]` | Track all pokemon (filtered) |
 | `!untrack <pokemon>` | Stop tracking a pokemon |
+| `!untrack id:<N>` | Remove one specific rule by UID |
 | `!untrack everything` | Remove all pokemon tracking |
 
-### Pokemon Options
+### Pokemon Filter Options
 
 | Option | Description | Example |
 |--------|-------------|---------|
-| `iv<n>` | Min IV % | `iv90`, `iv90-100` |
-| `maxiv<n>` | Max IV % | `maxiv50` |
-| `level<n>` | Min level | `level35`, `level30-35` |
-| `maxlevel<n>` | Max level | `maxlevel30` |
-| `cp<n>` | Min CP | `cp2000`, `cp2000-3000` |
-| `maxcp<n>` | Max CP | `maxcp1500` |
-| `atk<n>` | Min attack | `atk15`, `atk14-15` |
-| `def<n>` | Min defense | `def15` |
-| `sta<n>` | Min stamina | `sta15` |
-| `maxatk<n>`, `maxdef<n>`, `maxsta<n>` | Max stat | `maxatk10` |
-| `d<n>` | Distance (meters) | `d500` |
-| `t<n>` | Min time remaining (sec) | `t300` |
+| `iv:<n>` / `iv:<low>-<high>` | IV % (min or range) | `iv:90`, `iv:90-100` |
+| `cp:<n>` / `cp:<low>-<high>` | CP (min or range) | `cp:2000-3000` |
+| `level:<n>` / `level:<low>-<high>` | Pokemon level | `level:30-35` |
+| `atk:<n>`, `def:<n>`, `sta:<n>` | Individual IVs (0-15, min or range) | `atk:13-15` |
+| `d:<n>` | Distance in metres | `d:500` |
+| `location:<name>` | Distance from a named location (requires `d:`) | `location:Home` |
+| `area:<name>[,<name>]` | Restrict to specific areas | `area:downtown` |
+| `t:<n>` | Min time remaining (sec) | `t:300` |
 | `form:<name>` | Form name | `form:alolan` |
-| `gen<n>` | Generation | `gen1` |
-| `rarity<n>` | Min rarity (1-5) | `rarity3` |
-| `maxrarity<n>` | Max rarity | `maxrarity4` |
-| `size<n>` | Min size (1-5) | `size5` |
-| `maxsize<n>` | Max size | `maxsize3` |
-| `weight<n>` | Min weight | `weight100` |
-| `maxweight<n>` | Max weight | `maxweight50` |
-| `great<n>` | Great League rank | `great5`, `great1-5` |
-| `ultra<n>` | Ultra League rank | `ultra10` |
-| `little<n>` | Little League rank | `little5` |
-| `greatcp<n>`, `ultracp<n>`, `littlecp<n>` | League min CP | `greatcp1400` |
-| `cap<n>` | PVP level cap | `cap50` |
+| `gen:<n>` | Generation | `gen:1` |
+| `rarity:<n>` / `rarity:<low>-<high>` | Rarity tier (1-5) | `rarity:3-5` |
+| `size:<n>` / `size:<low>-<high>` | Size category (1-5) | `size:5` |
+| `weight:<low>-<high>` | Weight range | `weight:0-1` |
+| `great:<n>`, `ultra:<n>`, `little:<n>` | PVP league rank | `great:1-10` |
+| `greatcp:<n>`, `ultracp:<n>`, `littlecp:<n>` | League min CP | `greatcp:1400` |
+| `cap:<n>` | PVP level cap | `cap:50` |
 | `male`, `female`, `genderless` | Gender filter | `male` |
-| `template<n>` | Template number | `template2` |
+| `template:<n>` | Template number | `template:2` |
 | `clean` | Auto-delete expired | `clean` |
+| `edit` | Single message, edited in place | `edit` |
 | `everything` | All pokemon | `everything` |
 | `individually` | Track as individual rows | `individually` |
 
 ## Raid & Egg Tracking
 
+See [Raids & Eggs](raids.md).
+
 | Command | Description |
 |---------|-------------|
-| `!raid <pokemon/level> [options]` | Track raids |
+| `!raid <pokemon\|level:n> [options]` | Track raids |
 | `!raid remove <target>` | Remove raid tracking |
-| `!egg <level> [options]` | Track eggs |
+| `!egg level:<n> [options]` | Track eggs |
 | `!egg remove <level>` | Remove egg tracking |
 
-### Raid/Egg Options
-
-`level<n>`, `ex`, `d<n>`, team names (`instinct`/`valor`/`mystic`/`harmony`), `move:<name>`, `template<n>`, `clean`, `everything`, `remove`
+Common options: `level:<n>`, `ex`, `d:<n>`, `team:instinct`/`valor`/`mystic`/`harmony`, `gym:<name>`, `move:<name>`, `area:<name>`, `location:<name>`, `template:<n>`, `clean`, `edit`, `rsvp`, `rsvp_only`, `everything`, `remove`.
 
 ## MAX Battle Tracking
 
+See [MAX Battle Tracking](maxbattle.md).
+
 | Command | Description |
 |---------|-------------|
-| `!maxbattle level<n> [options]` | Track MAX Battles by level (1-5) |
+| `!maxbattle level:<n> [options]` | Track MAX Battles by level (1-5) |
 | `!maxbattle <pokemon> [options]` | Track MAX Battles for a specific pokemon |
 | `!maxbattle everything [options]` | Track all MAX Battle levels |
 | `!maxbattle remove <target>` | Remove MAX Battle tracking |
-| `!maxbattle remove everything` | Remove all MAX Battle tracking |
 
-### MAX Battle Options
-
-| Option | Description | Example |
-|--------|-------------|---------|
-| `level<n>` | MAX Battle level | `level5` |
-| `gmax` | Gigantamax variant only | `gmax` |
-| `d<n>` | Distance (meters) | `d500` |
-| `move/<name>` | Filter by move | `move/flamethrower` |
-| `gen<n>` | Generation filter | `gen1` |
-| `form:<name>` | Form filter | `form:alolan` |
-| `template<n>` | Template number | `template2` |
-| `clean` | Auto-delete expired | `clean` |
-
-For more details see [MAX Battle Tracking](maxbattle.md).
+Common options: `level:<n>`, `gmax`, `d:<n>`, `move:<name>`, `gen:<n>`, `form:<name>`, `area:<name>`, `location:<name>`, `template:<n>`, `clean`.
 
 ## Other Tracking
 
 | Command | Description |
 |---------|-------------|
-| `!quest <reward> [options]` | Track quest rewards |
-| `!quest remove <reward>` | Remove quest tracking |
-| `!incident <type> [options]` | Track invasions |
-| `!incident remove <type>` | Remove invasion tracking |
-| `!lure <type> [options]` | Track lures |
-| `!lure remove <type>` | Remove lure tracking |
-| `!nest <pokemon> [options]` | Track nests |
-| `!nest remove <pokemon>` | Remove nest tracking |
-| `!gym <team> [options]` | Track gym changes |
-| `!gym remove <team>` | Remove gym tracking |
-| `!fort [options]` | Track fort updates (new/removed/renamed stops and gyms) |
+| `!quest <reward> [options]` | Track quest rewards (see [Quests](quests.md)) |
+| `!incident <type> [options]` | Track invasions / Kecleon / Gold Pokéstops / Showcases (see [Invasions](invasions.md)) |
+| `!lure <type> [options]` | Track lures (see [Lures](lures.md)) |
+| `!nest <pokemon> [options]` | Track nests (see [Nests](nests.md)) |
+| `!gym <team> [options]` | Track gym changes (see [Gyms](gyms.md)) |
+| `!fort [options]` | Track fort updates (new / removed / renamed stops and gyms) |
 | `!weather` | Track weather changes |
 
+Each tracker supports the common filter set: `d:<n>`, `location:<name>`, `area:<name>`, `template:<n>`, `clean`, `everything`, `remove`.
+
 ## Profiles
+
+See [Profiles](profiles.md).
 
 | Command | Description |
 |---------|-------------|
@@ -136,6 +130,20 @@ For more details see [MAX Battle Tracking](maxbattle.md).
 | `!profile copy <n>` | Copy current to profile N |
 | `!profile delete <n>` | Delete profile N |
 | `!profile settime <times>` | Set auto-switch schedule (e.g. `weekday09:00 weekend10:00`, `every08:00`) |
+
+## Mute
+
+See [Muting Alerts](mute.md).
+
+| Command | Description |
+|---------|-------------|
+| `!mute <scope> <value> [duration:<d>]` | Mute a gym / pokemon / area / pokestop / station |
+| `!mute everything [duration:<d>]` | Mute ALL alerts |
+| `!mute <pokemon> [duration:<d>]` | Shorthand — pokemon scope assumed |
+| `!unmute <scope> <value>` | End a mute early |
+| `!unmute everything` (or `all`) | Clear all active mutes |
+
+Default duration is 1h if omitted. Per-type aliases (`!raid mute gym ...`, `!gym mute gym ...`) forward to `!mute` with the scope pre-filled.
 
 ## Alert Summaries
 
@@ -148,6 +156,24 @@ Buffer matched events and deliver them grouped on a schedule. See [Alert Summari
 | `!summary quest settime <times>` | Set delivery schedule (e.g. `weekday07:30 weekend10:00`, `every08:00`) |
 | `!summary quest cleartime` | Remove the schedule (events still buffer) |
 | `!summary quest now` | Flush the buffer immediately |
+
+## Info & Lookups
+
+See [Info & Lookups](info.md).
+
+| Command | Description |
+|---------|-------------|
+| `!info <pokemon>` | Pokemon details (types, stats, evolutions, 100% CP) |
+| `!info moves` | List moves + IDs |
+| `!info items` | List items the bot recognises (canonical `!quest` tokens) |
+| `!info weather` | Current in-game weather + boosted types |
+| `!info templates` | DTS template numbers loaded on this server |
+| `!info rarity` | Pokemon rarity tier breakdown |
+| `!info shiny` | Observed shiny rates per species |
+
+## Slash Commands
+
+If your operator has enabled them, all the above (except admin-only ones) are also available as Discord `/track`, `/quest`, etc. with autocomplete and option panels. See [Slash Commands](slash.md).
 
 ## Language
 
@@ -182,11 +208,16 @@ These options are available across most tracking commands:
 
 | Option | Description |
 |--------|-------------|
-| `d<n>` | Distance from location in meters |
-| `template<n>` | Alert template number |
+| `d:<n>` | Distance from your location in metres |
+| `location:<name>` | Distance from a named (saved) location (requires `d:`) |
+| `area:<name>[,<name>]` | Restrict the rule to specific areas |
+| `template:<n>` | Alert template number (see `!info templates`) |
 | `clean` | Auto-delete expired alerts |
+| `edit` | Single message edited in place |
 | `remove` | Remove (instead of add) tracking |
 | `everything` | All items of that type |
+
+`d:` and `area:` are mutually exclusive. `location:` requires `d:`. See [Areas & Locations](areas.md#per-rule-overrides) for the full rules.
 
 ## Testing
 

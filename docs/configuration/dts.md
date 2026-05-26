@@ -63,6 +63,71 @@ The default template is controlled by `[general] default_template_name`.
 
 Templates are matched by `type`, `platform`, and `language`. If no exact language match is found, the default template is used.
 
+## TOML Format
+
+`config/dts/*.toml` files are loaded alongside JSON. The wire shape is the same — one entry per slot — but TOML's multi-line strings make the template body much easier to author than escaped JSON:
+
+```toml
+[[entry]]
+id          = "1"
+type        = "monster"
+platform    = "discord"
+language    = "en"
+description = "Compact monster card"
+
+template = """
+{
+  "embed": {
+    "title": "{{fullName}} {{round iv}}%",
+    "color": "{{ivColor}}"
+  }
+}
+"""
+```
+
+- Each `[[entry]]` is one DTS entry — same `(type, id, platform, language)` key as the JSON form.
+- The `template` field is the same Handlebars body you'd put in `templateFile` — TOML's `"""..."""` strings keep newlines and braces readable without `\n` and `\"` escaping.
+- Inline operator-authored buttons attach with the `[[entry.buttons]]` array-of-tables syntax (see [Interactive Buttons](dtsadvanced.md#interactive-buttons)).
+
+### Loading Order
+
+When multiple entries match the same `(type, platform, id, language)` key, **the last-loaded entry wins**. Files are loaded in this order:
+
+1. `fallbacks/dts.json` — bundled defaults (read-only, shipped with the code).
+2. `config/dts.json` — your main config.
+3. `config/dts/*.json` and `config/dts/*.toml` — additional files (alphabetical within the directory).
+
+This means a `monster/1/discord/en` entry in `config/dts/monster-1-discord-en.toml` overrides the same key in `config/dts.json`, which overrides `fallbacks/dts.json`. To customise a shipped template, copy it into `config/dts/` and edit there — your override always wins.
+
+### Config Editor Round-trip
+
+The config editor speaks JSON internally and re-emits each file in its original format on save. **Comments and operator-chosen key ordering are not preserved** across editor saves; the entire file is rewritten. Multi-line template strings (`"""..."""`) **are** preserved.
+
+Each save takes a pre-write backup into `config/backups/` so an accidental clobber is recoverable. If you hand-author elaborate TOML and want comments preserved, edit the file directly and call `POST /api/dts/reload` instead of going through the editor.
+
+### Per-template Save Behaviour
+
+The `POST /api/dts/templates` endpoint writes each saved template to **its own file** in `config/dts/` (e.g. `monster-1-discord-en.toml`). If the template previously lived in `config/dts.json` or another file, it is removed from the old file (other entries in that file are preserved). Source files that become empty are deleted (except `config/dts.json` itself).
+
+Templates can be reloaded from disk without restarting the processor via `GET /api/dts/reload`. See [`API.md`](https://github.com/jfberry/PoracleNG/blob/main/API.md) in the PoracleNG repo for the full DTS editor API.
+
+### The `default: true` Gotcha for Help Entries
+
+`default: true` on an entry means "match any query of this `(type, platform, language)` whose `id` doesn't have an exact match" — and it does **not** check the `id`. For most types that's harmless. For `type: "help"` it has a subtle consequence:
+
+- `!help` queries id `"index"`.
+- `!help track` queries id `"track"`.
+- `!help raid` queries id `"raid"`. ... etc.
+
+If your custom help entry has `"default": true` with any id (e.g. `"1"`), it matches **every one of those queries** and silently shadows the shipped per-topic help entries.
+
+| Intent | Config |
+|---|---|
+| My entry is the complete help (replaces all topics too) | `{"id": "<anything>", "default": true}` |
+| My entry is the landing page; shipped `!help track` / `!help raid` / ... still work | `{"id": "index", "default": false}` |
+
+PoracleNG emits a startup advisory when it sees a user `type: "help"` entry with `default: true`.
+
 ## Alert Types
 
 | Type | Trigger |

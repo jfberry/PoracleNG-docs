@@ -2,6 +2,9 @@
 
 Admin commands are available to users listed in the `admins` config for Discord or Telegram, and to delegated admins for their targets.
 
+!!! tip "REST API"
+    Most admin surfaces — user/tracking/profile CRUD, auto-create, DTS editing, named locations — are also available over HTTP. See the [API index](../api/index.md) for a summary and [`API.md`](https://github.com/jfberry/PoracleNG/blob/main/API.md) in the PoracleNG repo for the canonical endpoint reference.
+
 ## Channel Management
 
 === "Discord"

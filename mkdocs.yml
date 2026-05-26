@@ -94,9 +94,12 @@ nav:
     - Nests: userguide/nests.md
     - MAX Battles: userguide/maxbattle.md
     - Gyms & Forts: userguide/gyms.md
-    - Areas & Location: userguide/areas.md
+    - Areas & Locations: userguide/areas.md
     - Profiles: userguide/profiles.md
     - Alert Summaries: userguide/summaries.md
+    - Muting Alerts: userguide/mute.md
+    - Info & Lookups: userguide/info.md
+    - Slash Commands: userguide/slash.md
     - Command Reference: userguide/commands.md
   - Operation:
     - operation/index.md
