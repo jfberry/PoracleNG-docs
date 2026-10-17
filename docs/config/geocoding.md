@@ -37,7 +37,7 @@ Address results are cached on disk in `config/.cache/geocache`. Intersection res
 Use `style: "#(style)"` inside tileserver templates to switch styles by time of day.
 
 !!! note "Unused keys"
-    `sprite_height`, `sprite_width` and `scale` are not read by PoracleNG and can be removed.
+    `sprite_height`, `sprite_width` and `scale` are not read by PoracleNG and can be removed. The 5.3 `config.example.toml` no longer includes them.
 
 ### Circuit breakers
 

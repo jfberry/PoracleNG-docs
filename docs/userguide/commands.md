@@ -8,7 +8,7 @@ Filter options use `key:value` form: `iv:90`, `iv:90-100`, `cp:2000-3000`, `leve
 
 Keywords and names that contain spaces are typed with underscores or quotes: `no_rsvp`, `mega_legendary`, `slot_changes`, `area:city_centre`, `gym:"Hilltop Gym"`. (Multi-word item, pokemon, move, form and costume names are recognised with plain spaces too.)
 
-Any command followed by `help` (e.g. `!track help`) shows its usage. Several commands can be sent at once — one per line, or separated by `|` (`!track pikachu | track eevee`).
+Any command followed by `help` (e.g. `!track help`) shows its usage. Several commands can be sent at once, one per line. Within one command, `|` repeats the same command with different arguments: `!track pikachu iv:100 | eevee iv:90` runs `!track` twice.
 
 ## Registration & Status
 
@@ -77,7 +77,7 @@ See [Pokemon Tracking](pokemon.md).
 | `form:<name>` | Form name | `form:alolan` |
 | `costume:<name\|id>` | Costume (`costume:0` = no costume) | `costume:0` |
 | `gen:<n>` | Generation (narrows `everything` or named pokemon) | `everything gen:1` |
-| `rarity:<n>` / `rarity:<low>-<high>` | Rarity tier (1-6); a single value is an exact match | `rarity:3-5` |
+| `rarity:<n>` / `rarity:<low>-<high>` | Rarity tier (1-6 or `common`, `uncommon`, `rare`, `very-rare`, `ultra-rare`, `unseen`); a single value is an exact match | `rarity:3-5`, `rarity:very-rare` |
 | `size:<n>` / `size:<low>-<high>` | Size (1-5 or `xxs`/`xs`/`m`/`xl`/`xxl`); a single value is an exact match | `size:xxl` |
 | `great:<n>`, `ultra:<n>`, `little:<n>` | PVP league rank | `great:1-10` |
 | `mega`, `mega:x`, `mega:y` | Rank as Mega Evolution (with a league filter) | `great:5 mega` |
@@ -102,7 +102,7 @@ See [Raids & Eggs](raids.md).
 | `!egg level:<n> [options]` | Track eggs |
 | `!egg remove <level>` | Remove egg tracking |
 
-Common options: `level:<n>`, level names (`legendary`, `mega`, `mega_legendary`, `elite`, `primal`, `shadow`, `shadow_legendary`, …), `ex`, `d:<n>`, team (`instinct`/`valor`/`mystic`/`harmony` or `yellow`/`red`/`blue`/`gray` — bare words, no `team:` prefix), `gym:<name>`, `move:<name>`, `form:<name>`, `costume:<name>`, `area:<name>`, `location:<name>`, `template:<n>`, `clean`, `edit`, `rsvp`, `rsvp_only`, `no_rsvp`, `everything`, `remove`. Pokemon types and `gen:` are not raid filters.
+Common options: `level:<n>`, level names (`legendary`, `mega`, `mega_legendary`, `elite`, `primal`, `shadow`, `shadow_legendary`, …), `ex`, `d:<n>`, team (`instinct`/`valor`/`mystic`/`harmony` or `yellow`/`red`/`blue`/`gray` — bare words, no `team:` prefix), `gym:<name>`, `move:<name>`, `form:<name>`, `costume:<name>`, `area:<name>`, `location:<name>`, `template:<n>`, `clean`, `edit`, `rsvp`, `rsvp_only`, `no_rsvp`, `everything`, `remove`. Pokemon types and `gen:` are not raid filters and are rejected as unrecognised (5.3+). An unknown `move:` is rejected (5.3+).
 
 ## MAX Battle Tracking
 
@@ -115,7 +115,7 @@ See [MAX Battle Tracking](maxbattle.md).
 | `!maxbattle everything [options]` | Track all MAX Battle levels |
 | `!maxbattle remove <target>` | Remove MAX Battle tracking |
 
-Common options: `level:<n>`, `gmax`, `d:<n>`, `move:<name>`, `form:<name>`, `area:<name>`, `location:<name>`, `template:<n>`, `clean`. `gen:<n>` and pokemon types only narrow a list of named pokemon.
+Common options: `level:<n>`, `gmax`, `d:<n>`, `move:<name>`, `form:<name>`, `area:<name>`, `location:<name>`, `template:<n>`, `clean`. `gen:<n>` and pokemon types only narrow a list of named pokemon; without one they are rejected (5.3+). An unknown `move:` is rejected (5.3+).
 
 ## Other Tracking
 
@@ -127,7 +127,6 @@ Common options: `level:<n>`, `gmax`, `d:<n>`, `move:<name>`, `form:<name>`, `are
 | `!nest <pokemon> [options]` | Track nests (see [Nests](nests.md)) |
 | `!gym <team> [options]` | Track gym changes (see [Gyms](gyms.md)) |
 | `!fort [options]` | Track fort updates (new / removed / renamed stops and gyms — see [Gyms](gyms.md)) |
-| `!weather` | Not available yet — replies that weather tracking isn't supported |
 
 Each tracker supports the common filter set: `d:<n>`, `location:<name>`, `area:<name>`, `template:<n>`, `everything`, `remove`. `clean` is accepted by every tracker except `!fort`. `edit` is accepted only by `!track`, `!raid`, `!egg` and `!lure`.
 
@@ -141,7 +140,7 @@ See [Profiles](profiles.md).
 | `!profile add <name>` | Create a new profile |
 | `!profile <n\|name>` (or `switch <n\|name>`) | Switch profile (must already exist) |
 | `!profile remove <n\|name>` (or `delete`) | Delete a profile (not profile 1) |
-| `!profile copyto <name...\|all>` | Replace the tracking on other profiles with a copy of the current one |
+| `!profile copyto <name\|n...\|all>` | Replace the tracking on other profiles with a copy of the current one (by number as well as name in 5.3+) |
 | `!profile settime <times>` (or `hours`) | Set auto-switch schedule (e.g. `weekday09:00 weekend10:00`, `weekday:9-17/2`) |
 | `!profile cleartime` | Remove the current profile's schedule |
 
@@ -158,7 +157,7 @@ See [Muting Alerts](mute.md).
 | `!unmute <scope> <value>` | End a mute early |
 | `!unmute everything` (or `all`) | Clear all active mutes |
 
-Default duration is 1h if omitted; durations look like `30m`, `1h30m` or `2d`. Mutes are lost on restart. Per-type aliases only work for `!<type> mute id:<N>`, `!track mute <pokemon>` and `!gym mute <gym>` — see [Muting Alerts](mute.md#per-type-aliases).
+Default duration is 1h if omitted; durations look like `30m`, `1h30m` or `2d`. Mutes are lost on restart. Every tracking command also accepts `mute` / `unmute` followed by any of the forms above (`!raid mute gym "Hilltop Gym"`, `!track mute id:45`); before 5.3 only `!<type> mute id:<N>`, `!track mute <pokemon>` and `!gym mute <gym>` worked — see [Muting Alerts](mute.md#per-type-aliases).
 
 ## Alert Summaries
 
@@ -235,6 +234,9 @@ These options are available across most tracking commands:
 | `everything` | All items of that type |
 
 `d:` and `area:` are mutually exclusive. `location:` requires `d:`. See [Areas & Locations](areas.md#per-rule-overrides) for the full rules.
+
+!!! note "Words starting with `name` or `user`"
+    Admins can run a command for someone else with `user<ID>` / `user:<ID>` or `name<webhook>` / `name:<webhook>`. Any argument starting with `name` is still read that way, so a command containing a word such as an area called `Namesake` fails with a "webhook … not found" error unless a webhook has that name. In 5.3+ `user` only counts when a numeric ID follows (`user:123456`), so words like `Userton` are left alone. Older builds treated any word starting with `user` as an override too.
 
 ## Testing
 

@@ -2,7 +2,7 @@
 
 Admin commands are available to users listed in `admins` under `[discord]` or `[telegram]` in `config.toml`. Non-admins don't see them in `!help`, and most refuse with a 🙅 react.
 
-Delegated admins (`[[discord.delegated_admins]]`, `[[discord.webhook_admins]]`, `user_tracking_admins`) are **not** full admins: they can manage tracking for the channels, webhooks or users they've been given (see [Tracking on behalf of others](#tracking-on-behalf-of-others)), but can't run the commands on this page.
+Delegated admins (`[[discord.delegated_admins]]`, `[[telegram.delegated_admins]]`, `[[discord.webhook_admins]]`, `user_tracking_admins`) are **not** full admins: they can manage tracking for the channels, webhooks or users they've been given (see [Tracking on behalf of others](#tracking-on-behalf-of-others)), but can't run the commands on this page. The exception is Telegram community admins from [area security](../configuration/areasecurity.md), who can run `/channel add`/`remove` and, from 5.3, a `/userlist` limited to their communities.
 
 Telegram uses the same commands with a `/` prefix (`/userlist`, `/pa status`, …) unless noted as Discord-only.
 
@@ -65,7 +65,7 @@ When delivery is paused (see `maintenance` below), the status starts with a 🔴
 | `!pa maintenance status` | Show whether delivery is running or paused, the reason, and for how long. |
 
 !!! warning "Paused alerts are dropped, not queued"
-    During a pause, webhooks are still received, matched and rendered, but the resulting alerts are **thrown away**. Nothing is held back to send on resume, so you don't get a flood of stale alerts. Rate-limit notices still go out.
+    During a pause, webhooks are still received, matched and rendered, but the resulting alerts are **thrown away**. Nothing is held back to send on resume, so you don't get a flood of stale alerts. Rate-limit notices still go out. From 5.3 the `!pa maintenance` replies say so; in 5.2.x they wrongly said alerts were queued and would drain on resume.
 
     While paused, every command reply on both platforms ends with "🔧 Maintenance mode is active — alerts are not being delivered." so users know why alerts have stopped. The pause is in memory only: restarting the processor resumes delivery.
 
@@ -98,7 +98,7 @@ When delivery is paused (see `maintenance` below), the status starts with a 🔴
 | `!pa config search <term>` | Find every key whose path or value contains `<term>`, e.g. `!pa config search shlink`. Alias: `find`. Redacted values are searched as `***`, so a search can't reveal a secret. |
 | `!pa config help` | List these options. |
 
-Underscores in unquoted command arguments are turned into spaces. To name a section or search term that contains an underscore, put it in double quotes: `!pa config "alert_limits"`, `!pa config search "dm_log"`.
+From 5.3, section names and search terms ignore case and treat `_` and spaces alike, so `!pa config alert_limits`, `!pa config webhookLogging` and `!pa config search dm_limit` work as typed. In 5.2.x, unquoted underscores were turned into spaces and the section lookup was case-sensitive, so you had to quote: `!pa config "alert_limits"`.
 
 !!! note "5.3+"
     From 5.3, config output is shown in code blocks, so TOML values keep their formatting and aren't mangled by Discord markdown.
@@ -157,7 +157,7 @@ Registered channels, groups and webhooks receive alerts the same way a user does
 ```
 
 - Run in a thread, `!channel add` registers the thread (type `discord:thread`).
-- `area:` takes one area name and `language:` takes a language code. Both are optional.
+- `area:` takes one area name and `language:` takes a language code. Both are optional. From 5.3, area names with underscores work unquoted (`area:gent_centrum`), and a known area is stored under the fence's own name. In 5.2.x an `area:` or `name:` value containing an underscore was silently dropped.
 - Adding a webhook needs both `name:` and the URL. Webhooks can be added from a DM; channels can't.
 - `!channel` is for full admins only.
 
@@ -194,7 +194,7 @@ Mentioning a user or channel doesn't change who a command applies to. Use one of
 
 | How | Applies to | Who can do it |
 |---|---|---|
-| Run the command **inside a registered channel/group/topic** | That channel | Admins, and delegated admins for that channel or guild (`[[discord.delegated_admins]]`) |
+| Run the command **inside a registered channel/group/topic** | That channel | Admins; delegated admins for that channel, category or guild (`[[discord.delegated_admins]]`) or chat (`[[telegram.delegated_admins]]`); and, on Telegram with area security, community admins for groups in their communities. Category and Telegram delegation are 5.3+. |
 | Add `user:<id>` | That registered user | Admins and `user_tracking_admins` |
 | Add `name:<name>` | The webhook, channel or group with that registered name | Admins, and `[[discord.webhook_admins]]` for that webhook name |
 
@@ -220,7 +220,7 @@ The bot replies "This command is being executed as …" so you can see which tar
 
 ### `!userlist`
 
-Lists registered users, channels, groups and webhooks, with their areas and a status marker (🛑 stopped, ⛔ disabled). Add filters to narrow the list:
+Lists registered users, channels, groups and webhooks, with their areas and a status marker (🛑 stopped, ⛔ disabled). From 5.3, Telegram community admins can run it too, and see only humans in the communities they administer. Add filters to narrow the list:
 
 ```
 !userlist
@@ -236,7 +236,12 @@ Lists registered users, channels, groups and webhooks, with their areas and a st
 !enable <id> [<id> …]             # re-enable them
 ```
 
-Targets can be IDs, Discord mentions, or webhook/channel names. `!disable` stops alerts for the target until an admin enables it again. `!enable` also clears a user's own `!stop` and resets the failed-delivery count.
+Targets can be IDs, Discord mentions, or webhook/channel names. `!disable` stops alerts for the target until an admin enables it again. `!enable` also clears a user's own `!stop` (including a rate-limit stop) and resets the failed-delivery count.
+
+From 5.3:
+
+- IDs with no registration are listed as "Not registered: …" instead of being reported as done. If nothing was applied, the reply reacts 🙅. In 5.2.x the command reported success for unknown IDs.
+- `!enable` (and `!start`) also clear the target's rate-limit breach history, so a re-enabled user who floods again is banned again. See [Rate Limits](ratelimits.md).
 
 ### `!unregister`
 
@@ -245,7 +250,7 @@ Targets can be IDs, Discord mentions, or webhook/channel names. `!disable` stops
 !unregister                       # non-admin: remove yourself
 ```
 
-An admin can't unregister themselves this way. The command refuses if the only target is you.
+An admin can't unregister themselves this way. The command refuses if the only target is you. From 5.3, unknown IDs are listed as "Not registered" rather than reported as removed.
 
 ## Communities
 
@@ -316,7 +321,7 @@ The reply shows `>>> Executing as <type> / <name>` for each target, then the res
 ```
 
 !!! warning
-    The file must be plain JSON. The repository's `examples/broadcast.json` has `//` comments, so remove them when you copy it, or `!broadcast` replies "Failed to parse broadcast.json".
+    The file must be plain JSON: `//` comments make `!broadcast` reply "Failed to parse broadcast.json". Extra fields are ignored, so use a `"_comment": "…"` field for notes. From 5.3 the repository's `examples/broadcast.json` is valid JSON and can be copied as is; the 5.2.x copy has `//` comments that you must remove.
 
 ## Backup & Restore
 
@@ -333,7 +338,12 @@ The reply shows `>>> Executing as <type> / <name>` for each target, then the res
 - Names can contain only letters, numbers, `-` and `_`. Quote names that contain underscores.
 - Backups are saved in `backups/` under the processor base directory. Nothing is attached to the chat.
 - Combine with in-channel targeting, `user:` or `name:` to back up or restore a particular channel, user or webhook.
-- `!restore` replaces tracking only for the types that have rows in the backup. Tracking of other types on the target is kept.
+- Backups cover every tracking type: pokemon, raids, eggs, quests, invasions, lures, nests, gyms, weather, max battles and fort updates. Profiles and summary schedules aren't included; a backup is a per-profile tracking template.
+
+!!! info "PoracleNG 5.3+: `!restore` replaces everything"
+    From 5.3, `!restore` clears **every** tracking type on the target's current profile and refills it from the file, in one transaction. A type that is empty or missing from the backup ends up empty, and if anything fails nothing changes. The file is validated first: an unknown table or column rejects the whole restore before anything is touched.
+
+    In 5.2.x, `!restore` only replaced the types that had rows in the backup, kept other types, and didn't validate table or column names.
 
 ## Exporting Tracking (`!script`)
 
@@ -343,7 +353,7 @@ The reply shows `>>> Executing as <type> / <name>` for each target, then the res
 !script
 ```
 
-The export covers pokemon, raids, eggs, invasions, lures, nests, gyms and quests. Admins can add `user:<id>` or `name:<name>` to export someone else's tracking.
+The export covers pokemon, raids, eggs, invasions, lures, nests, gyms, quests and, from 5.3, max battles and fort updates (5.2.x leaves those two out). Admins can add `user:<id>` or `name:<name>` to export someone else's tracking.
 
 ## Finding IDs
 
@@ -427,6 +437,7 @@ See [Channel Auto-create](../configuration/autocreate.md) for the template forma
 !poracle-test pokemon hundo
 !poracle-test raid level5 template:2
 !poracle-test quest quest-pokecoins language:de
+!poracle-test nest riverside                # 5.3+
 ```
 
 | Type | Test IDs |
@@ -444,7 +455,7 @@ See [Channel Auto-create](../configuration/autocreate.md) for the template forma
 | `monster-changed` | `ditto-reveal` |
 | `rsvp-changes` | `level5` |
 | `weatherchange` | `rain` |
-| `nest` | (none bundled; add your own) |
+| `nest` | `riverside` (5.3+; 5.2.x bundles no nest data, so add your own) |
 
 DTS template type names also work as the type: `monster`, `egg`, `invasion`, `lure`, `maxbattle`, `monsterchanged` and so on. `!poracle-test` with no arguments lists the accepted types.
 

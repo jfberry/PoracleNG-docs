@@ -81,6 +81,8 @@ An unknown form name is rejected with an error. Use `!info <pokemon> forms` to s
 !maxbattle charizard move:blast_burn
 ```
 
+A move name the bot doesn't recognise is rejected with "Unknown move: …" (5.3+); older builds treated it as "any move".
+
 ### Type and Generation
 
 Type names and `gen:` only **narrow a list of pokemon you have named** — they are not standalone filters:
@@ -90,7 +92,7 @@ Type names and `gen:` only **narrow a list of pokemon you have named** — they 
 !maxbattle bulbasaur+ machop+ gen:1      # Both families are gen 1, so both are kept
 ```
 
-`!maxbattle fire` or `!maxbattle gen:1` on their own reply "No levels specified", and combining them with `everything` or `level:` (`!maxbattle everything fire`) is silently ignored — you get every MAX Battle.
+Without a named pokemon there is nothing for them to narrow, so in 5.3+ `!maxbattle fire`, `!maxbattle everything gen:1` and `!maxbattle level:5 fire` are rejected with "Generation and type filters only narrow named pokemon for max battles…" and nothing is saved. (Older builds ignored the filter alongside `everything` or `level:` and tracked every MAX Battle.)
 
 ## All MAX Battle Options
 
@@ -115,17 +117,21 @@ Legacy no-colon forms (`level5`, `d500`, `gen1`) still work. `edit` is not accep
 
 ## Removing Tracking
 
-Remove tracking for a pokemon, a single rule, or everything:
+Remove tracking for a pokemon, a level, a single rule, or everything:
 
 ```
 !maxbattle remove charizard          # All Charizard rules (every form)
+!maxbattle remove level:5            # Your level 5 rule
+!maxbattle remove level:1-3          # Level rules for levels 1 to 3
 !maxbattle remove id:12              # One rule by ID (see !tracked)
 !maxbattle remove everything         # All MAX Battle tracking
 !untrack maxbattle id:12             # Same as !maxbattle remove id:12
 ```
 
-!!! note
-    Level rules can only be removed by ID or with `everything` — `!maxbattle remove level:5` currently matches nothing. `form:` is not accepted on remove (removal is species-wide); remove a single form's rule by its ID.
+`remove level:` only removes by-level rules; pokemon rules are removed by naming the pokemon. `form:` is not accepted on remove (removal is species-wide); remove a single form's rule by its ID.
+
+!!! note "5.3+"
+    On older builds `!maxbattle remove level:5` replied 👌 but removed nothing; level rules could only be removed by ID or with `everything`.
 
 ## Examples
 

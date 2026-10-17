@@ -67,9 +67,10 @@ For example, to save a named location, you'd run `/location add` and fill in the
 | `/nest` | `pokemon` (required), `min_spawn_avg`, `distance`, `clean`, `template`, `location`, `areas` |
 | `/maxbattle` | `level`, `pokemon`, `gmax`, `distance`, `clean`, `template`, `location`, `areas` |
 | `/gym` | `team`, `slot_changes`, `battle_changes`, `distance`, `clean`, `template`, `location`, `areas` |
-| `/fort` | `fort_type` (required: Pokestop or Gym), `include_empty`, `distance`, `template`, `location`, `areas` |
+| `/fort` | `fort_type` (required: Pokestop, Gym, Station or Everything), `include_empty`, `distance`, `template`, `location`, `areas` |
 
-`/fort` also shows a `clean` option, but the fort command doesn't support `clean`, so setting it makes the command fail — leave it unset.
+!!! note "5.3+"
+    Before 5.3, `/fort` offered only Pokestop and Gym, and it also showed a `clean` option that made the command fail when set (fort rules have no `clean`). The `clean` option is gone.
 
 Anything not listed (individual-stat ranges, CP, level, `move:`, `gen:`, PVP `mega`, rarity, `ex`, `rsvp`, …) is text-only.
 
@@ -82,7 +83,8 @@ Several options have live autocomplete suggestions:
 | **Pokemon name** (on `/track`, `/quest`, `/raid`, `/nest`, `/maxbattle`) | Matches against names in your language + English + dex ID |
 | **Area** (on `/area add`, `/area remove`, and the `areas` option on tracking commands) | Areas your account is allowed to use. Pick several — each pick is added to a comma-separated list |
 | **Template** (on `/track template:…` and others) | Templates currently loaded on this server (same as `!info templates`) |
-| **Profile name** (on `/profile change`, `/profile delete`, `/profile copyto`) | Your existing profile names |
+| **Profile** (on `/profile change`, `/profile delete`, `/profile copyto`) | Your existing profiles, shown as `name [#number]`; picking one sends the profile number |
+| **Times** (on `/profile settime`, `/summary quest settime`) (5.3+) | Ready-made time specs such as `weekday07:30`, `weekend07:00-18:00` or `08:00-20:00/2`, each with a short description. Type a day prefix (`mon`, `w`…) to narrow them, or a digit to complete a time; whatever you've typed is always offered first so you can keep a custom spec |
 | **Form / costume** (on `/track`, `/raid`) | Forms/costumes for the chosen pokemon, with recently-seen ones listed first |
 | **Help topic** (on `/help`) | Available help topics (admin topics hidden for non-admins) |
 | **Tracking rule** (on `/untrack …`) | Your existing rules of that type, plus "Remove ALL" |
@@ -133,7 +135,7 @@ Slash: `/summary quest settime` then:
 
 - `times: weekday07:30,weekend10:00`
 
-The `times` option takes one or more specs separated by commas (or spaces), using the same [time-spec grammar](profiles.md#time-spec-grammar) as the text command.
+The `times` option takes one or more specs separated by commas (or spaces), using the same [time-spec grammar](profiles.md#time-spec-grammar) as the text command. Its autocomplete (5.3+) suggests one spec at a time, so it's most useful for a single spec; for several, type them out.
 
 ## Limitations
 
@@ -147,7 +149,7 @@ The `times` option takes one or more specs separated by commas (or spaces), usin
 
 These remain text-only — they're either admin operations or don't fit the slash model:
 
-`!poracle`, `!poracle-test`, `!poracle-admin`, `!poracle-clean`, `!poracle-id`, `!poracle-emoji`, `!broadcast`, `!apply`, `!enable`, `!disable`, `!unregister`, `!channel`, `!webhook`, `!autocreate`, `!community`, `!role`, `!ask`, `!script`, `!userlist`, `!backup`, `!restore`, `!mute`, `!unmute`, `!weather`.
+`!poracle`, `!poracle-test`, `!poracle-admin`, `!poracle-clean`, `!poracle-id`, `!poracle-emoji`, `!broadcast`, `!apply`, `!enable`, `!disable`, `!unregister`, `!channel`, `!webhook`, `!autocreate`, `!community`, `!role`, `!ask`, `!script`, `!userlist`, `!backup`, `!restore`, `!mute`, `!unmute`.
 
 ## Related
 

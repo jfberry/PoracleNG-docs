@@ -76,6 +76,12 @@ database = "poracle"
 !!! note "api_secret location"
     The migration script moves PoracleJS's `server.apiSecret` to `[processor] api_secret`. Early PoracleNG configs kept it under `[alerter]`; PoracleNG still reads that location for backward compatibility and copies the value into `[processor]` at load time, but new configs should put it directly under `[processor]`.
 
+!!! note "IP lists and reverse proxies (5.3+)"
+    The script copies `server.ipWhitelist` / `ipBlacklist` to `[processor] ip_whitelist` / `ip_blacklist`. From 5.3 these accept exact IPs and CIDR ranges, an invalid entry stops startup, and forwarded headers are only believed from `[processor] trusted_proxies`. If PoracleJS sat behind a reverse proxy and you rely on the IP lists, add the proxy to `trusted_proxies`. See [`[processor]`](../config/processor.md).
+
+!!! note "Delegated admins (5.3+)"
+    The script converts `delegatedAdministration` to `[[discord.delegated_admins]]` / `[[telegram.delegated_admins]]`. Category targets on Discord and all Telegram delegated admins only take effect from 5.3; on 5.2.x use guild or channel IDs on Discord.
+
 !!! warning "Migrated before PoracleNG 5.1?"
     Two migration-script bugs were fixed in 5.1. If you converted your config with an older copy of the script, check by hand:
 

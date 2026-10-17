@@ -45,11 +45,11 @@ Bans apply to **every** destination type: users, channels, threads, Discord webh
 !!! info "PoracleNG 5.3+: bans fire once"
     In 5.2.x, each later breach in the same 24-hour window (for example while an already-queued backlog drained) triggered the whole ban again: another farewell, shame post and admin notice every `timing_period`. From 5.3 the ban fires only once per 24-hour violation window. Later breaches still count, and `!poracle-admin ratelimit` still shows the destination as banned.
 
-    A side effect: if the destination re-enables itself with `!start` and breaches again within the same 24 hours, it is rate-limited but not banned a second time. Use `!poracle-admin ratelimit reset <id>` to clear its history.
+    Re-enabling a destination with `!start` or `!enable` clears its breach history (but not the current window's counters), so if it floods again it is banned again after another `max_limits_before_stop` breaches. In early 5.3 development builds the ban stayed latched for the whole 24-hour window after a re-enable, so a re-enabled user could flood without being banned again.
 
 ### Stopped vs Disabled
 
-- **Stopped** (default) — the user (or an admin in the channel) re-enables with `!start`. Tracking is kept.
+- **Stopped** (default) — the user (or an admin in the channel) re-enables with `!start`. An admin can also lift it with `!enable <id>`. Tracking is kept.
 - **Admin-disabled** (`disable_on_stop = true`) — needs an admin to run `!enable <id>`, which stops users from simply restarting a flood.
 
 ## Auto-Disable on Delivery Failures

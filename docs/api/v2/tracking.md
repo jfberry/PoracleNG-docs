@@ -72,7 +72,7 @@ curl -X POST -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/js
 POST keeps the bot's de-duplication behaviour. Each incoming rule is compared with the human's existing rules of that type on the same profile:
 
 - **identical** → reported in `unchanged`, nothing written;
-- **differs only in one "display" field** (`distance`, `template`, `clean`/`edit`/`summary`, or `ping`) → the existing rule is updated in place and reported in `updated` (same `uid`);
+- **differs only in one "display" field** (`distance`, `template`, `clean`/`edit`/`summary`, or `ping`) → the existing rule is updated and reported in `updated`, keeping its `uid` (5.3+; earlier builds returned a new uid);
 - **anything else** → a new rule is inserted and reported in `created`.
 
 An empty array is rejected with `422`.
@@ -87,8 +87,7 @@ curl -X PUT -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/jso
   -d '{"pokemon_id": 150, "team": "mystic", "distance": 2000}'
 ```
 
-!!! warning "PUT assigns a new uid"
-    A replace is implemented as delete-then-insert, so the rule comes back in `updated` with a **new `uid`**. Update any uid you've cached from the response.
+The rule comes back in `updated` and **keeps its `uid`** (5.3+), so mutes on that rule (`!mute id:N`, mute buttons, the [mutes API](profiles.md#mutes)), `id:N` commands and buttons on earlier alerts keep working. Earlier builds gave the replaced rule a new uid. If moving the rule back onto its old uid fails, the request still succeeds, the response carries the new uid, and the failure is logged, so always take the uid from the response.
 
 If the replacement would be identical to a *different* existing rule, the PUT is refused with `409` and nothing is changed.
 
@@ -117,7 +116,7 @@ curl -H "X-Poracle-Secret: your-secret" \
 
 ```json
 {
-  "human": {"id": "123456789012345678", "name": "Alice", "type": "discord:user", "enabled": 1, "current_profile_no": 1, "area": "[\"downtown\"]", "...": "..."},
+  "human": {"id": "123456789012345678", "name": "Alice", "type": "discord:user", "enabled": true, "current_profile_no": 1, "area": ["downtown"], "...": "..."},
   "tracking": {
     "pokemon": [{"uid": 9012, "profile_no": 1, "pokemon_id": 149, "...": "..."}],
     "raid": [],
@@ -131,14 +130,17 @@ curl -H "X-Poracle-Secret: your-secret" \
     "fort": [],
     "maxbattle": []
   },
-  "profiles": [{"uid": 1, "id": "123456789012345678", "profile_no": 1, "name": "Default", "area": "[\"downtown\"]", "latitude": 51.28, "longitude": 1.08, "active_hours": "[]"}],
+  "profiles": [{"uid": 1, "id": "123456789012345678", "profile_no": 1, "name": "Default", "area": ["downtown"], "latitude": 51.28, "longitude": 1.08, "active_hours": []}],
   "locations": {"default": {"latitude": 51.28, "longitude": 1.08}, "named": [{"label": "work", "latitude": 51.3, "longitude": 1.1}]},
-  "summaries": [{"id": "123456789012345678", "alert_type": "quest", "active_hours": [{"day": 1, "hours": 7, "mins": 30}]}],
+  "summaries": [{"alert_type": "quest", "active_hours": [{"day": 1, "hours": 7, "mins": 30}]}],
   "mutes": []
 }
 ```
 
-Note that `human` and `profiles` in the snapshot use the same encoding as the v1 records (`enabled` as `0/1`, `area` and profile `active_hours` as JSON-encoded strings). Use [`GET …/profiles`](profiles.md#list) if you want `active_hours` as a typed array.
+`human` has the same typed shape as [`GET /api/v2/humans/{id}`](humans.md#fetch-a-human), `profiles` the same as [`GET …/profiles`](profiles.md#list), and each `summaries` entry is `{alert_type, active_hours}` with ISO-weekday `active_hours` entries (1 = Monday … 7 = Sunday).
+
+!!! warning "Changed in 5.3"
+    Before 5.3 the snapshot's `human` and `profiles` used the v1 encodings (`enabled` as `0`/`1`, `area` and profile `active_hours` as JSON-encoded strings), and each `summaries` entry also carried the human's `id`.
 
 ## Fields common to every type
 

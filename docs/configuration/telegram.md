@@ -6,7 +6,7 @@ Full Telegram configuration reference. For initial bot setup, see [Telegram Bot 
 
 ```toml
 [telegram]
-enabled = false
+enabled = true                           # false stops Telegram commands and (5.3+) all Telegram alerts
 token = ""                               # Bot token from BotFather
 admins = ["user-id"]                     # Admin user IDs
 channels = ["group-id"]                  # Registration group IDs
@@ -26,16 +26,16 @@ The `{user}` placeholder in `group_welcome_text` is replaced with the user's nam
 
 ## Delegated Admins
 
-Intended to let users manage tracking for specific groups or channels:
+Let users manage tracking for specific groups or forum topics:
 
 ```toml
 [[telegram.delegated_admins]]
-target = "group_or_channel_id"
+target = "group_or_channel_id"           # chat ID, or <chatId>:<topicId> for one forum topic
 admins = ["user_id_1", "user_id_2"]
 ```
 
-!!! warning
-    The processor currently only reads and logs this setting. It doesn't give the listed users any permissions on Telegram. See [Telegram Admin Operations](../operation/telegram.md#delegated-admins-and-tracking-admins).
+!!! info "PoracleNG 5.3+"
+    Delegated admins work from 5.3: the listed users can run tracking commands in that chat to change its tracking. In 5.2.x the setting was only read and logged, and gave nobody any permissions. See [Telegram Admin Operations](../operation/telegram.md#delegated-admins-and-tracking-admins).
 
 ## User Tracking Admins
 

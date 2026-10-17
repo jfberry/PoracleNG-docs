@@ -6,7 +6,7 @@ Full Discord configuration reference. For initial bot setup, see [Discord Bot Se
 
 ```toml
 [discord]
-enabled = true
+enabled = true                           # false stops the bot and (5.3+) all Discord alerts
 token = "bot-token"                      # Bot token
 guilds = ["guild-id"]                    # Server IDs
 channels = ["channel-id"]               # Registration channel IDs
@@ -42,7 +42,7 @@ Both bots must be invited to every guild they operate in. The command bot needs 
 ```toml
 [discord]
 admin_channel_id = ""                    # Channel for operator notices (auto-disables, keep-alive failures, render errors)
-thread_keep_alive_interval_hours = 24    # Unarchive Poracle's threads this often; 0 = off, max 168
+thread_keep_alive_interval_hours = 24    # Unarchive Poracle's threads this often; 0 = off, max 168 (built-in default 0 if omitted)
 ```
 
 ## Registration and Access
@@ -61,7 +61,7 @@ When `user_role` is set, users with those roles are automatically registered wit
 
 ## Delegated Admins
 
-Grant admin access to specific channels, guilds, or categories:
+Let users and roles manage the tracking of registered channels in a specific channel, guild or category, without full admin access:
 
 ```toml
 [[discord.delegated_admins]]
@@ -69,9 +69,11 @@ target = "channel_or_guild_id"
 admins = ["user_id_1", "role_id_2"]
 
 [[discord.delegated_admins]]
-target = "category_id"
+target = "category_id"                   # 5.3+: covers channels (and their threads) in the category
 admins = ["user_id_3"]
 ```
+
+A thread also matches its parent channel and that channel's category. Category and thread-parent matching are **5.3+**; in 5.2.x only channel and guild IDs were checked.
 
 ## Webhook Admins
 
@@ -128,7 +130,7 @@ Valid keys:
 - Whole commands: `monster` (`!track`), `raid`, `egg`, `quest`, `gym`, `lure`, `invasion` (covers `!invasion` and `!incident`), `nest`, `maxbattle`, `poracle_admin` (`!poracle-admin`)
 - Features: `pvp` (PVP filters in `!track`), `specificgym` (tracking a specific gym in `!gym`)
 
-Any other key (`area`, `location`, `profile`, `tracked`, `fort`, ...) is silently ignored. In DMs, the user's roles from all configured `guilds` are combined. See [`[discord.command_security]`](../config/discord.md#discordcommand_security) for details.
+Any other key (`area`, `location`, `profile`, `tracked`, `fort`, ...) is silently ignored. In DMs, the user's roles from all configured `guilds` are combined. Bot admins always bypass `command_security` (on text commands too from 5.3). See [`[discord.command_security]`](../config/discord.md#discordcommand_security) for details.
 
 !!! warning "Sub-table placement"
     `[discord.command_security]`, `[discord.slash_commands]` and the `[[discord.*]]` arrays must come **after** all plain `[discord]` keys. Any `[discord]` key placed below a sub-table header becomes part of that sub-table and is lost.

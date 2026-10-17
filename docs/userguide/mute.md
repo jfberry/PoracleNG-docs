@@ -55,6 +55,8 @@ There is a shorthand for the most common case — if the first argument isn't a 
 
 `!mute id:<N>` silences the alerts produced by a single tracking rule, leaving your other rules for the same pokemon, gym or area alone. Rule IDs are shown by `!tracked`.
 
+In 5.3+, editing a rule keeps its ID. Re-running a tracking command with new filters (`!track pikachu iv:90` and then `!track pikachu iv:90 d:500`) updates the existing rule in place, so a rule mute, a remembered `id:N`, and the mute and unsubscribe buttons on alerts already sent keep pointing at it. On older builds an edited rule got a new ID, and a rule mute set before the edit stopped working.
+
 === "Discord"
 
     ```
@@ -86,27 +88,37 @@ A unit is required: `duration:30` is rejected. If you omit `duration:` entirely,
 
 ## Per-type Aliases
 
-Tracking commands accept `mute` / `unmute` as their first argument and forward to `!mute` / `!unmute` with the type word in front. Only these forms actually work:
+Tracking commands (`!track`, `!raid`, `!egg`, `!quest`, `!invasion` / `!incident`, `!lure`, `!nest`, `!gym`, `!fort`, `!maxbattle`) accept `mute` / `unmute` as their first argument. Whatever follows is handled exactly like `!mute` / `!unmute`, so every scope works:
 
 === "Discord"
 
     ```
     !raid mute id:17 duration:2h                # same as: !mute id:17 duration:2h
-    !egg mute id:18                             # works for raid, egg, quest, invasion/incident, lure, nest, gym, fort, maxbattle
+    !track mute id:45                           # same as: !mute id:45
+    !raid mute gym "Hilltop Gym"                # same as: !mute gym "Hilltop Gym"
+    !invasion mute pokestop abc123def456        # same as: !mute pokestop abc123def456
+    !maxbattle mute station 789...              # same as: !mute station 789...
+    !raid mute everything duration:1h           # same as: !mute everything duration:1h
     !track mute pikachu                         # same as: !mute pokemon pikachu
+    !raid mute mewtwo                           # same as: !mute pokemon mewtwo
     !gym mute "Hilltop Gym"                     # same as: !mute gym "Hilltop Gym"
+    !raid unmute gym "Hilltop Gym"              # same as: !unmute gym "Hilltop Gym"
     ```
 
 === "Telegram"
 
     ```
     /raid mute id:17 duration:2h
+    /track mute id:45
+    /raid mute gym "Hilltop Gym"
     /track mute pikachu
     /gym mute "Hilltop Gym"
     ```
 
-!!! warning
-    Other combinations don't work: `!raid mute gym "Hilltop Gym"` or `!invasion mute pokestop abc123` fail because the type word is placed in front of the scope. Use the full `!mute gym …` / `!mute pokestop …` form instead. Pokemon rules can't be muted with `!track mute id:N` either — use `!mute id:N`.
+The type word doesn't narrow the mute: `!raid mute gym "Hilltop Gym"` silences every alert from that gym, not just raids. With no scope word, `!gym mute <name>` mutes a gym and `!fort mute`, `!track mute` and the other types mute a pokemon (the same shorthand as `!mute <pokemon>`).
+
+!!! note "5.3+"
+    Before 5.3 only `!<type> mute id:<N>`, `!track mute <pokemon>` and `!gym mute <gym>` worked. Other scopes after the type word (`!raid mute gym …`, `!invasion mute pokestop …`) were read as a pokemon name, and `!track mute id:N` didn't mute the rule.
 
 ## Mute Buttons
 
@@ -133,6 +145,8 @@ Operators can also add an **Unsubscribe** button, which permanently deletes the 
     /unmute pokemon pikachu
     /unmute everything
     ```
+
+Area names are matched without regard to case, so `!unmute area downtown` ends a mute set with `!mute area Downtown` (5.3+; older builds needed the exact display-cased name).
 
 Expired mutes clean themselves up — you only need `!unmute` to end one early.
 

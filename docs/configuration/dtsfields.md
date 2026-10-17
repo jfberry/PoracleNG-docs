@@ -6,7 +6,7 @@ This page lists the fields each alert template type can use. For how templates a
     `main` is PoracleNG 5.2.x and `develop` is 5.3.0-dev. Fields marked **5.3+** exist only on `develop`. Everything else works on both.
 
 !!! tip "See exactly what a template gets"
-    The DTS editor endpoint `POST /api/dts/enrich` (used by PoracleWeb and the [Config UI](config-ui.md)) returns the complete variable map for a sample webhook. `GET /api/dts/fields` and `GET /api/dts/fields/{type}` return the editor's field catalogue. The catalogue is maintained by hand, so where it disagrees with this page, check the enrich output.
+    The DTS editor endpoint `POST /api/dts/enrich` (used by PoracleWeb and the [Config UI](config-ui.md)) returns the complete variable map for a sample webhook. `GET /api/dts/fields` and `GET /api/dts/fields/{type}` return the editor's field catalogue. The catalogue is maintained by hand, so where it disagrees with this page, check the enrich output. On 5.3+ it only lists fields the code produces, under their real names; the 5.2 catalogue offers some that don't exist (for example `isNight`, `areasList`, `weatherTthh`, `totalStationedPokemon`, `cp20`, `sunriseTime`), and `distance`/`bearing` for every type.
 
 ## How Fields Are Resolved
 
@@ -72,7 +72,7 @@ These are available on every alert type that comes from a webhook. The address f
 | `tthd`, `tthh`, `tthm`, `tths` | Days, hours, minutes and seconds left until `time` |
 | `now` | Current time, RFC 3339, UTC |
 | `nowISO` | Current time, ISO 8601 with milliseconds, UTC |
-| `nightTime`, `dawnTime`, `duskTime` | Booleans for the time of day at the alert location |
+| `nightTime`, `dawnTime`, `duskTime` | Booleans for the time of day at the alert location. Not set for `quest` or `nest`. |
 
 Times are formatted using `[locale] time`. These types have no `time`/`tth*` fields: `gym` (it uses `conqueredTime` and a fixed 1-hour TTH), `fort-update`, `weatherchange` (use `weatherTth`), `questSummary`, `greeting` and `help`.
 
@@ -122,7 +122,7 @@ Available on pokemon types, `raid`/`rsvpChanges` and `maxbattle`.
 | `boostWeatherName`, `boostWeatherNameEng` | Boosting weather name, translated and English |
 | `boostWeatherEmoji` | Boosting weather emoji (empty if not boosted) |
 | `boostingWeatherIds` | Every weather that boosts this pokemon's types |
-| `boostingWeathersEmoji` | Those weathers' emoji joined together (raid and maxbattle only) |
+| `boostingWeathersEmoji` | Those weathers' emoji joined together. Raid and maxbattle only: pokemon alerts don't set it, although the upstream DTS.md and the editor's field list show it for pokemon. |
 | `boost`, `boostemoji` | *Deprecated* aliases |
 
 ## Pokemon Names
@@ -262,7 +262,7 @@ These fields are set for every recipient:
 
 | Field | Description |
 |---|---|
-| `bestGreatLeagueRank`, `bestUltraLeagueRank`, `bestLittleLeagueRank` | Best rank in each league, as an **integer**. Mega ranks are excluded. `4096` means no rank. |
+| `bestGreatLeagueRank`, `bestUltraLeagueRank`, `bestLittleLeagueRank` | Best rank in each league, as an **integer**. Mega ranks are excluded. `4096` means no base-form rank. Not set when the webhook has no PVP data for that league. |
 | `bestGreatLeagueRankCP`, `bestUltraLeagueRankCP`, `bestLittleLeagueRankCP` | CP at that rank |
 | `pvp_rankings_great_league` (and `_ultra_`, `_little_`) | Every enriched rank entry, without per-user filtering |
 | `pvpBestRank`, `pvpEvolutionData` | Raw per-league data |
@@ -324,7 +324,7 @@ All [pokemon fields](#pokemon-monster-monsternoiv) are available and describe th
 | `teamId` | `team_id` | 0 uncontested, 1 Mystic, 2 Valor, 3 Instinct |
 | `teamName`, `teamNameEng`, `teamEmoji`, `teamColor` | | Team name, English name, emoji and colour |
 | `gymColor`, `color` | | Team colour (`color` is deprecated) |
-| `ex` | `is_ex_raid_eligible` | EX eligible (see note) |
+| `ex` | `ex_raid_eligible`, `is_ex_raid_eligible` | EX eligible (see note) |
 | `level` | | Raid level |
 | `levelName`, `levelNameEng` | | e.g. `Level 5`, `Mega` |
 | `start`, `end`, `hatchTimestamp`, `endTimestamp` | | Unix times |
@@ -334,7 +334,7 @@ All [pokemon fields](#pokemon-monster-monsternoiv) are available and describe th
 | `rsvps` | | Upcoming RSVP slots: `{timeSlot, time, goingCount, maybeCount}` (also `timeslot`, `going_count`, `maybe_count`) |
 
 !!! note
-    `{{ex}}` reads the `is_ex_raid_eligible` webhook field, but Golbat sends `ex_raid_eligible`. With Golbat, use `{{ex_raid_eligible}}`.
+    On 5.3+ `{{ex}}` is true when either `ex_raid_eligible` (Golbat) or the older `is_ex_raid_eligible` is set. On 5.2 it only reads `is_ex_raid_eligible`, so with Golbat it's always empty; use `{{ex_raid_eligible}}` there.
 
 For an **egg**, `time` is the **hatch time**, `tth*` counts down to the hatch, and `disappearTime` is the raid end.
 
@@ -356,7 +356,7 @@ For an **egg**, `time` is the **hatch time**, `tth*` counts down to the hatch, a
 | `shinyPossible`, `shinyPossibleEmoji` | | Shiny |
 | `hasEvolutions`, `hasMegaEvolutions`, `evolutions`, `megaEvolutions`, `prevEvolutions` | | See [Evolutions](#evolutions) |
 
-Raids have no forecast fields: `weatherChange`, `weatherCurrentName`, `weatherNextName` and `weatherChangeTime` are never set. Only `weatherForecastCurrent`, `weatherForecastNext` and `nextHourTimestamp` are available.
+Raids have no forecast fields: `weatherChange`, `weatherCurrentName`, `weatherNextName` and `weatherChangeTime` are never set, even though the upstream DTS.md lists them for raids. Only `weatherForecastCurrent`, `weatherForecastNext` and `nextHourTimestamp` are available.
 
 ### `rsvpChanges`
 
@@ -447,7 +447,7 @@ Used for Pokémon Showcase contests. They're tracked as incidents (the `showcase
 | `showcaseFocusType` | `pokemon`, `type`, `alignment`, `class`, `family`, `buddy`, `generation`, `hatched`, `mega` or `shiny` |
 | `showcaseFocusCategory` | Translated category, e.g. `Type` |
 | `showcaseFocusName` | Translated value, e.g. `Steel` or `3+`. Empty for `hatched`/`mega`/`shiny`. |
-| `showcaseFocusEmoji` | An emoji **key**; render it with `{{getEmoji showcaseFocusEmoji}}` |
+| `showcaseFocusEmoji` | Emoji for the focus category (**5.3+**; always empty on 5.2). Defaults to 🏆; override per focus with the `showcase-focus-<type>` keys in `emoji.json` (e.g. `showcase-focus-type`). |
 
 Each `showcase` entry has: `rank`, `score`, `scoreFormatted`, `pokemonId`, `pokemonName`, `formId`, `formName`, `fullName` (with a Shadow/Purified prefix and mega name), `costumeId`, `costumeName`, `genderId`, `genderName`, `genderEmojiKey`, `shiny`, `shinyEmoji`, `tempEvolutionId`, `tempEvolutionName`, `alignment`, `alignmentName`, `badge`, `background` and `imgUrl`.
 
@@ -476,8 +476,9 @@ Each `showcase` entry has: `rank`, `score`, `scoreFormatted`, `pokemonId`, `poke
 | `gymId`, `gymName`, `gymUrl` | `gym_id`/`id`, `name`, `url` | Gym (the name is sanitised) |
 | `teamId`, `teamName`, `teamNameEng`, `teamEmoji`, `teamColor` | `team_id` | New team |
 | `oldTeamId`, `oldTeamName`, `oldTeamNameEng` | | Previous team |
-| `previousControlTeamEmoji` | | Emoji of the **previous team** (`oldTeamId`) |
-| `previousControlId`, `previousControlName`, `previousControlNameEng` | | The last team that held the gym. This survives a period of being uncontested. |
+| `oldTeamEmoji` | | Emoji of the previous team (`oldTeamId`). **5.3+**; always empty on 5.2. |
+| `previousControlId`, `previousControlName`, `previousControlNameEng` | | The last team that held the gym: the last non-zero team Poracle saw on it, so it survives a period of being uncontested. `-1` when unknown. |
+| `previousControlTeamEmoji` | | Emoji of the previous controlling team (`previousControlId`). On 5.2 this wrongly showed the `oldTeamId` emoji. |
 | `gymColor`, `color` | | New team colour |
 | `slotsAvailable`, `oldSlotsAvailable`, `trainerCount`, `oldTrainerCount` | | Defender slots |
 | `inBattle`, `ex` | | Booleans |
@@ -504,7 +505,7 @@ Each `showcase` entry has: `rank`, `score`, `scoreFormatted`, `pokemonId`, `poke
 |---|---|---|
 | `stationName`, `stationId` | `station_name`, `station_id` | Power Spot. The name is sanitised on **5.3+**. |
 | `pokemonId` | `battle_pokemon_id` | Boss pokedex number |
-| `id` | raw `id` | The **station id**, not the pokemon. Use `pokemonId`. |
+| `id` | | Boss pokedex number, same as `pokemonId` (**5.3+**). On 5.2 `{{id}}` is the raw station id; use `pokemonId` for the boss and `stationId` for the station. |
 | `form`, `formId`, `gender`, `costume`, `alignment` | | Boss identity |
 | names, `megaName` | `formname` | See [Pokemon Names](#pokemon-names). `megaName` equals `fullName`. |
 | `level`, `levelName`, `levelNameEng` | `battle_level` | Battle level |
@@ -562,7 +563,7 @@ These templates are shown when a user registers and when they run `!help`. They 
 | `prefix` | The bot's command prefix (`!` or `/`) |
 | `userIsAdmin` | `help` only: the user is an admin |
 
-`{{prefix}}` exists **only** in these templates. Helpers in them always use English.
+`{{prefix}}` exists **only** in these templates. On 5.3+ helpers in them use the user's language (`!help`, the `!poracle` greeting) or `[general] locale` (greetings sent by role reconciliation); on 5.2 they always use English.
 
 ## Button Responses (`buttonResponse`)
 

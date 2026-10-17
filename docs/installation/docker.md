@@ -103,6 +103,9 @@ port = 3030
 !!! warning "Change `host` from the example value"
     The image sets `PORACLE_HOST=0.0.0.0`, but that only applies when `host` is **absent** from `config.toml`. `config.example.toml` sets `host = "127.0.0.1"` explicitly, which wins — so a copied example config binds to the container's loopback and nothing outside the container can reach port 3030. Set `host = "0.0.0.0"` (or delete the line). The Compose file's `127.0.0.1:3030:3030` mapping still keeps the port private to the Docker host.
 
+!!! note "PoracleNG 5.3+"
+    Because the container listens on `0.0.0.0`, 5.3 logs a startup warning if `api_secret` is blank. Set one. If you put a reverse proxy (nginx, Traefik) in front of Poracle and use `ip_whitelist` / `ip_blacklist`, list the proxy in `[processor] trusted_proxies`, otherwise every request appears to come from the proxy. See [`[processor]`](../config/processor.md).
+
 #### Database
 
 If you are using the bundled MariaDB service from the Compose file, set the host to the service name:

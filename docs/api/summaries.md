@@ -61,6 +61,6 @@ Both return `{"status": "ok"}`. Deleting a schedule that doesn't exist is not an
 |---|---|
 | `400` | Unknown alert type, missing `active_hours`, or `active_hours` that isn't a valid schedule |
 | `404` | `GET` of a schedule that doesn't exist |
-| `503` | The summary store failed to initialise at startup (the message mentions `quest_summary_enabled`, but that flag doesn't cause it) |
+| `503` | The summary store failed to initialise at startup; check the processor log. Turning off `quest_summary_enabled` does **not** cause this — the endpoints stay live. (Before 5.3 the error message wrongly pointed at `quest_summary_enabled`.) |
 
 The v2 [full tracking snapshot](v2/tracking.md#full-snapshot-get-tracking) also includes the user's summaries.

@@ -133,13 +133,26 @@ Track specific item rewards. Multi-word names work with spaces or underscores:
 
 Use `!info items` to see every item name the bot recognises.
 
-Each `!quest` command tracks **one** reward kind: one item, or one of `stardust` / `pokecoins` / `energy` / `candy`, or a list of pokemon. To add several items at once, separate them with `|`:
+Every reward you name in one command becomes its own rule, so you can mix kinds:
+
+```
+!quest stardust pikachu pokecoins       # Three rules: stardust, Pikachu encounters, pokecoins
+!quest energy:charizard spinda          # Charizard mega energy + Spinda encounters
+!quest energy candy pikachu             # Pikachu mega energy + Pikachu candy (no Pikachu encounter rule)
+```
+
+A bare `energy` or `candy` takes the pokemon named in the same command as its target, so those pokemon don't also become encounter rules; use `energy:<pokemon>` / `candy:<pokemon>` if you want both. `everything` already covers every reward type, so anything named alongside it is ignored.
+
+Only one item is recognised per command. To add several items at once, separate them with `|`:
 
 ```
 !quest fast_tm | charged_tm | rare_candy
 ```
 
-`amount:<n>` sets a minimum quantity for item, candy and mega energy rewards (and acts like `stardust:<n>` / `pokecoins:<n>` with those keywords). It is rejected on pokemon-encounter rules.
+`amount:<n>` sets a minimum quantity for item, candy and mega energy rewards (and acts like `stardust:<n>` / `pokecoins:<n>` with those keywords). It applies to every reward in the command that has an amount, and is ignored for pokemon encounters. It is rejected only when pokemon encounters are the only reward named (`!quest pikachu amount:5`).
+
+!!! note "5.3+"
+    Before 5.3 a command with several reward kinds kept only the first one (stardust, then pokecoins, energy, candy, pokemon, item) and dropped the rest without saying so: `!quest stardust pikachu` tracked only stardust.
 
 ## Distance and Areas
 
@@ -241,5 +254,7 @@ Schedule when those grouped messages fire — and flush the buffer on demand —
     /quest remove everything
     /quest remove id:12
     ```
+
+Unlike adding, `!quest remove` still handles **one** reward kind per command: `!quest remove stardust pikachu` removes only the stardust rule. Remove each kind separately, or join them with `|` (`!quest remove stardust | remove pikachu`).
 
 `!quest remove` with nothing else removes all your quest tracking. `form:` is not accepted on remove (removal is species-wide) — remove a single form's rule by its ID. Plain `!untrack id:12` removes a *pokemon* rule, not a quest rule.

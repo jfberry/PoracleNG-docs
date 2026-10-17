@@ -105,7 +105,10 @@ Switch to the **Config** tab (top of the left pane) to edit `config.toml` instea
 
 Save rewrites `config/config.toml` in place, after backing up the previous version to `config/backups/`. Settings that can be hot-reloaded take effect immediately; if any changed field needs a restart, the response says so and lists the fields.
 
-The editor deliberately doesn't include `[processor]`, `[database]` or the Discord/Telegram bot tokens; edit those in `config.toml` by hand. Other sensitive values (API keys, Koji token, Shlink key) are shown masked as `****` and are only changed if you type a new value.
+The editor deliberately doesn't include `[processor]`, `[database]` or the Discord/Telegram bot tokens; edit those in `config.toml` by hand. Other sensitive values (API keys, Koji token, Shlink key) are shown masked as `****` and are only changed if you type a new value. That includes the 5.3 `[processor] trusted_proxies` and `enable_pprof` keys.
+
+!!! info "PoracleNG 5.3+: saved values that equal a default"
+    When saving, the editor leaves out any value equal to its schema default. In 5.2.x some schema defaults didn't match the code (for example Telegram `enabled`, `filter_max_rank`, `removal_safety_max_percent` and `thread_keep_alive_interval_hours`), so saving one of those values deleted the line and the code's different default applied. On 5.2.x, check those keys in `config.toml` after saving. From 5.3 the schema defaults match the code.
 
 ## Config UI vs end-user web UIs
 

@@ -139,7 +139,7 @@ Optional. Each entry is one private thread under the parent channel.
 | `buttonStyle` | no | `"primary"` (blue), `"secondary"` (grey, default), `"success"` (green), or `"danger"` (red). |
 | `commands` | no | Commands run as the thread (a `humans` row of type `discord:thread`). |
 
-Threads are created as Discord **private threads** with `auto_archive_duration = 7d`. They require **Create Private Threads** + **Manage Threads** on the parent channel for the bot. Each thread becomes a `humans` row of type `discord:thread` with `current_profile_no = 1`. A background sweeper unarchives threads on a schedule (controlled by `[discord] thread_keep_alive_interval_hours` — default 24, max 168) so they stay accessible without anyone posting in them.
+Threads are created as Discord **private threads** with `auto_archive_duration = 7d`. They require **Create Private Threads** + **Manage Threads** on the parent channel for the bot. Each thread becomes a `humans` row of type `discord:thread` with `current_profile_no = 1`. A background sweeper unarchives threads on a schedule (controlled by `[discord] thread_keep_alive_interval_hours` — the example config sets 24, max 168; if the key is omitted the built-in default is 0, which turns the sweeper **off**, so set it explicitly) so they stay accessible without anyone posting in them.
 
 #### Thread re-runs
 

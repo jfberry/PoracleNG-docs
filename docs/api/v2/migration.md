@@ -10,7 +10,8 @@ The v1 endpoints (`/api/tracking/*`, `/api/humans/*`, `/api/profiles/*`) are fro
 4. **Create bodies are always arrays.** PUT bodies are a single object.
 5. **`?silent=true`** replaces `silent` / `suppressMessage`; **`?profile=`** replaces `profile_no`; **`?include_descriptions=true`** replaces `includeDescriptions` and works on every tracking call.
 6. **No `{"status":"ok"}` envelope** on reads or tracking mutations.
-7. **PUT replaces and re-numbers.** A v2 PUT returns the rule with a new `uid`.
+7. **PUT replaces in full.** Omitted fields reset to their defaults. In 5.3+ the rule keeps its `uid` (earlier builds returned a new one).
+8. **Typed human and profile records** (5.3+). `enabled`/`admin_disable` are booleans, `area`, `community_membership`, `blocked_alerts` and profile `area` are arrays, `area_restriction` is an array or `null`, and `language` is `""` when unset. v1 still returns `0`/`1` and JSON-encoded strings.
 
 ## Tracking
 
@@ -38,14 +39,14 @@ The v1 endpoints (`/api/tracking/*`, `/api/humans/*`, `/api/profiles/*`) are fro
 | `POST /api/humans/{id}/start` / `stop` | `POST /api/v2/humans/{id}/enable` / `disable` |
 | `POST /api/humans/{id}/adminDisabled` `{state}` | `POST /api/v2/humans/{id}/admin-disable` `{disabled}` |
 | `POST /api/humans/{id}/language` | `POST /api/v2/humans/{id}/language` |
-| `POST /api/humans/{id}/setLocation/{lat}/{lon}` | `POST /api/v2/humans/{id}/location` `{lat, lon}` |
+| `POST /api/humans/{id}/setLocation/{lat}/{lon}` | `POST /api/v2/humans/{id}/location` `{latitude, longitude}` |
 | — | `DELETE /api/v2/humans/{id}/location` (5.3+) |
-| `GET /api/humans/{id}/checkLocation/{lat}/{lon}` | `GET /api/v2/humans/{id}/check-location?lat=&lon=` |
+| `GET /api/humans/{id}/checkLocation/{lat}/{lon}` | `GET /api/v2/humans/{id}/check-location?latitude=&longitude=` |
 | `POST /api/humans/{id}/setAreas` (body `[names]`) | `POST /api/v2/humans/{id}/areas` `{areas}` |
 | `POST /api/humans/{id}/switchProfile/{n}` | `POST /api/v2/humans/{id}/profile` `{profile_no}` |
 | `GET /api/humans/{id}/locations[/{label}]` | `GET /api/v2/humans/{id}/locations[/{label}]` |
-| `POST /api/humans/{id}/locations/add` | `POST /api/v2/humans/{id}/locations` `{label, lat, lon}` (one per call) |
-| — | `PUT /api/v2/humans/{id}/locations/{label}` `{lat, lon}` |
+| `POST /api/humans/{id}/locations/add` | `POST /api/v2/humans/{id}/locations` `{label, latitude, longitude}` (one per call) |
+| — | `PUT /api/v2/humans/{id}/locations/{label}` `{latitude, longitude}` |
 | `POST /api/humans/{id}/locations/{label}/delete` | `DELETE /api/v2/humans/{id}/locations/{label}` |
 | `GET /api/humans/{id}/roles` | `GET /api/v2/humans/{id}/roles` |
 | `POST /api/humans/{id}/roles/add/{roleId}` | `POST /api/v2/humans/{id}/roles/{roleId}` |

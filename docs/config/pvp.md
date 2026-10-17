@@ -10,7 +10,7 @@ PVP rank tracking and display options. PVP ranks come from Golbat's webhooks; Po
 | `include_mega_evolution` | bool | `false` | Default for PVP rules that don't use a `mega` keyword. `false`: those rules match base forms only. `true`: they also match mega/temporary-evolution ranks. A rule's own `mega` / `mega:x` / `mega:y` keyword always overrides this. |
 | `evolution_direct_tracking` | bool | `false` | Allow users to track PVP evolutions directly (e.g. tracking `vaporeon` matches an `eevee`). |
 | `filter_by_track` | bool | `false` | Auto-filter PVP listings in alerts by the user's track requirements. |
-| `filter_max_rank` | int | `100` | **Worst** (highest-numbered) rank a user may track. A `!track` request for a worse rank is clamped to this. (`config.example.toml` ships `10`.) |
+| `filter_max_rank` | int | `100` | **Worst** (highest-numbered) rank a user may track. A `!track` request for a worse rank is clamped to this. (The 5.2.x `config.example.toml` shipped `10`; from 5.3 it shows `100`.) |
 | `filter_great_min_cp` | int | `1400` | CP floor applied by `!track` to Great League rules. |
 | `filter_ultra_min_cp` | int | `2350` | CP floor applied by `!track` to Ultra League rules. |
 | `filter_little_min_cp` | int | `450` | CP floor applied by `!track` to Little League rules. |

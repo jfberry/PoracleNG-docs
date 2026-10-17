@@ -30,6 +30,18 @@ Everything belongs to a human, so everything lives under one prefix:
 | [Profiles, roles & mutes](profiles.md) | Profiles and `active_hours`, profile switching and copying, Discord roles, mutes |
 | [Migrating from v1](migration.md) | v1 → v2 endpoint and field mapping |
 
+!!! warning "Changes in 5.3 (breaking for v2 clients)"
+    In 5.3 v2 stopped reusing v1's wire format for humans and profiles. If you wrote a client against an earlier v2 build:
+
+    - **Human** (`GET /api/v2/humans/{id}`, `POST /api/v2/humans`, snapshot `human`): `enabled` and `admin_disable` are booleans (were `1`/`0`). `area`, `community_membership` and `blocked_alerts` are arrays, `[]` when empty (were JSON-encoded strings, and `blocked_alerts` could be `null`). `area_restriction` is an array or `null` (`null` = unrestricted, `[]` = no areas allowed). `language` is `""` when unset (was `null`).
+    - **Profiles** (`GET …/profiles` and snapshot `profiles`): `area` is an array. The snapshot's profiles now return `active_hours` as a typed array too, like `GET …/profiles`.
+    - **Snapshot `summaries`**: each entry is `{alert_type, active_hours}` with typed ISO-weekday entries; the `id` field is gone.
+    - **Coordinates are `latitude`/`longitude` everywhere**: the bodies of `POST …/location`, `POST …/locations` and `PUT …/locations/{label}`, and the `check-location` query, no longer accept `lat`/`lon`.
+    - **`POST /api/v2/humans`**: `area` is an array of area names (was a JSON-encoded string).
+    - **Edited rules keep their `uid`**: `PUT …/tracking/{type}/{uid}` and a `POST` that updates an existing rule return the rule under its existing uid (they used to return a new one). The same applies to v1 `POST /api/tracking/*` and bot commands.
+
+    v1 endpoints are unchanged.
+
 ## Conventions
 
 ### Strict input
@@ -111,7 +123,7 @@ curl -X POST -H "X-Poracle-Secret: $SECRET" -H "Content-Type: application/json" 
   $BASE/humans
 
 curl -X POST -H "X-Poracle-Secret: $SECRET" -H "Content-Type: application/json" \
-  -d '{"lat": 51.2802, "lon": 1.0789}' \
+  -d '{"latitude": 51.2802, "longitude": 1.0789}' \
   $BASE/humans/123456789012345678/location
 
 curl -X POST -H "X-Poracle-Secret: $SECRET" -H "Content-Type: application/json" \

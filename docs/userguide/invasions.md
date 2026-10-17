@@ -148,7 +148,10 @@ Legacy no-colon forms (`d500`) still work. `edit` is not accepted on `!incident`
 
     ```
     !incident remove dragon             # Stop tracking dragon grunts
+    !incident remove dragon female      # Only the female dragon rule
+    !incident remove female             # Every female-only rule
     !incident remove everything         # Remove all invasion tracking
+    !incident remove                    # Same as remove everything
     !incident remove id:12              # One rule by ID (see !tracked)
     !untrack incident id:12             # Same as !incident remove id:12
     ```
@@ -160,5 +163,9 @@ Legacy no-colon forms (`d500`) still work. `edit` is not accepted on `!incident`
     /incident remove everything
     ```
 
-!!! warning
-    `!incident remove` with no recognised type removes **all** your incident rules — check the spelling of the type before running it.
+`!incident remove` (or `!invasion remove`) with nothing after it removes **all** your incident rules. A gender narrows the removal to rules with that gender.
+
+Any word that isn't a known type, leader or event is rejected, on add and on remove alike: `!incident remove dragn` replies "No valid invasion types found" and removes nothing, and `!incident dragon watr` replies "Unrecognized: watr" and saves nothing.
+
+!!! note "5.3+"
+    On older builds a typo after `remove` was treated as "everything" and **deleted every incident rule**, a typo next to a valid type was silently dropped, and a gender on remove was ignored.

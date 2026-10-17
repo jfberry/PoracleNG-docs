@@ -80,10 +80,12 @@ admins = ["user_id_1", "user_id_2"]
 
 `user_tracking_admins` lets the listed users add `user:<id>` to tracking commands to manage another user's tracking.
 
-!!! warning
-    `[[telegram.delegated_admins]]` is read and logged at startup, but it doesn't currently give the listed users any permissions on Telegram. Until that's fixed, only full `admins` (and, for `/channel add`, community admins from area security) can manage a group's tracking.
+`[[telegram.delegated_admins]]` lets the listed users run tracking commands in a registered group (or forum topic) to change **that chat's** tracking. `target` is the chat ID, which covers its forum topics too, or `<chatId>:<topicId>` for one topic.
 
-Community admins (`telegram.admins` in an [area security](../configuration/areasecurity.md) community) can `/channel add` a group. The group then gets that community's membership and area restriction.
+Community admins (`telegram.admins` in an [area security](../configuration/areasecurity.md) community) can `/channel add` a group. The group then gets that community's membership and area restriction. From 5.3, community admins can also manage tracking in any group belonging to their communities, and run `/userlist`, which shows only humans in their communities.
+
+!!! info "PoracleNG 5.3+"
+    In 5.2.x, `[[telegram.delegated_admins]]` was only read and logged, and community admins couldn't manage a group's tracking or run `/userlist`. Only full `admins` could manage a group's tracking.
 
 ## Messages
 

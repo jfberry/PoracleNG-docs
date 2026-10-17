@@ -84,7 +84,7 @@ curl -X POST -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/js
 
 | Field | Notes |
 |---|---|
-| `text`* | The full command line **including the prefix** — the Discord `[discord] prefix` (default `!`). Several commands can be sent on separate lines. Text without the prefix is ignored and returns no replies. |
+| `text`* | The command line, e.g. `tracked` or `!tracked`. In 5.3+ the configured prefix (`[discord] prefix`, default `!`) is added to any line that doesn't already start with it, so callers don't need to know it. Earlier builds required the prefix and silently ignored text without it. Several commands can be sent on separate lines. |
 | `user_id`* | Who is running it. Their language, active profile and permissions apply. |
 | `platform` | `discord` or `telegram`; used for admin and `command_security` checks |
 | `user_name`, `channel_id`, `guild_id`, `is_dm` | Context, as a bot command would have |

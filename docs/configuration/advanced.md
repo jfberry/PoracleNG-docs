@@ -51,13 +51,15 @@ Restrict which client IPs can reach PoracleNG:
 
 ```toml
 [processor]
-ip_whitelist = ["192.168.1.10", "192.168.1.11"]
+ip_whitelist = ["192.168.1.0/24", "203.0.113.7"]
 ip_blacklist = ["10.0.0.5"]
+trusted_proxies = []                     # 5.3+: list your reverse proxy here if you have one
 ```
 
-- Entries are exact IP addresses. CIDR ranges such as `192.168.1.0/24` are **not** supported.
 - The lists apply to every route, including the webhook receiver, so a whitelist must include your scanner's IP.
-- The client IP honours `X-Forwarded-For`, which a client can set itself. Treat the IP lists as a convenience, not as access control. Use `api_secret` and a firewall.
+- **5.3+:** entries can be exact IPs or CIDR ranges (IPv4 or IPv6), and an invalid entry stops startup. In 5.2.x only exact IPs work, and invalid entries are silently ignored.
+- **5.3+:** `X-Forwarded-For` / `X-Real-IP` are only believed from addresses in `trusted_proxies`; otherwise the client IP is the TCP peer. **If PoracleNG is behind a reverse proxy (nginx, Traefik, a Docker network), add the proxy to `trusted_proxies`**, or every request appears to come from the proxy. See [`[processor]`](../config/processor.md).
+- In 5.2.x the client IP honours `X-Forwarded-For` from anyone, so a client can spoof it. On 5.2.x, treat the IP lists as a convenience, not as access control; use `api_secret` and a firewall.
 
 PoracleNG is a single binary, and `[processor]` is its only listener. IP lists under an old `[alerter]` section are not read.
 

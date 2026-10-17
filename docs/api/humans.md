@@ -49,7 +49,7 @@ curl -X POST -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/js
 {"status": "ok", "message": "New: **Bulbasaur** | iv: 90%-100% | ...", "newUids": [42], "alreadyPresent": 0, "updates": 0, "insert": 1}
 ```
 
-If an incoming rule matches an existing one except for a single display field (`distance`, `template`, `clean`, `ping`), the existing rule is updated in place instead of duplicated.
+If an incoming rule matches an existing one except for a single display field (`distance`, `template`, `clean`, `ping`), the existing rule is updated instead of duplicated. In 5.3+ the updated rule keeps its `uid` (as it does when edited through bot commands or v2), so tracking mutes, alert buttons and `id:N` commands that refer to it keep working; earlier builds replaced it under a new uid.
 
 Rules use the stored representation directly: v1 sentinels (`9000` = any boss/move, `-1` = no floor, `4096` = no rank limit), integer enums (`team` 0–4 with 4 = any, `gender` 0–3), and the `clean` bitmask (1 = clean, 2 = edit, 4 = summary). Notable per-type fields:
 

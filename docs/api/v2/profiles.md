@@ -24,14 +24,14 @@ curl -H "X-Poracle-Secret: your-secret" http://localhost:3030/api/v2/humans/1234
 ```json
 {
   "profiles": [
-    {"uid": 41, "id": "123456789012345678", "profile_no": 1, "name": "Default", "area": "[\"downtown\"]", "latitude": 51.28, "longitude": 1.08, "active_hours": []},
-    {"uid": 42, "id": "123456789012345678", "profile_no": 2, "name": "Work", "area": "[\"business-park\"]", "latitude": 51.30, "longitude": 1.07,
+    {"uid": 41, "id": "123456789012345678", "profile_no": 1, "name": "Default", "area": ["downtown"], "latitude": 51.28, "longitude": 1.08, "active_hours": []},
+    {"uid": 42, "id": "123456789012345678", "profile_no": 2, "name": "Work", "area": ["business-park"], "latitude": 51.30, "longitude": 1.07,
      "active_hours": [{"day": 1, "hours": 8, "mins": 30}, {"day": 2, "hours": 8, "mins": 30}]}
   ]
 }
 ```
 
-`active_hours` is a typed array here (`[]` when unscheduled). `area` is still a JSON-encoded string.
+`active_hours` is a typed array (`[]` when unscheduled) and `area` is an array of area names (`[]` when the profile has none). Before 5.3, `area` was a JSON-encoded string.
 
 ### `active_hours`
 
