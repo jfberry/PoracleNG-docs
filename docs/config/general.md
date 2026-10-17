@@ -41,7 +41,7 @@ Core processor behaviour, branding URLs, and per-webhook-type processing toggles
 | `disable_pokestop` | bool | `false` | **Deprecated, no effect.** Use `disable_lure`, `disable_invasion` and `disable_quest` instead. Still accepted so older configs parse. |
 
 !!! note "Keys that no longer do anything"
-    These keys appear in older configs (and some still appear in `config.example.toml`) but PoracleNG does not read them. They are safe to delete:
+    These keys appear in older configs (and, before 5.3, in `config.example.toml`) but PoracleNG does not read them. They are safe to delete:
     `environment`, `process_confirmed_invasion_lineups`, `disable_unconfirmed_invasion`, `disable_pokestop`, and the `[general.images]` / `[general.stickers]` per-type repository tables.
 
 ## `role_check_mode`

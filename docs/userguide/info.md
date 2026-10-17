@@ -35,6 +35,8 @@ Returns base stats, generation, types (with weather boost and type matchups), ev
 
 Each entry is printed as a ready-to-paste tracking token — e.g. `vulpix form:alola` or `pikachu costume:holiday_2016` — so you can copy it straight into `!track` or `!raid`.
 
+If your language is not English, the translated form prefix works in `!info <pokemon> form:…` as well as `form:` (e.g. French `forme:`) in 5.3+.
+
 `!info <pokemon> forms` shows the recent and full form lists untruncated; `!info <pokemon> costumes` shows every costume recently seen on that species (spawns and raids combined).
 
 ## Costumes

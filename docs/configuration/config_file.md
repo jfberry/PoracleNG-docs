@@ -16,13 +16,15 @@ HTTP listener for scanner webhooks and the API. PoracleNG is a single Go binary,
 [processor]
 host = "127.0.0.1"                       # 127.0.0.1 = this machine only; 0.0.0.0 = all interfaces (Docker sets 0.0.0.0 via PORACLE_HOST)
 port = 3030                              # Receives webhooks and serves the API
-ip_whitelist = []                        # Exact IPs allowed on ALL routes (empty = allow all)
-ip_blacklist = []                        # Exact IPs refused on all routes
+ip_whitelist = []                        # IPs/CIDRs allowed on ALL routes (empty = allow all; CIDR 5.3+)
+ip_blacklist = []                        # IPs/CIDRs refused on all routes
+trusted_proxies = []                     # 5.3+: reverse proxies whose X-Forwarded-For is believed
 api_secret = ""                          # X-Poracle-Secret for /api/* — blank = NO AUTHENTICATION
+enable_pprof = false                     # 5.3+: serve /debug/pprof behind api_secret
 ```
 
 !!! danger "Blank `api_secret` means an open API"
-    If `api_secret` is empty, `/api/*` accepts requests **without any authentication**. Anyone who can reach the port can read and change users, tracking rules, config and templates. Always set a long random secret, which PoracleWeb and the Config UI also need. `POST /`, `GET /health`, `GET /metrics` and `/debug/pprof` are never authenticated. Older configs that set `api_secret` under `[alerter]` are still read as a fallback; move it to `[processor]`.
+    If `api_secret` is empty, `/api/*` accepts requests **without any authentication**. Anyone who can reach the port can read and change users, tracking rules, config and templates. Always set a long random secret, which PoracleWeb and the Config UI also need. `POST /`, `GET /health` and `GET /metrics` are never authenticated. In 5.2.x `/debug/pprof` is also always open; from 5.3 it only exists with `enable_pprof = true` and sits behind `api_secret`. From 5.3, startup warns when the secret is blank and the listen host isn't loopback (including Docker's `0.0.0.0`). Older configs that set `api_secret` under `[alerter]` are still read as a fallback; move it to `[processor]`.
 
 ## Database
 
@@ -69,7 +71,7 @@ level_caps = [50]                        # Must match Golbat's PVP level caps
 include_mega_evolution = false           # Default for rules without a mega keyword
 evolution_direct_tracking = false
 filter_by_track = false
-filter_max_rank = 10                     # Worst rank a user may track (built-in default 100)
+filter_max_rank = 100                    # Worst rank a user may track (5.2.x example shipped 10)
 filter_great_min_cp = 1400
 filter_ultra_min_cp = 2350
 filter_little_min_cp = 450
@@ -181,7 +183,7 @@ user_role = []
 admins = ["user-id"]
 prefix = "!"
 admin_channel_id = ""                    # Operator notices
-thread_keep_alive_interval_hours = 24
+thread_keep_alive_interval_hours = 24    # Built-in default is 0 (off) if omitted
 
 # All [discord.*] sub-tables must come AFTER the plain [discord] keys
 [discord.slash_commands]
@@ -196,11 +198,14 @@ See [Telegram](telegram.md) and [`[telegram]`](../config/telegram.md).
 
 ```toml
 [telegram]
-enabled = false
+enabled = false                          # Built-in default true. 5.3+: false also stops all Telegram alerts
 token = ""
 admins = []
 channels = []
 ```
+
+!!! info "PoracleNG 5.3+: `enabled = false` really disables a platform"
+    `[discord] enabled = false` or `[telegram] enabled = false` now stops that platform's alerts as well as its commands (Discord webhooks count as Discord). In 5.2.x it only stopped the gateway. `config.example.toml` ships `[telegram] enabled = false`, so if you added a Telegram token and left that line, set it to `true`. Startup warns when a platform has a token but is disabled.
 
 ## Geocoding
 

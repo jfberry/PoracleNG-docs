@@ -53,4 +53,7 @@ When `smart_forecast = true`, the processor will fetch weather data on demand wh
 
 ## User Commands
 
-There is no user command for weather tracking yet. `!weather` (`/weather` on Telegram) exists but only replies that weather tracking is not yet available. Weather change alerts are sent automatically as described in [Weather Change Alerts](#weather-change-alerts).
+There is no user command for weather tracking. Weather change alerts are sent automatically as described in [Weather Change Alerts](#weather-change-alerts).
+
+!!! info "PoracleNG 5.3+"
+    The placeholder `!weather` command (`/weather` on Telegram) has been removed. On 5.2.x it still exists but only replies that weather tracking is not yet available.

@@ -73,17 +73,28 @@ The template for each recipient is chosen from their alert type, platform, templ
 2. Same type + id + platform, with an entry that has no language
 3. A `default` entry for the type + platform in the user's language
 4. A `default` entry for the type + platform with no language
-5. A `default` entry for the type + platform in `[general] locale`
+5. A `default` entry for the type + platform in `[general] locale` (skipped when that is the user's language, since step 3 already tried it)
 6. Any `default` entry for the type + platform
 
-If several entries match at the same step, the last one loaded wins. If nothing matches the user's platform, the steps are repeated for entries with `platform: ""`.
+The first step that finds a match decides. If several entries match at the same step, the last one loaded wins. If nothing matches the user's platform, the steps are repeated for entries with `platform: ""`.
+
+So with both a German default and a language-less default, a German user gets the German default (step 3) and everyone else gets the language-less one (step 4).
 
 Template **ids don't carry over between languages**. If a German user asks for `template:2` and you only have an English `2`, they get the German **default** template, not your English `2`. Give every language each id you use, or give the template no language. A missing `monsterNoIv` template falls back to `monster`.
 
-!!! warning
-    On the current code, a default entry with **no** language beats a default entry in the user's language (step 4 overrides step 3). If you have both, remove `"default": true` from the one without a language.
+!!! warning "5.2: language-less default wins"
+    In 5.2 a bug let step 4 override step 3, so a default entry with **no** language beat a default entry in the user's language and users never got their language's default. Fixed in 5.3. On 5.2, if you have both, remove `"default": true` from the one without a language.
 
-If nothing matches at all, the message reads `Template not found: type/platform/id/language`. The same message is sent if the template fails to render or produces invalid JSON, and the admin channel is notified.
+When an alert can't be rendered, the user gets a short fallback message instead, ending in `type/platform/id/language`:
+
+| Message (5.3+) | Cause | Admin channel notified |
+|---|---|---|
+| `Template not found: …` | No entry matched any step | No |
+| `Template render error: …` | The template failed while rendering (e.g. a helper error) | Yes |
+| `Template produced invalid JSON: …` | The rendered text isn't valid JSON | Yes |
+| `Template rendered empty: …` | Valid JSON with nothing to send, e.g. `{"content": ""}` or an empty embed | Yes |
+
+5.2 says `Template not found` for the first three causes. The empty-message check means such alerts never reach Discord, which would reject them (error 50006) and count them towards the consecutive-failure auto-disable.
 
 ### The `default: true` Gotcha for Help Entries
 
@@ -159,6 +170,8 @@ Each save first writes a backup to `config/backups/`, so you can recover from a 
 | `fort-update` | Pokestop or gym added, edited or removed | |
 | `greeting` | Welcome message when a user registers | Fields: `{{prefix}}` only |
 | `help` | `!help` and `!help <topic>` | Fields: `{{prefix}}`, `{{userIsAdmin}}` |
+
+From 5.3, `help` and `greeting` render like alerts: language-aware helpers (`{{pokemonName}}`, `{{translate}}`, …) see `@language` and `@platform`, and a broken template is reported as an error instead of crashing the processor. `!help` and the `!poracle` greeting use the user's language. Greetings sent by role reconciliation (when a user gains access through a role) use `[general] locale`, because the user hasn't chosen a language yet. In 5.2 these helpers always rendered English in help and greeting templates.
 | `buttonResponse` | Button click reply, chosen by `response_template_id` | Same fields as the alert snapshot |
 
 ## Writing Templates
@@ -180,7 +193,7 @@ Other raw webhook fields are **not** cleaned.
 
 - A field that doesn't exist prints nothing.
 - An **unknown helper** (e.g. `{{sum a b}}`) also prints nothing. No error is shown, so check spelling against the [helper reference](dtsadvanced.md#helper-reference).
-- A known helper called with **too few arguments** (e.g. `{{add 1}}`, or `{{#pokemon id}}` without a form) makes the whole render fail. The user gets the fallback `Template not found` message and the admin channel is notified.
+- A known helper called with **too few arguments** (e.g. `{{add 1}}`) makes the whole render fail. The user gets a fallback message (`Template render error` on 5.3+, `Template not found` on 5.2) and the admin channel is notified. `{{#pokemon id}}` without a form works on 5.3+; on 5.2 it needs the form (`{{#pokemon id 0}}`).
 - On **5.3+**, passing a missing field to a helper (e.g. `{{concat a missing}}`) treats it as empty. Older versions printed `[]`.
 
 ### Partials

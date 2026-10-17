@@ -78,6 +78,8 @@ Legacy no-colon forms (`d500`) still work.
     !lure remove glacial                # Stop tracking glacial lures
     !lure remove mossy magnetic         # Remove both rules
     !lure remove everything             # Remove all lure tracking
+    !lure remove id:12                  # One rule by ID (see !tracked)
+    !untrack lure id:12                 # Same as !lure remove id:12
     ```
 
 === "Telegram"
@@ -85,4 +87,8 @@ Legacy no-colon forms (`d500`) still work.
     ```
     /lure remove glacial
     /lure remove everything
+    /lure remove id:12
     ```
+
+!!! note "5.3+"
+    Removing a lure rule by ID (`!lure remove id:N`, `!untrack lure id:N`, or picking a rule in the Discord `/untrack lure` menu) only works from 5.3. Older builds replied "No lure type specified", so remove by lure type instead.

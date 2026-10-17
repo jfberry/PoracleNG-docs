@@ -18,7 +18,7 @@ A **human** is any alert destination: a Discord user, channel or thread, a Teleg
 | `POST` | `/api/v2/humans/{id}/areas` | Set selected areas |
 | `POST` | `/api/v2/humans/{id}/location` | Set location |
 | `DELETE` | `/api/v2/humans/{id}/location` | Clear location (5.3+) |
-| `GET` | `/api/v2/humans/{id}/check-location?lat=&lon=` | Would this location be allowed? |
+| `GET` | `/api/v2/humans/{id}/check-location?latitude=&longitude=` | Would this location be allowed? |
 | `GET` / `POST` | `/api/v2/humans/{id}/locations` | List / create saved locations |
 | `GET` / `PUT` / `DELETE` | `/api/v2/humans/{id}/locations/{label}` | Fetch / move / delete a saved location |
 
@@ -74,7 +74,7 @@ curl -X POST -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/js
 | `enabled` | Default `true` |
 | `admin_disable` | Default `false` |
 | `language` | Default: the server's `[general] locale` |
-| `area` | Initial areas as a **JSON-encoded string**, e.g. `"[\"downtown\"]"` |
+| `area` | Initial areas as an array of area names, e.g. `["downtown"]` (5.3+; earlier builds took a JSON-encoded string) |
 | `latitude`, `longitude` | Initial location |
 | `community` | Community names; with area security on, sets the human's area restriction |
 | `profile_name` | Name of the default profile (default `Default`) |
@@ -94,26 +94,37 @@ curl -H "X-Poracle-Secret: your-secret" http://localhost:3030/api/v2/humans/1234
     "id": "123456789012345678",
     "type": "discord:user",
     "name": "Alice",
-    "enabled": 1,
-    "area": "[\"downtown\",\"harbour\"]",
+    "enabled": true,
+    "area": ["downtown", "harbour"],
     "latitude": 51.2802,
     "longitude": 1.0789,
     "fails": 0,
     "last_checked": null,
     "language": "de",
-    "admin_disable": 0,
+    "admin_disable": false,
     "disabled_date": null,
     "current_profile_no": 1,
-    "community_membership": "[\"kent\"]",
+    "community_membership": ["kent"],
     "area_restriction": null,
     "notes": "",
-    "blocked_alerts": null
+    "blocked_alerts": []
   }
 }
 ```
 
-!!! note "Legacy encodings on the human record"
-    The full human record keeps the database encodings: `enabled` and `admin_disable` are `0`/`1`, and `area`, `community_membership`, `area_restriction` and `blocked_alerts` are **JSON-encoded string arrays** that you must parse. `blocked_alerts` is derived from `command_security` during reconciliation and can't be set through the API.
+| Field | Type | Notes |
+|---|---|---|
+| `enabled`, `admin_disable` | bool | |
+| `area`, `community_membership`, `blocked_alerts` | string[] | `[]` when empty |
+| `area_restriction` | string[] or `null` | `null` = unrestricted; `[]` = no areas allowed |
+| `language` | string | `""` when unset (the server's `[general] locale` applies) |
+| `latitude`, `longitude` | float | `0` when unset |
+| `last_checked`, `disabled_date` | timestamp or `null` | |
+
+`blocked_alerts` is derived from `command_security` during reconciliation and can't be set through the API.
+
+!!! warning "Changed in 5.3"
+    Earlier v2 builds returned the v1 encodings here: `enabled`/`admin_disable` as `0`/`1`, the array fields as JSON-encoded strings (`blocked_alerts` could be `null`), and `language` as `null` when unset. The same typed shape is now used by `POST /api/v2/humans` and the snapshot's `human`.
 
 ## Delete a human (5.3+)
 
@@ -189,7 +200,7 @@ curl -X POST -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/js
 
 ```sh
 curl -X POST -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/json" \
-  -d '{"lat": 51.2802, "lon": 1.0789}' \
+  -d '{"latitude": 51.2802, "longitude": 1.0789}' \
   http://localhost:3030/api/v2/humans/123456789012345678/location
 ```
 
@@ -208,7 +219,7 @@ Resets the location to unset (0,0). Not subject to the area-restriction check. R
 
 ```sh
 curl -H "X-Poracle-Secret: your-secret" \
-  "http://localhost:3030/api/v2/humans/123456789012345678/check-location?lat=51.28&lon=1.08"
+  "http://localhost:3030/api/v2/humans/123456789012345678/check-location?latitude=51.28&longitude=1.08"
 ```
 
 ```json
@@ -222,7 +233,7 @@ Always `true` when area security is off.
 Saved (named) locations let a tracking rule measure distance from somewhere other than the profile location, via `override_location_label` (see [Tracking](tracking.md#fields-common-to-every-type) and the [`!location` command](../../userguide/commands.md)). Labels are unique per human and matched case-insensitively.
 
 !!! note "Field names"
-    Requests use `lat`/`lon`; responses use `latitude`/`longitude`.
+    Requests and responses both use `latitude`/`longitude` (5.3+). Earlier v2 builds took `lat`/`lon` in request bodies and the `check-location` query.
 
 ```sh
 # list
@@ -243,7 +254,7 @@ curl -H "X-Poracle-Secret: your-secret" http://localhost:3030/api/v2/humans/1234
 ```sh
 # create (409 if the label exists)
 curl -X POST -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/json" \
-  -d '{"label": "work", "lat": 51.2961, "lon": 1.0612}' \
+  -d '{"label": "work", "latitude": 51.2961, "longitude": 1.0612}' \
   http://localhost:3030/api/v2/humans/123456789012345678/locations
 
 # fetch one -> {"location": {"label": "work", "latitude": ..., "longitude": ...}}
@@ -251,7 +262,7 @@ curl -H "X-Poracle-Secret: your-secret" http://localhost:3030/api/v2/humans/1234
 
 # move (new in v2)
 curl -X PUT -H "X-Poracle-Secret: your-secret" -H "Content-Type: application/json" \
-  -d '{"lat": 51.3001, "lon": 1.0700}' \
+  -d '{"latitude": 51.3001, "longitude": 1.0700}' \
   http://localhost:3030/api/v2/humans/123456789012345678/locations/work
 
 # delete

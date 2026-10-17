@@ -32,19 +32,28 @@ A missing or wrong secret returns `401`:
 ```
 
 !!! danger "A blank `api_secret` leaves `/api` open"
-    If `api_secret` is empty or unset, the authentication check is skipped and **every `/api/*` endpoint is reachable without a secret** — including user deletion, config rewrites, and message delivery. There is no startup warning. Always set a secret on any processor reachable from outside the host, and consider restricting access with `ip_whitelist` (below) or a firewall.
+    If `api_secret` is empty or unset, the authentication check is skipped and **every `/api/*` endpoint is reachable without a secret** — including user deletion, config rewrites, and message delivery. From 5.3 the processor logs a warning at startup when the secret is blank **and** the effective listen host isn't loopback (this includes the `PORACLE_HOST` override, so Docker's `0.0.0.0` triggers it); 5.2 gives no warning. Always set a secret on any processor reachable from outside the host, and consider restricting access with `ip_whitelist` (below) or a firewall. See [`[processor]`](../config/processor.md).
 
 !!! note "Backward compatibility"
     An `api_secret` under `[alerter]` is still read and copied into `[processor]` at load time if `[processor] api_secret` is empty. New configs should use `[processor]`.
 
 ### IP allow/deny lists
 
-`[processor] ip_whitelist` and `ip_blacklist` restrict which client IPs may connect. They apply to **every** route on the port — the API, `/health`, `/metrics`, and the scanner webhook receiver (`POST /`) — so if you set a whitelist, include your scanner's address. Rejected clients get a bare `403`.
+`[processor] ip_whitelist` and `ip_blacklist` restrict which client IPs may connect. They apply to **every** route on the port — the API, `/health`, `/metrics`, and the scanner webhook receiver (`POST /`) — so if you set a whitelist, include your scanner's address. The blacklist is checked first; a non-empty whitelist then allows only matching addresses. Rejected clients get a bare `403`.
 
 ```toml
 [processor]
-ip_whitelist = ["127.0.0.1", "10.0.0.5"]
+ip_whitelist = ["127.0.0.1", "10.0.0.0/8", "2001:db8::/32"]
+trusted_proxies = ["172.16.0.0/12"]   # only if Poracle sits behind a reverse proxy
 ```
+
+- **CIDR ranges (5.3+).** Entries may be exact IPv4/IPv6 addresses or CIDR ranges. Invalid entries in any of the three lists stop startup with an error naming the entry (5.2 accepted only exact IPs and silently ignored anything else).
+- **`trusted_proxies` (5.3+).** By default no proxy is trusted, so the client IP is always the TCP peer and `X-Forwarded-For` / `X-Real-IP` are ignored. If Poracle is behind a reverse proxy (nginx, Traefik, a Docker network) and you rely on the IP lists, list the proxy's address or range here, otherwise every request appears to come from the proxy.
+
+!!! warning "5.2: forwarded headers can be spoofed"
+    In 5.2 every proxy is trusted, so the IP filter believes any `X-Forwarded-For` header a client sends and the lists can be bypassed. Don't rely on `ip_whitelist` alone as access control on 5.2; set `api_secret` and firewall the port.
+
+Full field reference: [`[processor]`](../config/processor.md).
 
 ### CORS
 
@@ -61,10 +70,11 @@ These do **not** require `X-Poracle-Secret`.
 | `GET` | `/metrics` | Prometheus metrics |
 | `GET` | `/openapi.json` | OpenAPI 3.1 spec for the whole `/api` surface |
 | `GET` | `/docs` | Interactive API documentation (Stoplight Elements, loaded from unpkg.com) |
-| `GET` | `/debug/pprof/*` | Go pprof profiling endpoints |
 
-!!! warning "pprof is always mounted"
-    `/debug/pprof/` is registered unconditionally and is not behind the API secret. Don't expose the processor port directly to the internet; put it behind a reverse proxy that only forwards what you need, or use `ip_whitelist`.
+!!! note "`/debug/pprof` (Go profiling)"
+    From 5.3, `/debug/pprof/` only exists when `[processor] enable_pprof = true` (default off), and then requires `X-Poracle-Secret` like `/api`. Startup warns if it's enabled with a blank `api_secret`. Leave it off unless you're diagnosing a performance problem.
+
+    In 5.2, `/debug/pprof/` is always mounted and **not** behind the secret. Don't expose a 5.2 processor port directly to the internet; put it behind a reverse proxy that only forwards what you need, or use `ip_whitelist`.
 
 ### `GET /health`
 

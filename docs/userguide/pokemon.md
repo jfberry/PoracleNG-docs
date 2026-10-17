@@ -160,7 +160,6 @@ You can use either the pokemon name or its Pokedex number.
 
     The check looks for a filter that genuinely narrows the set: IV, CP, level, ATK/DEF/STA, PVP league, type, generation, gender, distance, time or `costume:` all count. These do **not** count on their own:
 
-    - `shiny` — almost every species can be shiny (see the note on `shiny` below)
     - `form:`, `template:`, `clean` / `edit`
     - `size:m` / `rarity:common` (or a range that still includes them) — these classes cover most spawns. A size or rarity filter that *excludes* the common class (e.g. `size:xxl`, `rarity:3-5`) does count.
 
@@ -261,10 +260,12 @@ Rarity levels: 1 `common`, 2 `uncommon`, 3 `rare`, 4 `very-rare`, 5 `ultra-rare`
 !!! note "Single value = exact match"
     A single rarity or size value is an **exact** match: `rarity:4` means Very Rare only, *not* "Very Rare or rarer". Use a range (`rarity:4-5`) or `maxrarity:` to cover several tiers.
 
-Names work as well as numbers — `rarity:rare`, `rarity:uncommon-rare`, `rarity:rare-ultra-rare`, `maxrarity:very-rare`. Because `-` separates a range, the hyphenated names `very-rare` / `ultra-rare` only work in `maxrarity:` or as the *second* half of a range: `rarity:very-rare` on its own is not recognised, so use `rarity:4` / `rarity:5` instead.
+Names work as well as numbers — `rarity:rare`, `rarity:very-rare`, `rarity:uncommon-rare`, `rarity:common-very-rare`, `rarity:ultra-rare-unseen`, `maxrarity:very-rare`. `very_rare` / `ultra_rare` (with an underscore) work too.
 
-!!! note
-    Tier 6 (`unseen`) is accepted, but the server never currently assigns it — species with no recent sightings have no rarity tier — so a `rarity:6` rule won't match anything.
+Tier 6 (`unseen`) covers species the scanner hasn't seen at all in the rarity window. It only applies once the server has collected enough sightings to work out tiers; until then no species has a tier, and rules with a rarity filter don't match. Because a species with no sightings is now tier 6, a range that reaches 6 (`rarity:5-6`, `rarity:rare-unseen`) also fires for a species the moment it first appears, and those alerts show the rarity as "Unseen". `!info rarity` lists only species that have been seen.
+
+!!! note "5.3+"
+    Before 5.3, `rarity:very-rare` and `rarity:ultra-rare` weren't recognised (the hyphen was read as a range separator), so only `maxrarity:` or the second half of a range accepted them. Tier 6 was never assigned, so `rarity:6` matched nothing.
 
 ### Track by Size
 
@@ -349,7 +350,7 @@ On Discord, @mentioning a user or role in a `!track` command stores the mention 
 
 ### Shiny
 
-`shiny` is accepted by `!track` for compatibility but currently has no effect on matching — the rule is stored exactly as if `shiny` had not been typed.
+`!track` has no shiny filter. In 5.3+ `!track pikachu shiny` is rejected with "Unrecognized: shiny"; older builds accepted `shiny` but ignored it and tracked every Pikachu. (`!quest` does accept `shiny`, see [Quest Tracking](quests.md#shiny-eligible-quests).)
 
 ### Clean and Edit
 
@@ -445,7 +446,7 @@ PVP ranks are limited by your admin's configuration: the worst rank you can ask 
     /untrack id:45
     ```
 
-`form:` is not accepted when removing — `!untrack <pokemon>` removes all forms; use `id:` to remove a single rule. `!untrack gen:N` and `!untrack <type>` remove rules for individual species only; they don't touch an `everything` catch-all rule.
+`form:` is not accepted when removing — `!untrack <pokemon>` removes all forms; use `id:` to remove a single rule. In 5.3+ a rule keeps its ID when you edit it (re-running `!track` for the same pokemon with different filters), so an ID you noted earlier, a [rule mute](mute.md#muting-one-tracking-rule) and alert buttons keep working after the edit. `!untrack gen:N` and `!untrack <type>` remove rules for individual species only; they don't touch an `everything` catch-all rule.
 
 ### Removing other alert types
 

@@ -6,7 +6,7 @@ Telegram bot configuration: token, registration groups, admin permissions and we
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `enabled` | bool | `true` | Enable the Telegram bot. It only starts when `token` is also set. (`config.example.toml` ships `enabled = false`.) |
+| `enabled` | bool | `true` | Enable the Telegram bot. It only starts when `token` is also set. **5.3+:** `false` also stops all Telegram alerts, and startup warns if a token is set. In 5.2.x it only stopped commands, and alerts were still delivered. `config.example.toml` ships `enabled = false`: set it to `true` (or delete the line) when you add a token. |
 | `token` | string | `""` | Bot token from BotFather. An array is accepted, but only the first token is used. |
 | `admins` | array | `[""]` | Admin user IDs. |
 | `user_tracking_admins` | array | `[]` | User IDs that may manage other users' tracking. |
@@ -26,10 +26,13 @@ Telegram bot configuration: token, registration groups, admin permissions and we
 
 ## `[[telegram.delegated_admins]]`
 
-Grant users admin authority over a specific group or channel.
+Let users manage the tracking of a registered group or forum topic without being full admins. `target` is the chat ID, or `<chatId>:<topicId>` for a single forum topic (a chat ID also covers its topics); `admins` lists Telegram user IDs.
 
 ```toml
 [[telegram.delegated_admins]]
 target = "group_or_channel_id"
 admins = ["user_id_1", "user_id_2"]
 ```
+
+!!! info "PoracleNG 5.3+"
+    In 5.2.x this table was only read and logged; it gave nobody any permissions. From 5.3, the listed users can run tracking commands in that chat to change its tracking. With area security on, community admins (`telegram.admins` in an [area security community](area_security.md)) can do the same in any group belonging to their communities, and can run `/userlist` limited to their communities' members.

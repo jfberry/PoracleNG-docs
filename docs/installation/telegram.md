@@ -44,6 +44,9 @@ admins = ["your-user-id"]
 channels = ["your-registration-group-id"]
 ```
 
+!!! warning "Set `enabled = true`"
+    `config.example.toml` ships `[telegram] enabled = false`. If you copied it, change that line to `true` (or delete it). With `enabled = false` Telegram commands don't work, and from 5.3 no Telegram alerts are sent either.
+
 ## Step 5: Start the Bot
 
 After starting PoracleNG, open a chat with your bot in Telegram and send `/start` to begin interacting with it.

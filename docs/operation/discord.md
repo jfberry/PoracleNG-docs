@@ -97,11 +97,11 @@ Admins can also use `!role` in channels, and add `user:<id>` to change another u
 
 ## Delegated Admins
 
-Grant tracking management for specific channels or whole guilds without full admin access:
+Grant tracking management for specific channels, categories or whole guilds without full admin access:
 
 ```toml
 [[discord.delegated_admins]]
-target = "channel_or_guild_id"
+target = "channel_guild_or_category_id"
 admins = ["user_id_1", "role_id_2"]
 
 [[discord.webhook_admins]]
@@ -117,14 +117,14 @@ user_tracking_admins = ["user_id_1", "role_id_1"]
 
 | Setting | Grants |
 |---|---|
-| `delegated_admins` | Running tracking commands inside a registered channel in that channel or guild changes **the channel's** tracking. |
+| `delegated_admins` | Running tracking commands inside a registered channel in that channel, category or guild changes **the channel's** tracking. A thread matches its own ID, its parent channel and that channel's category. |
 | `webhook_admins` | Managing that webhook's tracking with `name:<webhook_name>`. Only user IDs are checked here, not role IDs. |
 | `user_tracking_admins` | Managing any registered user's tracking with `user:<id>`. |
 
 Delegated admins can't run admin commands such as `!channel`, `!userlist` or `!pa`.
 
-!!! warning
-    The config comments say a `delegated_admins` target can be a category ID, but only channel and guild IDs are currently checked. Use the guild ID, or list each channel.
+!!! info "PoracleNG 5.3+"
+    Category targets work from 5.3, as they did in PoracleJS. In 5.2.x only channel and guild IDs were checked, so on 5.2.x use the guild ID or list each channel. Delegation applies to `!` text commands only: slash commands always act on the person running them.
 
 !!! tip
     `[[discord.…]]` tables must come **after** all plain `[discord]` keys in `config.toml`, otherwise later keys get pulled into the table.

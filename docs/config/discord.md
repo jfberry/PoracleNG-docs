@@ -6,7 +6,7 @@ Discord bot configuration: tokens, registration channels, admin permissions, com
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `enabled` | bool | `true` | Start the Discord gateway bot (commands, reconciliation, role management). Set `false` to keep it off even when a token is configured. |
+| `enabled` | bool | `true` | Start the Discord gateway bot (commands, reconciliation, role management). Set `false` to keep it off even when a token is configured. **5.3+:** `false` also stops all Discord alerts, including Discord webhooks, and startup warns if a token is set. In 5.2.x it only stopped the gateway, and alerts were still delivered. |
 | `token` | string or array | (none) | Bot token. Used for all outbound delivery (DMs, channel and thread sends, edits, clean deletes). When `command_token` is empty it also drives the gateway side. Only the **first** token is used; extra entries in an array are ignored. |
 | `command_token` | string | `""` | Optional second bot token for the gateway side (commands, reconciliation, role management). See [Split-bot operation](#split-bot-operation). |
 | `activity` | string | `"PoracleNG"` | Bot activity text. |
@@ -17,7 +17,7 @@ Discord bot configuration: tokens, registration channels, admin permissions, com
 | `admins` | array | `[]` | User IDs of bot admins. |
 | `user_tracking_admins` | array | `[]` | User/role IDs that may manage other users' tracking. |
 | `admin_channel_id` | string | `""` | Channel ID for operator notices: users/channels auto-disabled (delivery failures, rate-limit bans), thread keep-alive failures, DTS render errors, state-reload failures. Empty = off. |
-| `thread_keep_alive_interval_hours` | int | `24` | How often (hours) Poracle unarchives the Discord threads it delivers to, so they stay usable. `0` = off. Values above `168` (7 days, Discord's maximum archive time) are clamped to `168`. |
+| `thread_keep_alive_interval_hours` | int | `0` | How often (hours) Poracle unarchives the Discord threads it delivers to, so they stay usable. `0` = off. `config.example.toml` sets the recommended `24`, but if you leave the key out the sweep is **off**. Values above `168` (7 days, Discord's maximum archive time) are clamped to `168`. |
 | `disable_auto_greetings` | bool | `false` | Skip greeting users who gain role-based access. |
 | `upload_embed_images` | bool | `false` | Re-upload embed images directly to the Discord CDN. |
 | `check_role` | bool | `false` | Periodically verify role membership for all users. |
@@ -34,7 +34,7 @@ Discord bot configuration: tokens, registration channels, admin permissions, com
     Setting `check_role = true` only schedules the check. Actual deletion or disabling depends on [`general.role_check_mode`](general.md#role_check_mode).
 
 !!! note "Dead keys"
-    `worker_status` and `worker_activity` (still present in some example configs) are not read by PoracleNG and can be removed.
+    `worker_status` and `worker_activity` are not read by PoracleNG and can be removed. They appear in older configs and in the 5.2.x `config.example.toml`; the 5.3 example no longer has them.
 
 !!! warning "Put `[discord.*]` sub-tables last"
     In TOML, a table header such as `[discord.command_security]`, `[discord.slash_commands]` or `[[discord.role_subscriptions]]` captures **every key below it** until the next header. If you put one of these above plain `[discord]` keys (`prefix`, `iv_colors`, `admin_channel_id`, ...), those keys silently become part of the sub-table and your `[discord]` settings are lost. Keep all sub-tables at the end of the `[discord]` section.
@@ -58,13 +58,18 @@ command_token = "command-bot-token"
 
 ## `[[discord.delegated_admins]]`
 
-Grant users admin authority over a specific channel, guild, or category.
+Let users manage the tracking of registered channels without being full admins. `target` is a channel, guild or category ID; `admins` lists user and role IDs.
 
 ```toml
 [[discord.delegated_admins]]
-target = "channel_or_guild_id"
+target = "channel_guild_or_category_id"
 admins = ["user_id_1", "role_id_2"]
 ```
+
+A command typed in a registered channel is checked against the channel's ID, its guild, and its ancestors: a text channel's category, or a thread's parent channel and that channel's category.
+
+!!! info "PoracleNG 5.3+"
+    Category targets (and thread parents) work from 5.3. In 5.2.x only channel and guild IDs were checked, so a category entry granted nothing. Slash commands always act on the person running them, so delegation applies to `!` commands only. See [Discord admin operations](../operation/discord.md#delegated-admins).
 
 ## `[[discord.webhook_admins]]`
 
@@ -131,7 +136,7 @@ pvp = ["role_id_1"]
 Role matching: in a server channel, the user's roles in that server are used. In DMs, Discord doesn't say which server the user belongs to, so Poracle combines the user's roles from **all** guilds listed in `guilds`.
 
 !!! note
-    For slash commands, bot admins always bypass `command_security`. For `!` text commands, admins are checked like everyone else, so include admin IDs in the list if you restrict a command they use.
+    Bot admins (`[discord] admins`) always bypass `command_security`. From 5.3 this applies to `!` text commands, slash commands and `POST /api/command` alike. In 5.2.x only slash commands let admins through; for text commands, include admin IDs in the list.
 
 ## `[discord.slash_commands]`
 

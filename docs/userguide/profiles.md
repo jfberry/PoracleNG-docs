@@ -70,12 +70,13 @@ Switching to a profile that doesn't exist replies "not found" — use `!profile 
 
 ### Copy Tracking to Other Profiles
 
-Copy every tracking rule on your **current** profile to other profiles, by name:
+Copy every tracking rule on your **current** profile to other profiles, by name or number:
 
 === "Discord"
 
     ```
     !profile copyto work                # Copy current profile's tracking to "work"
+    !profile copyto 3                   # ...to profile 3
     !profile copyto work weekend        # ...to several profiles
     !profile copyto all                 # ...to every other profile
     ```
@@ -84,11 +85,15 @@ Copy every tracking rule on your **current** profile to other profiles, by name:
 
     ```
     /profile copyto work
+    /profile copyto 3
     /profile copyto all
     ```
 
 !!! warning
-    `copyto` **replaces** the tracking on the target profiles — their existing rules are deleted first. Targets are matched by profile name (not number); unknown names are reported back.
+    `copyto` **replaces** the tracking on the target profiles — their existing rules are deleted first. Targets are matched by profile name (any case) or number; if several profiles share a name, all of them are copied to. Unknown targets, and your current profile, are reported back.
+
+!!! note "5.3+"
+    Before 5.3 `copyto` matched names only, so `!profile copyto 3` and every pick from the Discord `/profile copyto` autocomplete (which sends the profile number) failed.
 
 ### Delete a Profile
 

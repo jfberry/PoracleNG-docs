@@ -28,7 +28,7 @@ scrape_configs:
 The repository ships a starting point at `monitoring/prometheus.yml.example`.
 
 !!! note
-    `monitoring/prometheus.yml.example` still contains a second `poracle_alerter` job scraping port 3031. That component no longer exists — delete the job, or Prometheus will report the target as down.
+    In 5.2.x, `monitoring/prometheus.yml.example` also contains a `poracle_alerter` job scraping port 3031. That component no longer exists — delete the job, or Prometheus will report the target as down. The 5.3 example has only the processor job.
 
 ### Key Metrics
 
@@ -106,13 +106,13 @@ Each line looks like:
 INFO 2026-10-17 14:02:11 [9876543210123456789] -> Pikachu Hunters 123456789012345678 CHANNEL Sending discord message
 ```
 
-The level comes first (`DEBG`, `INFO`, `WARN`, `ERRO`). The bracketed reference, when present, is the event's own ID (encounter ID, gym ID, pokestop ID, …), so `grep` for it to follow one webhook through matching, rendering and delivery.
+The level comes first (`TRCE` (5.3+), `DEBG`, `INFO`, `WARN`, `ERRO`). The bracketed reference, when present, is the event's own ID (encounter ID, gym ID, pokestop ID, …), so `grep` for it to follow one webhook through matching, rendering and delivery.
 
 ### Log Levels
 
 | Level | Use |
 |-------|-----|
-| `trace` | Most verbose |
+| `trace` | Most verbose. PoracleNG logs nothing extra at this level today, so it matches `debug`. Prefer `debug` on 5.2.x, where a trace-level line could crash the processor (fixed in 5.3) |
 | `debug` | Per-message detail — matching decisions, shed messages, snapshot writes. Large volume on a busy server |
 | `info` | **Default.** Startup, deliveries, `[Status]` lines, commands |
 | `warn` | Warnings and errors only |

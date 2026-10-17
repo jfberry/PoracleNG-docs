@@ -63,4 +63,4 @@ Used only when [`[validation] url`](validation.md) is set.
 
 ## Unused keys
 
-`encounter_cache_ttl`, `batch_size` and `flush_interval_millis` are still accepted, but PoracleNG doesn't use them. `max_database_connections`, `concurrent_matched_processors` and `matched_max_queue_size` were removed with the old alerter and are ignored. All of these can be deleted from your config.
+`encounter_cache_ttl`, `batch_size` and `flush_interval_millis` are still accepted, but PoracleNG doesn't use them (they are no longer in the 5.3 `config.example.toml`). `max_database_connections`, `concurrent_matched_processors` and `matched_max_queue_size` were removed with the old alerter and are ignored. All of these can be deleted from your config.

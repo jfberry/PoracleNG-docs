@@ -49,8 +49,8 @@ Track nest pokemon changes in your areas.
 | `<pokemon>` | Pokemon name or ID | `pikachu`, `25` |
 | `minspawn:<n>` | Minimum average spawns per hour for the nest | `minspawn:10` |
 | `form:<name>` | Form filter (named pokemon only) | `form:alola` |
-| `gen:<n>` | Narrow named pokemon to a generation | `gen:4` |
-| `<type>` | Narrow named pokemon to a type | `dragon` |
+| `gen:<n>` | Narrow `everything`/named pokemon to a generation | `gen:4` |
+| `<type>` | Narrow `everything`/named pokemon to a type | `dragon` |
 | `d:<n>` | Distance in metres | `d:2000` |
 | `location:<name>` | Distance from a named location (requires `d:`) | `location:Home` |
 | `area:<name>[,<name>]` | Restrict to specific areas | `area:downtown` |
@@ -62,7 +62,7 @@ Track nest pokemon changes in your areas.
 Legacy no-colon forms (`d2000`, `minspawn10`) still work.
 
 !!! note "Type and generation"
-    Type names and `gen:` only **narrow a list of pokemon you have named** (handy with the `+` evolution suffix, e.g. `!nest bulbasaur+ charmander+ fire`). On their own (`!nest dragon`) they reply "no pokemon", and alongside `everything` they are ignored.
+    Type names and `gen:` **narrow `everything` or a list of pokemon you have named** (handy with the `+` evolution suffix, e.g. `!nest bulbasaur+ charmander+ fire`). On their own (`!nest dragon`) they reply "no pokemon". With `everything` (`!nest everything gen:1`, `!nest everything fire`) they work as on `!track`: one rule is stored for every matching species rather than a single catch-all rule (5.3+; older builds ignored the filter and tracked every nest).
 
 ## Removing Tracks
 

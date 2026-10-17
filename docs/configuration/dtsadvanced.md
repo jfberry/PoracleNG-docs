@@ -127,11 +127,11 @@ There is no `sum` helper. Use `add`.
 | `map`, `map2` | See [Custom Maps](#custom-maps) |
 
 !!! warning "Argument counts matter"
-    Calling a helper with too few arguments (e.g. `{{add 1}}`) makes the whole template fail. The user gets the `Template not found` fallback message instead of the alert.
+    Calling a helper with too few arguments (e.g. `{{add 1}}`) makes the whole template fail. The user gets a fallback message instead of the alert (`Template render error: …` on 5.3+, `Template not found: …` on 5.2) and the admin channel is notified.
 
 ### Template Variables (`@language`, `@platform`, `@altLanguage`)
 
-Each alert render sets three variables that templates can read:
+Each render sets three variables that templates can read:
 
 | Variable | Value |
 |---|---|
@@ -144,7 +144,7 @@ Each alert render sets three variables that templates can read:
 {{#ne @language 'en'}}({{nameEng}}){{/ne}}
 ```
 
-`greeting` and `help` templates don't have these variables, so their helpers use English.
+On 5.3+ `help` and `greeting` templates get `@language` and `@platform` too: `!help` and the `!poracle` greeting use the user's language, and greetings sent by role reconciliation use `[general] locale`. On 5.2 these templates have no variables, so their helpers always use English.
 
 ## Pokemon Lookup Helpers
 
@@ -161,7 +161,7 @@ Inside the block you can use `name`, `nameEng`, `formName`, `formNameEng`, `full
 
 - `typeName`, `typeNameEng` and `typeEmoji` are **lists** here (unlike the alert fields), so use `join`.
 - `fullName` puts the form in brackets, e.g. `Pikachu (Libre)`, and leaves out Normal forms.
-- Both arguments are required. Pass `0` as the form if you don't have one. `{{#pokemon id}}` makes the render fail.
+- The form is optional on 5.3+: `{{#pokemon id}}` uses the base form. On 5.2 both arguments are required (pass `0` as the form), and `{{#pokemon id}}` makes the render fail.
 - Used inline, `{{pokemon id formId}}` prints the `fullName`.
 
 ### CP and Power-Up Cost
@@ -261,6 +261,7 @@ The built-in keys are:
 | Gender | `gender-male`, `gender-female`, `gender-none` |
 | Directions | `north`, `northeast`, `east`, `southeast`, `south`, `southwest`, `west`, `northwest` |
 | Incidents | `incident-goldstop`, `incident-kecleon`, `incident-showcase` |
+| Showcase focus (**5.3+**) | `showcase-focus-pokemon`, `showcase-focus-type`, `showcase-focus-alignment`, `showcase-focus-class`, `showcase-focus-family`, `showcase-focus-buddy`, `showcase-focus-generation`, `showcase-focus-hatched`, `showcase-focus-mega`, `showcase-focus-shiny` (all 🏆 by default; used by `showcaseFocusEmoji`) |
 | Other | `shiny`, `grunt-unknown` |
 
 `examples/emoji.json` has a complete Discord set of custom emoji. Use any key directly with `{{getEmoji 'team-valor'}}`. After editing, run `!poracle-admin emoji reload`.
@@ -286,7 +287,8 @@ Add a `language` to an entry to target that language. See [Template Selection](d
 
 - An entry without a `language` matches every language.
 - Ids don't carry over between languages: a user whose language has no entry for their id gets that language's `default` entry.
-- If a language has no templates at all, the default entry for `[general] locale` is used.
+- If a language has no templates at all, a `default` entry with no language is used if you have one, otherwise the `default` entry for `[general] locale`.
+- A `default` entry in the user's language beats a `default` entry with no language. (5.2 had this the wrong way round; see [Template Selection](dts.md#template-selection).)
 - The fields themselves (pokemon names, moves, addresses) are always translated into the recipient's language. Use the `*Eng` fields or `*Alt` helpers for a second language.
 
 See [Multi-Language](multilang.md) for setting up languages, and `examples/dts/multilingual/` for examples.

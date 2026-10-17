@@ -18,7 +18,7 @@ Processor log output, file rotation, and verbosity.
 
 - **`info`**: recommended. Standard operational messages, including the periodic `[Status]` line.
 - **`debug`**: adds hot-path detail for diagnosing issues.
-- **`trace`**: everything. Very noisy. Use only while actively debugging.
+- **`trace`**: the most verbose level. PoracleNG itself currently logs nothing below `debug`, so in practice this gives the same output as `debug`. Trace lines are labelled `TRCE` (5.3+); in 5.2.x the log formatter had no trace label, and a trace-level line would crash the processor. Prefer `debug` on 5.2.x.
 - **`warn`**: warnings and errors only.
 
 An unrecognised or empty value falls back to `info`.

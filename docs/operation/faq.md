@@ -61,6 +61,7 @@ PoracleNG uses only this one port. If you have an `[alerter]` section with a `po
 4. **Check user has areas/location** — tracking needs at least one area, or a location with a distance
 5. **Check bot permissions** — the Discord bot needs Send Messages permission in DMs or channels
 6. **Check rate limits** — the destination may be limited or banned: `!poracle-admin ratelimit list` / `show <id>`. Stopped users re-enable with `!start`; admin-disabled ones need `!enable <id>`
+7. **Check the platform is enabled** — from 5.3, `[discord] enabled = false` or `[telegram] enabled = false` stops that platform's alerts, not just its commands
 
 ### Alerts are delayed
 
@@ -138,6 +139,14 @@ It is deprecated and does nothing. Use `disable_lure`, `disable_invasion`, `disa
 - Check `logs/processor.log` for geofence and `[KOJI]` messages
 - Run `!poracle-admin reload geofence` after fixing files
 
+### After upgrading to 5.3, Telegram alerts stopped
+
+Check `[telegram] enabled`. From 5.3, `enabled = false` stops Telegram alerts as well as commands, and `config.example.toml` ships `enabled = false`. Set it to `true` or delete the line. The startup log warns `[telegram] has a token but enabled = false`. The same applies to `[discord] enabled`.
+
+### After upgrading to 5.3, the API or webhooks are rejected with 403, or startup fails on an IP list
+
+From 5.3, `X-Forwarded-For` is only believed from `[processor] trusted_proxies`. Behind a reverse proxy, every request now comes from the proxy's address, so add the proxy to `trusted_proxies`. An invalid entry in `ip_whitelist`, `ip_blacklist` or `trusted_proxies` stops startup with a message naming it. See [`[processor]`](../config/processor.md).
+
 ## Database Issues
 
 ### Migration errors on startup
@@ -156,7 +165,7 @@ Migration 000009 moves everyone who was on the non-existent "profile 0" to profi
 
 - Check that `[tuning] reload_interval_secs` (default 60) isn't set too low
 - Ensure database indexes are intact
-- The processor's own connection pool is fixed (10 connections). `max_database_connections` in `config.example.toml` is a leftover and does nothing.
+- The processor's own connection pool is fixed (10 connections). `max_database_connections` (in the 5.2.x `config.example.toml`) is a leftover and does nothing.
 
 ## Discord-Specific
 

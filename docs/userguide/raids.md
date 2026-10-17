@@ -75,7 +75,7 @@ Only **one** level filter is read per command — `!raid legendary mega` or `!ra
 | 11–15 | `shadow` (all shadow levels) |
 
 !!! warning "No type or generation tracking for raids"
-    Raid rules are either *by boss* or *by level*. Pokemon type names (`dragon`, `fire`) and `gen:` are not raid filters: `!raid dragon` replies "No raid levels or pokemon specified", and adding them to a level rule (`!raid everything dragon`) is silently ignored. Name the bosses you want instead.
+    Raid rules are either *by boss* or *by level*. Pokemon type names (`dragon`, `fire`) and `gen:` are not raid filters: in 5.3+ `!raid dragon` or `!raid everything gen:1` is rejected with "Unrecognized: …" and nothing is saved. (Older builds silently ignored them on a level rule, so `!raid everything dragon` tracked every raid.) Name the bosses you want instead.
 
 ### Track by Form or Costume
 
@@ -167,6 +167,8 @@ If the name matches several gyms the bot lists them (up to 10) with their IDs so
     ```
     /raid mewtwo move:psystrike
     ```
+
+A move name the bot doesn't recognise is rejected with "Unknown move: …" (5.3+). Older builds treated it as "any move" and tracked the boss regardless. Use `!info moves` to check move names.
 
 ### Track with Distance / Areas
 
