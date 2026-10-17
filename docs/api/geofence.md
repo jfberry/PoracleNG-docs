@@ -1,55 +1,71 @@
 # Geofence API
 
-The geofence API exposes loaded geofence data and on-demand static map tile generation. All endpoints below sit under `/api/geofence/` and require the `X-Poracle-Secret` header (see [API authentication](index.md#authentication)).
+Read the loaded geofences, trigger a reload, and generate static map images of areas and locations. All endpoints are under `/api/geofence/` and need `X-Poracle-Secret` (see [API overview](index.md#authentication)).
 
-## Data Endpoints
+## Geofence data
 
 ### `GET /api/geofence/all`
 
-Returns the raw geofence data currently loaded by the processor.
+Every loaded geofence (from files and Koji) with its display metadata and polygon (`path`, or `multipath` for multi-polygon fences).
 
 ```sh
 curl -H "X-Poracle-Secret: your-secret" http://localhost:3030/api/geofence/all
 ```
 
+```json
+{
+  "status": "ok",
+  "geofence": [
+    {"name": "Canterbury", "id": 1, "color": "#3388ff", "group": "Kent", "description": "", "userSelectable": true, "displayInMatches": true,
+     "path": [[51.29, 1.05], [51.30, 1.10], [51.26, 1.11]]}
+  ]
+}
+```
+
 ### `GET /api/geofence/all/geojson`
 
-Returns all loaded geofences as a single GeoJSON `FeatureCollection`.
+The same fences as a GeoJSON `FeatureCollection`, wrapped in `{status, geoJSON}`. Each feature's `properties` carry `name`, `color`, `id`, `group`, `description`, `userSelectable` and `displayInMatches`.
 
-```sh
-curl -H "X-Poracle-Secret: your-secret" http://localhost:3030/api/geofence/all/geojson
+```json
+{"status": "ok", "geoJSON": {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"name": "Canterbury", "...": "..."}, "geometry": {"type": "Polygon", "coordinates": [[[1.05, 51.29], "..."]]}}]}}
 ```
 
 ### `GET /api/geofence/all/hash`
 
-Returns a hash of the currently loaded geofence set. Useful for clients (e.g. PoracleWeb) that want to detect when the server's geofences have changed without re-downloading the full payload.
+An MD5 hash **per area**, so a client can tell which fences changed without downloading polygons:
 
-```sh
-curl -H "X-Poracle-Secret: your-secret" http://localhost:3030/api/geofence/all/hash
+```json
+{"status": "ok", "areas": {"Canterbury": "6f1ed002ab5595859014ebf0951522d9", "Dover": "0cc175b9c0f1b6a831c399e269772661"}}
 ```
 
-### `POST /api/geofence/reload`
+### `GET` or `POST /api/geofence/reload`
 
-Triggers an in-place reload of geofences from disk. Also exposed as `GET` for convenience.
+A **full** reload: re-reads geofence files from disk, re-fetches Koji fences, rebuilds the spatial index, then reloads humans and tracking rules from the database. Returns `{"status": "ok"}`. For a database-only reload use `/api/reload` (see [Reload endpoints](index.md#reload-endpoints)).
 
 ```sh
 curl -X POST -H "X-Poracle-Secret: your-secret" http://localhost:3030/api/geofence/reload
 ```
 
-## Static Map Endpoints
+## Static map tiles
 
-These endpoints render static map tiles via the configured tileserver. They are used by PoracleWeb for previews and by templates that embed maps.
+These generate an image through your configured [static map provider](../configuration/staticmaps.md) and return its **URL as JSON** — they don't return image bytes:
 
-| Method | Path | Purpose |
+```json
+{"status": "ok", "url": "http://tileserver:9000/staticmap/pregenerated/abc123"}
+```
+
+| Method | Path | Image |
 |---|---|---|
-| `GET` | `/api/geofence/:area/map` | Render a map of a single named area |
-| `GET` | `/api/geofence/locationMap/:lat/:lon` | Render a map centred on a point |
-| `GET` | `/api/geofence/distanceMap/:lat/:lon/:distance` | Render a point with a distance ring |
-| `GET` | `/api/geofence/weatherMap/:lat/:lon` | Render a map with weather cell overlay |
-| `POST` | `/api/geofence/overviewMap` | Render an overview map (POST body specifies the request) |
+| `GET` | `/api/geofence/{area}/map` | One area's polygon (`404` for an unknown area or one with no polygon) |
+| `POST` | `/api/geofence/overviewMap` | Several areas in different colours; body `{"areas": ["canterbury", "dover"]}` (`404` if none match) |
+| `GET` | `/api/geofence/locationMap/{lat}/{lon}` | A pin at the location |
+| `GET` | `/api/geofence/distanceMap/{lat}/{lon}/{distance}` | A circle of `distance` metres around the point |
+| `GET` | `/api/geofence/weatherMap/{lat}/{lon}` | The weather S2 cell covering the point; optional `?weather=` condition id to override current weather |
+
+All return `503` if no static map provider is configured, and `500` if tile generation fails (check the processor log for `staticmap:` warnings).
 
 ```sh
-# Example: render a map of the "downtown" geofence
-curl -H "X-Poracle-Secret: your-secret" \
-  http://localhost:3030/api/geofence/downtown/map -o downtown.png
+URL=$(curl -s -H "X-Poracle-Secret: your-secret" \
+  http://localhost:3030/api/geofence/downtown/map | jq -r .url)
+curl -o downtown.png "$URL"
 ```

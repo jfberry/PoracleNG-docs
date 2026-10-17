@@ -44,6 +44,22 @@ Track pokemon by their PVP rank in a specific league:
     /track pikachu great:1-5
     ```
 
+### Best-rank bound
+
+`great:5` means ranks 1–5. To set only the *best* rank you want (for example to skip the very top ranks you already have), use `greathigh:` / `ultrahigh:` / `littlehigh:`:
+
+=== "Discord"
+
+    ```
+    !track pikachu greathigh:3 great:20  # Great League ranks 3 through 20
+    ```
+
+=== "Telegram"
+
+    ```
+    /track pikachu greathigh:3 great:20
+    ```
+
 ### Track with Minimum CP
 
 Ensure the pokemon has a minimum CP for that league:
@@ -111,7 +127,45 @@ Specify a PVP level cap for calculations:
     ```
 
 !!! note
-    Available level caps depend on your admin's configuration (`[pvp] level_caps`). Use `cap:0` to match any configured cap.
+    Available level caps depend on your admin's configuration (`[pvp] level_caps`). Use `cap:0` to match any configured cap. Asking for a cap that isn't configured is rejected with the list of valid caps.
+
+## Mega Evolution Ranks
+
+PVP ranks can be calculated for a pokemon's mega evolution as well as its base form. Add `mega` to a PVP rule to match on the mega's rank:
+
+=== "Discord"
+
+    ```
+    !track charmander+ great:10 mega     # Rank as any mega evolution (Mega X or Mega Y)
+    !track charizard ultra:5 mega:x      # Rank as Mega Charizard X only
+    !track charizard ultra:5 mega:y      # Rank as Mega Charizard Y only
+    ```
+
+=== "Telegram"
+
+    ```
+    /track charmander+ great:10 mega
+    /track charizard ultra:5 mega:x
+    ```
+
+| Rule | Matches |
+|------|---------|
+| no `mega` | Base-form ranks only — unless your admin has turned on `[pvp] include_mega_evolution`, in which case mega ranks match too |
+| `mega` | Mega / temporary-evolution ranks only (any variant) |
+| `mega:x` / `mega:y` | Only that specific mega variant |
+
+The `mega` keywords always override the server's `include_mega_evolution` default.
+
+!!! note
+    `mega` only has an effect together with a league filter (`great:`, `ultra:`, `little:` …); on a non-PVP rule it is ignored. If you ask for `mega:x` / `mega:y` on a species that has no such mega form, the rule is still saved but the reply warns that it can never match.
+
+## Server Limits
+
+Your admin's `[pvp]` settings bound what you can track:
+
+- **Worst rank** — the rank you ask for is capped at `filter_max_rank` (10 in the example config). With that setting `great:100` is stored as `great:10`.
+- **Minimum CP** — league rules are given a minimum CP of at least `filter_great_min_cp` / `filter_ultra_min_cp` / `filter_little_min_cp` (1400 / 2350 / 450 in the example config), even if you set a lower `greatcp:` etc.
+- **Permission** — PVP tracking can be restricted to certain users or roles by your admin.
 
 ## Combining PVP with Other Filters
 
@@ -138,10 +192,13 @@ PVP tracking can be combined with other pokemon tracking options:
 | `great:<n>` or `great:<low>-<high>` | Great League (1500 CP) rank | `great:5`, `great:1-5` |
 | `ultra:<n>` or `ultra:<low>-<high>` | Ultra League (2500 CP) rank | `ultra:10`, `ultra:1-10` |
 | `little:<n>` or `little:<low>-<high>` | Little League (500 CP) rank | `little:5`, `little:1-5` |
+| `greathigh:<n>`, `ultrahigh:<n>`, `littlehigh:<n>` | Best rank to accept | `greathigh:3` |
 | `greatcp:<n>` | Minimum CP for Great League match | `greatcp:1400` |
 | `ultracp:<n>` | Minimum CP for Ultra League match | `ultracp:2350` |
 | `littlecp:<n>` | Minimum CP for Little League match | `littlecp:450` |
 | `cap:<n>` | PVP level cap | `cap:50`, `cap:51` |
+| `mega` | Match mega-evolution ranks (any variant) | `mega` |
+| `mega:x`, `mega:y` | Match a specific mega variant's ranks | `mega:x` |
 
 Legacy no-colon forms (`great5`, `greatcp1400`, `cap50`) still work.
 

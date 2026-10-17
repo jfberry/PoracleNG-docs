@@ -1,264 +1,295 @@
 # Advanced DTS
 
-Advanced features for alert templates. For basics, see [Alert Templates (DTS)](dts.md).
+Helpers, custom maps, emoji, multi-language templates and interactive buttons. For the basics, see [Alert Templates (DTS)](dts.md). For the fields each alert type provides, see the [DTS Field Reference](dtsfields.md).
 
 ## Handlebars Helpers
 
-PoracleNG registers custom Handlebars helpers plus the full [@budibase/handlebars-helpers](https://github.com/nicedoc/handlebars-helpers) library, which provides a wide range of comparison, string, math, and collection helpers.
+PoracleNG uses a **fixed set** of helpers, listed in the [Helper Reference](#helper-reference) below. It does **not** include the `@budibase/handlebars-helpers` library that PoracleJS used. A helper that isn't in the list prints nothing and shows no error, so a template copied from PoracleJS can lose text without any warning. **5.3+** adds `capitalizeAll`, `ellipsis`, `startsWith` and `remove` to cover the PoracleJS helpers templates use most.
 
 ### Conditionals
 
+Every comparison helper can be used in three ways:
+
+- as a block: `{{#eq a b}}…{{else}}…{{/eq}}`
+- as a subexpression: `{{#if (eq a b)}}`
+- inline: `{{eq a b}}` prints `true` or `false`
+
 ```handlebars
-{{!-- Simple if/else --}}
 {{#if iv}}IV: {{round iv}}%{{else}}No IV data{{/if}}
 
-{{!-- Check equality --}}
 {{#eq futureEventTrigger 'start'}}starting{{else}}ending{{/eq}}
 
-{{!-- Check inequality --}}
 {{#isnt formName 'Normal'}} {{formName}}{{/isnt}}
 
-{{!-- Numeric comparison --}}
-{{#compare gruntRewardsList.first.chance '==' 100}}
-  Guaranteed: {{#forEach gruntRewardsList.first.monsters}}{{this.name}}{{/forEach}}
-{{/compare}}
+{{#compare gruntRewardsList.first.chance '<' 100}}{{gruntRewardsList.first.chance}}% chance{{/compare}}
 
-{{#compare gruntRewardsList.first.chance '<' 100}}
-  {{gruntRewardsList.first.chance}}% chance
-{{/compare}}
-
-{{!-- Greater/less than --}}
 {{#gt tthm 30}}More than 30 minutes left{{/gt}}
-{{#lte level 5}}Low level pokemon{{/lte}}
 
-{{!-- Boolean logic --}}
 {{#and pvpAvailable userHasPvpTracks}}Show PVP info{{/and}}
 {{#or pvpGreat pvpUltra}}Has PVP data{{/or}}
 
-{{!-- Unless (negation) --}}
+{{!-- "value is one of" — {{#or size 1 5}} would only test that some argument is truthy --}}
+{{#oneOf size 1 5}}Tiny or huge!{{/oneOf}}
+
+{{#if (and (gte iv 90) (lt cp 1500))}}Great league candidate{{/if}}
+
 {{#unless confirmedTime}}⚠️ Unverified despawn time{{/unless}}
 ```
 
-### Iterating Arrays
+`eq`, `ne`, `is`, `isnt` and `oneOf` compare values as numbers when both sides look like numbers (so `"100.00"` equals `100`), and as text otherwise. `compare` with `==`/`!=` always compares text. `gt`, `gte`, `lt` and `lte` always compare numbers.
+
+### Iterating
 
 ```handlebars
-{{!-- Loop over PVP rankings --}}
 {{#each pvpGreat}}
-  - {{fullName}} #{{rank}} @{{cp}}CP (Lvl. {{levelWithCap}})
+  - {{fullName}} #{{rank}} @{{cp}}CP (Lvl. {{levelWithCap}}){{#unless isLast}},{{/unless}}
 {{/each}}
 
-{{!-- forEach with isLast check --}}
-{{#forEach gruntRewardsList.first.monsters}}
-  {{this.name}}{{#unless isLast}}, {{/unless}}
-{{/forEach}}
+{{#forEach gruntRewardsList.first.monsters}}{{this.name}}{{#unless isLast}}, {{/unless}}{{/forEach}}
 
-{{!-- Loop over weather-affected pokemon --}}
-{{#each activePokemons}}
-  **{{this.name}}** {{#isnt this.formName 'Normal'}}{{this.formName}}{{/isnt}} - {{round this.iv}}% - {{this.cp}}CP
-{{/each}}
-
-{{!-- Access parent scope from inside loop --}}
-{{#each pvpGreat}}
-  {{fullName}} - {{../name}} base pokemon
-{{/each}}
+{{!-- reach the alert's own fields from inside a loop --}}
+{{#each evolutions}}{{fullName}} ({{../name}}){{/each}}
 ```
 
-### Number Formatting
+Inside `each` and `forEach` you can use the PoracleJS-style `isFirst`/`isLast` fields as well as `@index`, `@first`, `@last` and `@key`. `forEach` also gives `@total`. Both show their `{{else}}` block when the list is empty.
+
+### Helper Reference
+
+**Comparison and logic**
+
+| Helper | Usage |
+|---|---|
+| `eq` / `is` | `{{#eq a b}}` equal |
+| `ne` / `isnt` | `{{#ne a b}}` not equal |
+| `gt`, `gte`, `lt`, `lte` | Numeric comparisons |
+| `compare` | `{{#compare a '<=' b}}`, with operators `==`, `!=`, `<`, `>`, `<=`, `>=` |
+| `and`, `or` | Any number of arguments: all true / any true |
+| `neither` | Any number of arguments: none true |
+| `oneOf` | `{{#oneOf value a b c}}`: value equals one of the others |
+| `not` | `{{#not x}}…{{else}}…{{/not}}` (block only) |
+| `contains` | `{{#contains collection value}}`: text contains a substring, or a list contains an item (block only) |
+| `startsWith` (**5.3+**) | `{{#startsWith "EX" gymName}}`: the prefix comes **first**. Also works as a subexpression. |
+| `default` | `{{default value "fallback"}}`: the value if it's set, otherwise the fallback |
+
+**Math** (all return numbers)
+
+| Helper | Usage |
+|---|---|
+| `add` / `plus` | `{{add a b}}` |
+| `subtract` / `minus` | `{{minus lureTypeId 500}}` |
+| `multiply`, `divide` | Dividing by 0 gives `0` |
+| `round`, `floor`, `ceil` | `{{round iv}}` |
+| `toFixed` / `numberFormat` | `{{toFixed iv 1}}`: fixed number of decimals |
+| `toInt` | Drops the decimal part |
+| `addCommas` | `{{addCommas 125000}}` gives `125,000` |
+| `pad0` | `{{pad0 id}}` gives `025`, `{{pad0 id 4}}` gives `0025` |
+
+There is no `sum` helper. Use `add`.
+
+**Text**
+
+| Helper | Usage |
+|---|---|
+| `uppercase`, `lowercase` | Change case |
+| `capitalize` | Capitalise the first letter |
+| `capitalizeAll` (**5.3+**) | Capitalise the first letter of every word: `(old) church` gives `(Old) Church` |
+| `concat` | `{{concat 'Level ' level ' raid'}}` (any number of arguments) |
+| `replace`, `replaceFirst` | `{{replace s "old" "new"}}` replaces every match; `replaceFirst` only the first |
+| `remove` (**5.3+**) | `{{remove gymName " (EX)"}}` removes every match |
+| `truncate` | `{{truncate s 20}}` or `{{truncate s 20 suffix="…"}}`. The suffix counts towards the length and defaults to `...`. Counts bytes. |
+| `ellipsis` (**5.3+**) | `{{ellipsis gymName 20}}`: the first 20 characters, plus `…` if the text was longer |
+| `escape` | HTML-escape a value |
+
+**Lists**
+
+| Helper | Usage |
+|---|---|
+| `each`, `forEach` | Loops (see above) |
+| `length` | Length of a list, map or text |
+| `join` | `{{join typeNameEng ", "}}` |
+| `first`, `last` | `{{first list}}`, or `{{first list n=2}}` for the first two |
+
+**Game data** (these use the template's language and platform)
+
+| Helper | Usage |
+|---|---|
+| `pokemonName`, `pokemonNameEng`, `pokemonNameAlt` | `{{pokemonName 25}}` |
+| `pokemonForm`, `pokemonFormEng`, `pokemonFormAlt` | `{{pokemonForm formId}}` |
+| `pokemon` | Block helper, see [below](#pokemon-block-helper) |
+| `pokemonBaseStats` | `{{#with (pokemonBaseStats id formId)}}{{baseAttack}}{{/with}}` |
+| `calculateCp` | `{{calculateCp baseStats level atk def sta}}` or `{{calculateCp pokemonId formId level atk def sta}}` |
+| `getPowerUpCost` | `{{getPowerUpCost level 40}}` or as a block with `stardust`, `candy` and `xlCandy` |
+| `moveName`, `moveNameEng`, `moveNameAlt` | `{{moveName quickMoveId}}` |
+| `moveType`, `moveTypeEng`, `moveTypeAlt` | Move type name |
+| `moveEmoji`, `moveEmojiEng`, `moveEmojiAlt` | Move type emoji (all three give the same result) |
+| `getEmoji` | `{{getEmoji 'shiny'}}`, see [Custom Emoji](#custom-emoji) |
+| `translateAlt` | Translate a key into the alt language |
+| `map`, `map2` | See [Custom Maps](#custom-maps) |
+
+!!! warning "Argument counts matter"
+    Calling a helper with too few arguments (e.g. `{{add 1}}`) makes the whole template fail. The user gets the `Template not found` fallback message instead of the alert.
+
+### Template Variables (`@language`, `@platform`, `@altLanguage`)
+
+Each alert render sets three variables that templates can read:
+
+| Variable | Value |
+|---|---|
+| `@language` | The recipient's language (or `[general] locale`) |
+| `@platform` | `discord` or `telegram` |
+| `@altLanguage` | `[locale] language` (default `en`); used by the `*Alt` helpers |
 
 ```handlebars
-{{!-- Round to integer --}}
-{{round iv}}
-
-{{!-- Format with specific decimal places --}}
-{{numberFormat iv 1}}
-
-{{!-- Pad with zeros (default 3 digits) --}}
-{{pad0 id}}          {{!-- 25 → "025" --}}
-{{pad0 id 4}}        {{!-- 25 → "0025" --}}
-
-{{!-- Arithmetic --}}
-{{minus lureTypeId 500}}    {{!-- Subtract --}}
-{{sum level 1}}             {{!-- Add --}}
-
-{{!-- Thousands separator --}}
-{{addCommas stardust}}      {{!-- 125000 → "125,000" --}}
+{{#eq @platform 'telegram'}}*bold*{{else}}**bold**{{/eq}}
+{{#ne @language 'en'}}({{nameEng}}){{/ne}}
 ```
 
-### String Helpers
-
-```handlebars
-{{!-- Concatenation --}}
-{{concat 'Level ' level ' raid'}}
-
-{{!-- Lowercase --}}
-{{lowercase name}}
-```
+`greeting` and `help` templates don't have these variables, so their helpers use English.
 
 ## Pokemon Lookup Helpers
 
-These helpers look up game data by ID, translating to the user's language:
-
-### Move Helpers
-
-```handlebars
-{{!-- Look up move by ID --}}
-{{moveName quickMoveId}}          {{!-- Translated move name --}}
-{{moveNameEng quickMoveId}}       {{!-- English move name --}}
-{{moveNameAlt quickMoveId}}       {{!-- Alt language move name --}}
-{{moveType quickMoveId}}          {{!-- Move type (translated) --}}
-{{moveTypeEng quickMoveId}}       {{!-- Move type (English) --}}
-{{moveEmoji quickMoveId}}         {{!-- Move type emoji --}}
-```
-
-### Pokemon Name Helpers
-
-```handlebars
-{{!-- Look up pokemon by ID --}}
-{{pokemonName 25}}                {{!-- "Pikachu" (translated) --}}
-{{pokemonNameEng 25}}             {{!-- "Pikachu" (English) --}}
-{{pokemonNameAlt 25}}             {{!-- Alt language name --}}
-{{pokemonForm formId}}            {{!-- Form name (translated) --}}
-{{pokemonFormEng formId}}         {{!-- Form name (English) --}}
-
-{{!-- Alt translation helper --}}
-{{translateAlt name}}             {{!-- Name in secondary language --}}
-```
-
 ### Pokemon Block Helper
-
-The `{{#pokemon}}` block helper provides detailed info about a pokemon by ID and form:
 
 ```handlebars
 {{#pokemon id formId}}
-  Name: {{name}} ({{nameEng}})
-  Full: {{fullName}}
-  Type: {{typeName}} {{typeEmoji}}
-  Has evolutions: {{hasEvolutions}}
+  {{fullName}} ({{fullNameEng}}): {{join typeName "/"}} {{join typeEmoji ""}}
   Base stats: {{baseStats.baseAttack}}/{{baseStats.baseDefense}}/{{baseStats.baseStamina}}
 {{/pokemon}}
 ```
 
-Available fields inside the block: `name`, `nameEng`, `formName`, `formNameEng`, `fullName`, `fullNameEng`, `formNormalised`, `formNormalisedEng`, `emoji`, `typeNameEng`, `typeName`, `typeEmoji`, `hasEvolutions`, `baseStats`.
+Inside the block you can use `name`, `nameEng`, `formName`, `formNameEng`, `fullName`, `fullNameEng`, `typeName`, `typeNameEng`, `typeEmoji`, `baseStats` and `hasEvolutions`. Note that:
 
-### CP Calculation
+- `typeName`, `typeNameEng` and `typeEmoji` are **lists** here (unlike the alert fields), so use `join`.
+- `fullName` puts the form in brackets, e.g. `Pikachu (Libre)`, and leaves out Normal forms.
+- Both arguments are required. Pass `0` as the form if you don't have one. `{{#pokemon id}}` makes the render fail.
+- Used inline, `{{pokemon id formId}}` prints the `fullName`.
 
-Calculate what CP a pokemon would be at a given level and IVs:
-
-```handlebars
-{{calculateCp baseStats level atk def sta}}
-```
-
-Example:
+### CP and Power-Up Cost
 
 ```handlebars
 {{calculateCp baseStats 40 15 15 15}}
-```
+{{calculateCp 150 0 50 15 15 15}}
 
-### Power-Up Cost
-
-Calculate stardust and candy cost to power up between levels:
-
-```handlebars
-{{!-- As a string --}}
-{{getPowerUpCost level 40}}
-
-{{!-- As a block with individual fields --}}
 {{#getPowerUpCost level 40}}
   Cost: {{stardust}} Stardust, {{candy}} Candy{{#if xlCandy}}, {{xlCandy}} XL Candy{{/if}}
 {{/getPowerUpCost}}
 ```
 
-### Base Stats Lookup
+`baseStats` is available on pokemon, raid, maxbattle, quest (pokemon rewards), PVP entries and evolution entries.
 
-```handlebars
-{{!-- Get base stats for a pokemon --}}
-{{#with (pokemonBaseStats id formId)}}
-  ATK: {{baseAttack}} DEF: {{baseDefense}} STA: {{baseStamina}}
-{{/with}}
+## Custom Maps
+
+Custom maps are lookup tables you define in `config/customMaps/*.json` and read in templates with `{{map}}`. They have nothing to do with static map images. Use them for things like friendly area names, counters for raid bosses, or IV symbols.
+
+!!! note
+    The file formats, block mode, `{{else}}` and language variants described below are **5.3+**. On 5.2 each file is a flat `{"key": "value"}` object named after the file, and a missing key prints the key itself.
+
+### File formats
+
+Each file can hold any of these:
+
+```json
+{ "name": "raidCounters", "map": { "150": { "trainers": "3", "counters": "Tyranitar, Gengar" } } }
 ```
-
-### Emoji Lookup
-
-```handlebars
-{{getEmoji 'shiny'}}
-{{getEmoji 'weather_1'}}
-```
-
-## Custom Map Lookup
-
-The `map` helper looks up values from custom map files in `config/customMaps/`:
-
-```handlebars
-{{map "myMapName" someValue}}
-
-{{!-- As a block --}}
-{{#map "ivTier" iv}}
-  {{this.label}}: {{this.color}}
-{{/map}}
-```
-
-There's also `map2` which tries a second key as fallback:
-
-```handlebars
-{{#map2 "pokemonNicknames" id formId}}{{this}}{{/map2}}
-```
-
-## Multiple Templates
-
-Create multiple template styles for different use cases by using different `id` values:
 
 ```json
 [
-  {
-    "id": 1,
-    "type": "monster",
-    "platform": "discord",
-    "template": { "embed": { "title": "Compact: {{round iv}}% {{name}}" } }
-  },
-  {
-    "id": 2,
-    "type": "monster",
-    "platform": "discord",
-    "template": { "embed": { "title": "Detailed: {{fullName}}", "description": "Full stats..." } }
-  }
+  { "name": "arealist", "map": { "london": "London (Central)" } },
+  { "name": "arealist", "language": "de", "map": { "london": "London (Zentrum)" } }
 ]
 ```
 
-Users select templates with the `template` flag:
-
-```
-!track pikachu template2
-```
-
-## Multi-Language Templates
-
-Templates can be language-specific. Add the `language` field to target a locale:
-
 ```json
-{
-  "id": 1,
-  "language": "de",
-  "type": "monster",
-  "platform": "discord",
-  "template": { ... }
-}
+{ "london": "London (Central)" }
 ```
 
-If no template matches the user's language, the default (no language or `"en"`) is used.
+- A map is found by its `name`, not the file name. The flat form (the last example) is named after the file, and `arealist.de.json` is the German version of `arealist`.
+- Values can be text, numbers or objects.
+- If a version exists for the recipient's language, it's checked first, then the version without a language.
+- Maps are read at startup, so restart after changing them. Editors can list them with `GET /api/dts/custommaps`.
+
+`examples/customMaps/` contains `ivSymbol.json` and `raidCounters.json`.
+
+### Using maps
+
+```handlebars
+{{!-- Inline: prints the value, or nothing if the key is missing --}}
+{{map 'ivSymbol' atk}}{{map 'ivSymbol' def}}{{map 'ivSymbol' sta}}
+
+{{!-- Subexpression: a missing key counts as false --}}
+{{#if (map 'raidCounters' pokemon_id)}}Counters available{{/if}}
+
+{{!-- Block: object values become the block's context; {{else}} runs when the key is missing --}}
+{{#map 'raidCounters' pokemon_id}}Counters ({{trainers}} trainers): {{counters}}{{else}}No counters yet{{/map}}
+
+{{!-- map2: try a second key if the first is missing --}}
+{{map2 'nicknames' (concat pokemon_id '_' form) pokemon_id}}
+
+{{!-- area names --}}
+{{#each matched}}{{map 'arealist' this}} {{/each}}
+```
+
+Used inline, an object value prints nothing. Use the block form to get at its fields.
 
 ## Custom Emoji
 
-Define custom emoji mappings in `config/emoji.json`:
+Emoji fields (`typeEmoji`, `boostWeatherEmoji`, `genderEmoji`, `teamEmoji`, `lureTypeEmoji`, `bearingEmoji`, `shinyPossibleEmoji` and so on) are looked up by **key**. Each key first checks your per-platform overrides in `config/emoji.json`, then the built-in defaults.
+
+`config/emoji.json` maps **platform → key → emoji**:
 
 ```json
 {
-  "shiny": "<:shiny:123456789>",
-  "weather_1": "<:sunny:123456789>",
-  "pokemon_type_fire": "<:fire:123456789>"
+  "discord": {
+    "type-fire": "<:poracle_type_fire:878636941975896085>",
+    "weather-sunny": "<:poracle_weather_sunny:878660407739416586>",
+    "team-valor": "<:valor:123456789012345678>"
+  },
+  "telegram": {
+    "shiny": "🌟"
+  }
 }
 ```
 
-Reference in templates with `{{getEmoji 'shiny'}}`.
+The built-in keys are:
+
+| Group | Keys |
+|---|---|
+| Types | `type-normal`, `type-fire`, `type-water`, `type-grass`, `type-electric`, `type-ice`, `type-fighting`, `type-poison`, `type-ground`, `type-flying`, `type-psychic`, `type-bug`, `type-rock`, `type-ghost`, `type-dragon`, `type-dark`, `type-steel`, `type-fairy` |
+| Weather | `weather-sunny`, `weather-rain`, `weather-partly-cloudy`, `weather-cloudy`, `weather-windy`, `weather-snow`, `weather-fog` |
+| Teams | `team-uncontested`, `team-mystic`, `team-valor`, `team-instinct` |
+| Lures | `lure-normal`, `lure-glacial`, `lure-mossy`, `lure-magnetic`, `lure-rainy`, `lure-sparkly` |
+| Gender | `gender-male`, `gender-female`, `gender-none` |
+| Directions | `north`, `northeast`, `east`, `southeast`, `south`, `southwest`, `west`, `northwest` |
+| Incidents | `incident-goldstop`, `incident-kecleon`, `incident-showcase` |
+| Other | `shiny`, `grunt-unknown` |
+
+`examples/emoji.json` has a complete Discord set of custom emoji. Use any key directly with `{{getEmoji 'team-valor'}}`. After editing, run `!poracle-admin emoji reload`.
+
+## Multiple Templates
+
+Give entries different `id` values to offer several styles:
+
+```json
+[
+  { "id": "1", "type": "monster", "platform": "discord", "default": true,
+    "template": { "embed": { "title": "Compact: {{round iv}}% {{name}}" } } },
+  { "id": "2", "type": "monster", "platform": "discord", "name": "Detailed",
+    "template": { "embed": { "title": "Detailed: {{fullName}}", "description": "Full stats..." } } }
+]
+```
+
+Users choose one with `!track pikachu template:2`.
+
+## Multi-Language Templates
+
+Add a `language` to an entry to target that language. See [Template Selection](dts.md#template-selection) for the full order PoracleNG follows. Keep in mind:
+
+- An entry without a `language` matches every language.
+- Ids don't carry over between languages: a user whose language has no entry for their id gets that language's `default` entry.
+- If a language has no templates at all, the default entry for `[general] locale` is used.
+- The fields themselves (pokemon names, moves, addresses) are always translated into the recipient's language. Use the `*Eng` fields or `*Alt` helpers for a second language.
+
+See [Multi-Language](multilang.md) for setting up languages, and `examples/dts/multilingual/` for examples.
 
 ## Broadcast Templates
 
@@ -419,25 +450,13 @@ A working end-to-end example covering inline response templates, action buttons,
 
 `GET /api/dts/actions` returns each action's `name`, accepted `scopes`, whether a scope is required, and the `params` keys the handler accepts. The PoracleWeb editor uses this to drive its button-authoring UI. See [`API.md`](https://github.com/jfberry/PoracleNG/blob/main/API.md) in the PoracleNG repo for the full action registry endpoint.
 
-## Telegram-Specific Options
-
-Telegram templates support these extra fields:
-
-| Field | Description |
-|-------|-------------|
-| `content` | Message text (can be string or array of strings) |
-| `sticker` | Sticker image URL |
-| `parse_mode` | `"Markdown"` or `"HTML"` |
-| `location` | `true` to include a location pin |
-| `webpage_preview` | `true` to show link previews |
 
 ## Tips
 
-- Always test templates after changes with `!poracle-test`
-- Use `{{{triple braces}}}` for URLs and any content with special characters
-- Use `{{round iv}}` instead of raw `{{iv}}` to avoid long decimal numbers
-- Use `{{#if field}}` to handle optional fields that may be empty
-- The `{{#isnt formName 'Normal'}}` pattern hides "Normal" form names
-- Discord embeds have character limits: title (256), description (4096), footer (2048)
-- The `examples/dts/` directory contains community-contributed templates for inspiration
-- Use `{{> partialName}}` to reuse common template fragments across alert types
+- Test your changes with `!poracle-test` (see [Testing Templates](dts.md#testing-templates)).
+- Use `{{round iv}}` rather than `{{iv}}`, which has two decimal places.
+- Use `{{#if field}}` around optional fields.
+- `formNormalised` is already empty for Normal forms, so you don't need `{{#isnt formName 'Normal'}}`.
+- Check helper names against the [Helper Reference](#helper-reference). A misspelt helper prints nothing.
+- Discord limits embed titles to 256 characters, descriptions to 4096 and footers to 2048. Longer text is cut off.
+- Use `{{> partialName}}` and `@include` to share snippets between templates.

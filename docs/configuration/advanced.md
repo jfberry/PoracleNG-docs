@@ -4,15 +4,17 @@ Advanced settings and features for experienced administrators.
 
 ## Shortlink Providers
 
-Shorten URLs in alert messages:
+Shorten URLs marked with `<S< >S>` in DTS templates. Only [Shlink](https://shlink.io/) is implemented; any other value leaves links unshortened.
 
 ```toml
 [general]
-shortlink_provider = "hideuri"           # hideuri, shlink, or yourls
-shortlink_provider_url = ""              # Provider URL (for shlink/yourls)
-shortlink_provider_key = ""              # API key
-shortlink_provider_domain = ""           # Custom domain (if supported)
+shortlink_provider = "shlink"
+shortlink_provider_url = "https://shlink.example.com"
+shortlink_provider_key = "your-shlink-api-key"
+shortlink_provider_domain = ""           # Optional domain override
 ```
+
+If Shlink fails 5 times in a row, shortening is skipped for 30 seconds and alerts are sent with the full URLs.
 
 ## Map Links
 
@@ -20,12 +22,13 @@ Add links to mapping tools in your DTS templates:
 
 ```toml
 [general]
-rdm_url = "https://myRDM.com/"
 react_map_url = "https://myReactMap.com/"
+diadem_url = "https://myDiadem.com/"
+rdm_url = "https://myRDM.com/"
 rocket_mad_url = "https://myRocketMAD.com/"
 ```
 
-These populate the `{{rdmUrl}}`, `{{reactMapUrl}}`, and `{{rocketMadUrl}}` DTS variables.
+These populate the `{{reactMapUrl}}`, `{{diademUrl}}`, `{{rdmUrl}}` and `{{rocketMadUrl}}` DTS variables.
 
 ## Image URLs
 
@@ -39,58 +42,42 @@ sticker_url = "https://raw.githubusercontent.com/bbdoc/tgUICONS/main/Shuffle"
 request_shiny_images = false             # Request shiny-variant images
 ```
 
-Override per alert type:
-
-```toml
-[general.images]
-monster = "https://custom-repo.com/icons"
-
-[general.stickers]
-monster = "https://custom-repo.com/stickers"
-```
-
-Valid types: `monster`, `gym`, `nest`, `invasion`, `lure`, `quest`, `raid`, `weather`
+!!! note
+    The per-alert-type `[general.images]` / `[general.stickers]` tables from PoracleJS are not supported and are ignored.
 
 ## IP Restrictions
 
-Restrict which IPs can access the processor and alerter:
+Restrict which client IPs can reach PoracleNG:
 
 ```toml
 [processor]
-ip_whitelist = ["192.168.1.0/24"]
-
-[alerter]
-ip_whitelist = ["192.168.1.0/24"]
+ip_whitelist = ["192.168.1.10", "192.168.1.11"]
 ip_blacklist = ["10.0.0.5"]
 ```
+
+- Entries are exact IP addresses. CIDR ranges such as `192.168.1.0/24` are **not** supported.
+- The lists apply to every route, including the webhook receiver, so a whitelist must include your scanner's IP.
+- The client IP honours `X-Forwarded-For`, which a client can set itself. Treat the IP lists as a convenience, not as access control. Use `api_secret` and a firewall.
+
+PoracleNG is a single binary, and `[processor]` is its only listener. IP lists under an old `[alerter]` section are not read.
 
 ## Tuning
 
 !!! warning
     Only change tuning settings after consulting the Poracle community on Discord.
 
-### Processor Tuning
-
 ```toml
 [tuning]
-reload_interval_secs = 60               # DB reload interval for tracking changes
-encounter_cache_ttl = 3600               # Seconds to cache encounter data
-worker_pool_size = 4                     # Matching worker goroutines
-batch_size = 50                          # Results per batch to alerter
-flush_interval_millis = 100              # Max time before flushing partial batch
-```
-
-### Alerter Tuning
-
-```toml
-[tuning]
-max_database_connections = 15            # Max DB connections per worker
-concurrent_matched_processors = 10       # Concurrent matched payload processors
-matched_max_queue_size = 5000            # Max buffered items before backpressure
-concurrent_discord_destinations = 10     # Concurrent Discord sends per bot
-concurrent_telegram_destinations = 10    # Concurrent Telegram sends per bot
+reload_interval_secs = 60                # Reload tracking rules from the database
+worker_pool_size = 4                     # Webhooks processed concurrently
+render_pool_size = 8                     # Concurrent DTS renders
+delivery_queue_size = 200                # Buffer per destination
+concurrent_discord_destinations = 10     # Concurrent Discord DM/channel sends
+concurrent_telegram_destinations = 10    # Concurrent Telegram sends
 concurrent_discord_webhooks = 10         # Concurrent Discord webhook sends
 ```
+
+See [`[tuning]`](../config/tuning.md) for the tileserver, geocoding and validation settings, and for keys that no longer have any effect.
 
 ## Rarity Stats
 

@@ -91,7 +91,7 @@ bearer_token = "your-koji-api-token"
 cache_dir = ".cache/geofences"
 ```
 
-When a Koji token is configured, PoracleNG downloads geofences from Koji and caches them locally. The cache is shared between the processor and alerter.
+When a Koji token is configured, PoracleNG downloads geofences from Koji at startup and on every geofence reload, and caches them locally. If Koji is unreachable, the last cached copy is used.
 
 To use Koji fences, add the Koji project URL to the geofence paths:
 

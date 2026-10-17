@@ -23,7 +23,7 @@ Track lure modules placed on pokestops.
 
 | Type | Name |
 |------|------|
-| `normal` | Normal Lure |
+| `normal` | Normal (standard) Lure Module |
 | `glacial` | Glacial Lure |
 | `mossy` | Mossy Lure |
 | `magnetic` | Magnetic Lure |
@@ -31,13 +31,16 @@ Track lure modules placed on pokestops.
 | `sparkly` | Sparkly Lure |
 | `everything` | All lure types |
 
+Naming several types creates **one rule per type**, so each shows (and can be removed) separately in `!tracked`. `everything` is a single "any lure" rule.
+
 ## Examples
 
 === "Discord"
 
     ```
     !lure glacial                       # Track glacial lures
-    !lure mossy magnetic                # Track mossy and magnetic
+    !lure mossy magnetic                # Track mossy and magnetic (two rules)
+    !lure normal glacial edit           # Normal + glacial, updates edit in place
     !lure everything                    # Track all lure types
     !lure glacial d:500                 # Glacial lures within 500m
     !lure mossy area:downtown           # Mossy lures restricted to an area
@@ -61,6 +64,7 @@ Track lure modules placed on pokestops.
 | `area:<name>[,<name>]` | Restrict to specific areas | `area:downtown` |
 | `template:<n>` | Alert template | `template:2` |
 | `clean` | Auto-delete expired alerts | `clean` |
+| `edit` | Repeat alerts for the same lure edit the original message instead of sending a new one | `edit` |
 | `everything` | All lure types | `everything` |
 | `remove` | Remove tracking | `remove` |
 
@@ -72,6 +76,7 @@ Legacy no-colon forms (`d500`) still work.
 
     ```
     !lure remove glacial                # Stop tracking glacial lures
+    !lure remove mossy magnetic         # Remove both rules
     !lure remove everything             # Remove all lure tracking
     ```
 

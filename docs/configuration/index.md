@@ -51,7 +51,7 @@ Some features use JSON data files loaded from `config/` with automatic fallback 
 | `dts/` | Additional DTS files (merged with dts.json) | No |
 | `broadcast.json` | Broadcast message templates | No |
 | `channelTemplate.json` | Discord channel auto-creation templates | No |
-| `customMaps/` | Custom static map definitions | No |
+| `customMaps/` | Lookup tables for the DTS `{{map}}` helper (not static maps) | No |
 | `emoji.json` | Custom emoji mappings | No |
 | `custom.<lang>.json` | Custom locale translations | No |
 

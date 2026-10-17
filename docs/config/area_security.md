@@ -19,7 +19,7 @@ Defined as an array of tables. Each entry is one community.
 | `allowed_areas` | Fences users in this community may add via `!area add`. |
 | `location_fence` | Single fence used for `strict_locations` enforcement. |
 | `discord` | Inline table: `{ channels = [...], user_role = [...] }` — registration channels and gating roles. |
-| `telegram` | Inline table: `{ channels = [...] }` — qualifying membership groups. |
+| `telegram` | Inline table: `{ channels = [...], admins = [...] }`. `channels` are the qualifying membership groups. `admins` are Telegram user IDs that can use `/channel add`/`remove` for this community, limited to the community's location fence. |
 
 ```toml
 [area_security]

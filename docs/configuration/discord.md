@@ -7,7 +7,7 @@ Full Discord configuration reference. For initial bot setup, see [Discord Bot Se
 ```toml
 [discord]
 enabled = true
-token = ["bot-token"]                    # Array of bot tokens
+token = "bot-token"                      # Bot token
 guilds = ["guild-id"]                    # Server IDs
 channels = ["channel-id"]               # Registration channel IDs
 admins = ["user-id"]                     # Admin user IDs
@@ -22,16 +22,28 @@ prefix = "!"                             # Command prefix
 activity = "PoracleNG"                   # Bot activity status text
 ```
 
-## Multiple Bots
+## Separate Command Bot
 
-PoracleNG supports multiple Discord bot tokens. The first token is the command controller; additional tokens are message delivery workers:
+By default one bot token handles everything. To split command handling from alert delivery, add a second bot as `command_token`:
 
 ```toml
 [discord]
-token = ["main-bot-token", "worker-1-token", "worker-2-token"]
+token = "delivery-bot-token"             # Sends alerts
+command_token = "command-bot-token"      # Commands, reconciliation, role management
 ```
 
-This distributes message delivery across multiple bots to avoid rate limits on busy servers.
+Both bots must be invited to every guild they operate in. The command bot needs the Server Members and Message Content intents and Manage Roles; the delivery bot only needs send permissions. Users see separate DM conversations for alerts and commands. See [Split-bot operation](../config/discord.md#split-bot-operation).
+
+!!! note
+    `token` accepts an array for backward compatibility, but only the first token is used. Extra tokens do **not** spread delivery across several bots.
+
+## Operator Notices and Threads
+
+```toml
+[discord]
+admin_channel_id = ""                    # Channel for operator notices (auto-disables, keep-alive failures, render errors)
+thread_keep_alive_interval_hours = 24    # Unarchive Poracle's threads this often; 0 = off, max 168
+```
 
 ## Registration and Access
 
@@ -102,15 +114,35 @@ Roles are automatically removed when a user loses their Poracle membership.
 
 ## Command Security
 
-Restrict specific commands to certain users or roles:
+Restrict commands to certain users or roles. Discord only.
 
 ```toml
 [discord.command_security]
-monster = ["userid", "roleid"]
-pvp = ["roleid"]
+raid = ["role_id_1", "user_id_2"]
+poracle_admin = ["role_id_1"]
+pvp = ["role_id_1"]
 ```
 
-Valid commands: `monster`, `pvp`, `gym`, `invasion`, `lure`, `nest`, `quest`, `egg`, `raid`, `fort`, `area`, `location`, `profile`, `tracked`, `script`, `start`, `language`
+Valid keys:
+
+- Whole commands: `monster` (`!track`), `raid`, `egg`, `quest`, `gym`, `lure`, `invasion` (covers `!invasion` and `!incident`), `nest`, `maxbattle`, `poracle_admin` (`!poracle-admin`)
+- Features: `pvp` (PVP filters in `!track`), `specificgym` (tracking a specific gym in `!gym`)
+
+Any other key (`area`, `location`, `profile`, `tracked`, `fort`, ...) is silently ignored. In DMs, the user's roles from all configured `guilds` are combined. See [`[discord.command_security]`](../config/discord.md#discordcommand_security) for details.
+
+!!! warning "Sub-table placement"
+    `[discord.command_security]`, `[discord.slash_commands]` and the `[[discord.*]]` arrays must come **after** all plain `[discord]` keys. Any `[discord]` key placed below a sub-table header becomes part of that sub-table and is lost.
+
+## Slash Commands
+
+```toml
+[discord.slash_commands]
+enabled = true
+register_globally = false
+guilds = ["guild-id"]                    # Per-guild registration: changes show in seconds
+```
+
+See [`[discord.slash_commands]`](../config/discord.md#discordslash_commands) and [Slash Commands](../userguide/slash.md).
 
 ## Appearance
 

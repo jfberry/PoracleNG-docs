@@ -14,7 +14,7 @@ Welcome to the PoracleNG user guide. This section explains how to set up and use
    - [Invasions](invasions.md) — Team Rocket grunts and leaders, Kecleon, Gold Pokéstops
    - [Lures](lures.md) — lure modules on pokestops
    - [Nests](nests.md) — nest pokemon
-   - [Gyms & Forts](gyms.md) — gym team changes, EX raids, fort updates
+   - [Gyms & Forts](gyms.md) — gym team, slot and battle changes; fort (pokestop/gym/station) updates
    - [MAX Battles](maxbattle.md) — Dynamax / Gigantamax raids
 4. **Refine** — [mute](mute.md) noisy alerts, set up [profiles](profiles.md) to switch tracking configurations, or use [`!info`](info.md) to look up pokemon and game data
 5. **(Discord)** — if your operator has enabled them, the same commands are available as [slash commands](slash.md) with autocomplete
@@ -56,4 +56,6 @@ Use [Profiles](profiles.md) to save and switch between different tracking config
 - Use `!stop` to indefinitely pause all alerts, `!start` to resume; for time-bounded silence use [`!mute`](mute.md) instead
 - Most tracking commands support the `remove` keyword to delete a subscription
 - Filter options use `key:value` form — `iv:90-100`, `cp:2000-3000`, `d:500`. Ranges (`low-high`) are preferred over `miniv:`/`maxiv:` pairs; bare-minimum-with-colon (`iv:99`) is fine when you only want a floor
+- Keywords with spaces are typed with underscores or quotes — `no_rsvp`, `mega_legendary`, `area:city_centre`, `gym:"Hilltop Gym"`
+- Add `help` after any command (e.g. `!raid help`) to see its usage
 - Commands are case-insensitive

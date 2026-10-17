@@ -23,6 +23,9 @@ port = 3030
 api_secret = "a-long-random-string"
 ```
 
+!!! danger
+    If `api_secret` is blank, PoracleNG does **not** turn the API off. It serves `/api/*` with no authentication at all. Always set a secret before exposing the port.
+
 Your browser must be able to reach the processor's `host:port` directly. If PoracleNG runs on a remote server where the API port isn't exposed publicly, use an SSH tunnel (see below).
 
 ## Connecting
@@ -98,7 +101,11 @@ Templates edited here can be applied via Discord (`!autocreate <name> ...`) or d
 
 ## The config editor
 
-Switch to the **Config** tab (top of the left pane) to edit `config.toml` instead of templates. Each `[section]` becomes a form group with typed inputs, defaults shown, and links into this documentation. Save writes the changes back to PoracleNG.
+Switch to the **Config** tab (top of the left pane) to edit `config.toml` instead of templates. Each `[section]` becomes a form group with typed inputs, defaults shown, and links into this documentation.
+
+Save rewrites `config/config.toml` in place, after backing up the previous version to `config/backups/`. Settings that can be hot-reloaded take effect immediately; if any changed field needs a restart, the response says so and lists the fields.
+
+The editor deliberately doesn't include `[processor]`, `[database]` or the Discord/Telegram bot tokens; edit those in `config.toml` by hand. Other sensitive values (API keys, Koji token, Shlink key) are shown masked as `****` and are only changed if you type a new value.
 
 ## Config UI vs end-user web UIs
 

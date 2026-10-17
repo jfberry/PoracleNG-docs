@@ -29,6 +29,9 @@ Track nest pokemon changes in your areas.
     !nest everything                    # Track all nest changes
     !nest pikachu d:2000                # Pikachu nests within 2km
     !nest gible area:downtown           # Gible nests restricted to an area
+    !nest pikachu minspawn:10           # Only nests averaging 10+ spawns per hour
+    !nest everything minspawn:20        # Any nest averaging 20+ spawns per hour
+    !nest vulpix form:alola             # Alolan Vulpix nests only
     ```
 
 === "Telegram"
@@ -44,6 +47,10 @@ Track nest pokemon changes in your areas.
 | Option | Description | Example |
 |--------|-------------|---------|
 | `<pokemon>` | Pokemon name or ID | `pikachu`, `25` |
+| `minspawn:<n>` | Minimum average spawns per hour for the nest | `minspawn:10` |
+| `form:<name>` | Form filter (named pokemon only) | `form:alola` |
+| `gen:<n>` | Narrow named pokemon to a generation | `gen:4` |
+| `<type>` | Narrow named pokemon to a type | `dragon` |
 | `d:<n>` | Distance in metres | `d:2000` |
 | `location:<name>` | Distance from a named location (requires `d:`) | `location:Home` |
 | `area:<name>[,<name>]` | Restrict to specific areas | `area:downtown` |
@@ -52,14 +59,18 @@ Track nest pokemon changes in your areas.
 | `everything` | All nest pokemon | `everything` |
 | `remove` | Remove tracking | `remove` |
 
-Legacy no-colon forms (`d2000`) still work.
+Legacy no-colon forms (`d2000`, `minspawn10`) still work.
+
+!!! note "Type and generation"
+    Type names and `gen:` only **narrow a list of pokemon you have named** (handy with the `+` evolution suffix, e.g. `!nest bulbasaur+ charmander+ fire`). On their own (`!nest dragon`) they reply "no pokemon", and alongside `everything` they are ignored.
 
 ## Removing Tracks
 
 === "Discord"
 
     ```
-    !nest remove pikachu
+    !nest remove pikachu                # All Pikachu nest rules (every form)
+    !nest remove id:12                  # One rule by ID (see !tracked)
     !nest remove everything
     ```
 
@@ -69,3 +80,5 @@ Legacy no-colon forms (`d2000`) still work.
     /nest remove pikachu
     /nest remove everything
     ```
+
+`form:` is not accepted on remove — removal is species-wide. Remove a single form's rule by its ID.

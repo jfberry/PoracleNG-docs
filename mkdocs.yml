@@ -76,6 +76,7 @@ nav:
     - Geocoding: configuration/geocoding.md
     - Static Maps: configuration/staticmaps.md
     - Alert Templates (DTS): configuration/dts.md
+    - DTS Field Reference: configuration/dtsfields.md
     - Advanced DTS: configuration/dtsadvanced.md
     - Channel Auto-create: configuration/autocreate.md
     - Weather: configuration/weather.md
@@ -108,14 +109,27 @@ nav:
     - Telegram Admin: operation/telegram.md
     - Monitoring: operation/monitoring.md
     - Rate Limits: operation/ratelimits.md
+    - Upgrading & Release Notes: operation/upgrading.md
     - FAQ: operation/faq.md
   - API:
     - api/index.md
-    - Config API: api/config.md
+    - API v2:
+      - Overview & conventions: api/v2/index.md
+      - Tracking: api/v2/tracking.md
+      - Humans & locations: api/v2/humans.md
+      - Profiles, roles & mutes: api/v2/profiles.md
+      - Migrating from v1: api/v2/migration.md
+    - Legacy v1 API (deprecated): api/humans.md
+    - Config & game data: api/config.md
+    - DTS editor API: api/dts.md
     - Geofence API: api/geofence.md
-    - Humans API: api/humans.md
+    - Summaries API: api/summaries.md
+    - Delivery, test & commands: api/messaging.md
     - Auto-create API: api/autocreate.md
+    - Validation hook: api/validation-hook.md
   - Config Reference:
+    - processor: config/processor.md
+    - database: config/database.md
     - general: config/general.md
     - locale: config/locale.md
     - discord: config/discord.md
@@ -135,6 +149,10 @@ nav:
     - logging: config/logging.md
     - webhookLogging: config/webhookLogging.md
     - ai: config/ai.md
+    - snapshots: config/snapshots.md
+    - validation: config/validation.md
+    - summariser: config/summariser.md
+    - autocreate: config/autocreate.md
   - PoracleWeb:
     - poracleWeb/index.md
     - Installation: poracleWeb/install.md

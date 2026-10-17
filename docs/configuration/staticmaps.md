@@ -2,11 +2,12 @@
 
 Static maps are map images embedded in alert messages. This page covers advanced static map configuration. For basic setup, see [Geocoding](geocoding.md#static-maps).
 
-## Custom Map Definitions
+## Custom Map Templates
 
-Custom map definitions allow you to create specialized map templates for different alert types. Place custom map JSON files in `config/customMaps/`.
+The map's appearance (markers, polygons, layout) comes from the templates on your TileServerCache server, named `poracle-<type>` (e.g. `poracle-monster`, `poracle-raid`, `poracle-questsummary`). Edit those templates on the tileserver to change what the maps look like. PoracleNG only sends the data fields for each alert type.
 
-Custom maps extend the built-in map types with additional markers, polygons, or multiple map views.
+!!! note "`config/customMaps/` is not about static maps"
+    Despite the name, files in `config/customMaps/` are **lookup tables for DTS templates**, read with the `{{map}}` helper. They have no effect on static map images. See [Advanced DTS — Custom Maps](dtsadvanced.md#custom-maps).
 
 ## TileserverCache Settings
 

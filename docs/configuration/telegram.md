@@ -26,13 +26,16 @@ The `{user}` placeholder in `group_welcome_text` is replaced with the user's nam
 
 ## Delegated Admins
 
-Grant users admin access to specific groups or channels:
+Intended to let users manage tracking for specific groups or channels:
 
 ```toml
 [[telegram.delegated_admins]]
 target = "group_or_channel_id"
 admins = ["user_id_1", "user_id_2"]
 ```
+
+!!! warning
+    The processor currently only reads and logs this setting. It doesn't give the listed users any permissions on Telegram. See [Telegram Admin Operations](../operation/telegram.md#delegated-admins-and-tracking-admins).
 
 ## User Tracking Admins
 
@@ -42,6 +45,8 @@ Allow specific users to manage other users' tracking:
 [telegram]
 user_tracking_admins = ["user_id_1"]
 ```
+
+These users can add `user:<id>` to tracking commands (for example `/track pikachu iv100 user:123456789`) to act on that registered user. See [Tracking on Behalf of Others](../operation/admincommands.md#tracking-on-behalf-of-others).
 
 ## Messages
 

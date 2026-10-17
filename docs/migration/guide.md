@@ -4,10 +4,10 @@ This guide walks you through migrating an existing PoracleJS installation to Por
 
 ## Prerequisites
 
-- Go 1.25+
+- Go 1.25+ for 5.2.x (`main`) or Go 1.27+ for 5.3 (`develop`), plus `bash` and `git` — or use [Docker](../installation/docker.md) instead
 - Node.js 18+ — **only needed to run the migration script**. PoracleNG itself has no Node.js runtime dependency.
 - Your existing PoracleJS installation accessible on the filesystem
-- Your existing database (will be auto-adopted)
+- Your existing database (will be auto-adopted) — **and a fresh backup of it** (`mysqldump`)
 
 ## Step 1: Clone and Build PoracleNG
 
@@ -18,6 +18,9 @@ make build
 ```
 
 This produces a single binary at `processor/poracle-processor`. There is no separate alerter component in PoracleNG — all webhook handling, matching, rendering, and Discord/Telegram delivery happens inside the one binary.
+
+!!! danger "Back up the database before first start"
+    PoracleNG adopts your PoracleJS database in place and applies its own migrations on first startup. Several of these change data, and one (000009, in 5.3) is irreversible. A `mysqldump` taken now is your only clean way back to PoracleJS.
 
 ## Step 2: Run the Migration Script
 
@@ -71,19 +74,25 @@ database = "poracle"
     ```
 
 !!! note "api_secret location"
-    In PoracleJS the API secret lived under `[alerter]`. PoracleNG reads that location for backward compatibility and copies the value into `[processor]` at load time, but new configs should put it directly under `[processor]`.
+    The migration script moves PoracleJS's `server.apiSecret` to `[processor] api_secret`. Early PoracleNG configs kept it under `[alerter]`; PoracleNG still reads that location for backward compatibility and copies the value into `[processor]` at load time, but new configs should put it directly under `[processor]`.
+
+!!! warning "Migrated before PoracleNG 5.1?"
+    Two migration-script bugs were fixed in 5.1. If you converted your config with an older copy of the script, check by hand:
+
+    - **`[general.dts_dictionary]`** — the old script snake-cased your custom keys (`scannerUrl` became `scanner_url`), so `{{scannerUrl}}` and friends render empty. Rename the keys back to exactly what your templates use.
+    - **`[processor] host`** — the old script dropped PoracleJS's `server.host`. If you had bound the API to a specific address, set `host` again.
 
 For a full walkthrough of every section, see the [Config File Reference](../configuration/config_file.md).
 
 ## Step 4: Update Webhook URL
 
-Update your scanner (Golbat or RDM) to send webhooks to the PoracleNG processor on port **3030**:
+Point your scanner (Golbat or RDM) at PoracleNG's `[processor]` `host:port`:
 
 ```
 http://<your-host>:3030/
 ```
 
-In PoracleJS this was typically port `4201` (or whatever port you had configured). Whatever your previous address was, change it to the processor's `host:port` from `[processor]` in `config.toml`.
+The migration script copies your PoracleJS `server.port` into `[processor] port`, so if PoracleNG runs on the same host as PoracleJS did, the webhook URL may not need to change. If you used a different port, or are moving hosts, update the scanner accordingly.
 
 See [Scanner Setup](../installation/scanner.md) for Golbat/RDM webhook configuration.
 
@@ -106,7 +115,7 @@ curl http://localhost:3030/health
 
 A `200 OK` response means the processor is up. Only one port and one health check — the old alerter port no longer exists.
 
-Then test that alerts are working by sending `!poracle-test pokemon` in Discord (or `/poracle-test pokemon` in Telegram).
+Then, as an admin, test that alerts render and deliver by sending `!poracle-test pokemon` in Discord (or `/poracle-test pokemon` in Telegram).
 
 ## Step 7: Update External Tools
 
@@ -114,25 +123,29 @@ If you use a web UI or other API clients, point them at the processor (port 3030
 
 ## What About My Database?
 
-Your existing PoracleJS database is fully compatible. On first startup, PoracleNG's migration tool detects the existing Knex-managed schema, marks the initial version as applied, and then runs any pending migrations. No manual database migration is needed.
+Your existing PoracleJS database is adopted in place. On first startup, PoracleNG's migration tool detects the existing Knex-managed schema, creates a `schema_migrations` table marked at version 1, drops PoracleJS's foreign-key constraints, and then runs the remaining PoracleNG migrations. No manual database work is needed.
 
-All existing user registrations, tracking rules, profiles, and areas are preserved.
+All existing user registrations, tracking rules, profiles, and areas are preserved. Users who were on the legacy "profile 0" are moved to profile 1 by migration 000009 in 5.3 — see [Upgrading & Release Notes](../operation/upgrading.md#migration-000009-profile-0-profile-1).
 
 ## Rollback
 
 If you need to roll back to PoracleJS:
 
 1. Stop PoracleNG (`Ctrl-C` or via your process manager)
-2. Point your scanner webhooks back to PoracleJS's port
-3. Start PoracleJS as before
+2. **Restore the database backup** you took before the first PoracleNG start
+3. Point your scanner webhooks back to PoracleJS's port
+4. Start PoracleJS as before
 
-Your database is unchanged — both versions can use it. PoracleNG's migrations only add a `schema_migrations` bookkeeping table and drop PoracleJS's foreign-key constraints; PoracleJS tolerates both.
+!!! warning "The database is not left unchanged"
+    PoracleNG's migrations go well beyond bookkeeping. Besides `schema_migrations` and dropping the foreign keys, they add tables (`maxbattle` if missing, `summary_schedules`, `user_locations`), add columns (per-rule location/area overrides, `pvp_ranking_evolution`, `costume` on `monsters` and `raid`), drop the legacy `invasion`/`lures` unique keys, and in 5.3 rewrite profile data (000009). PoracleNG has no downgrade command, and 000009 cannot be reversed at all. Rules created under PoracleNG may also use features PoracleJS doesn't understand.
+
+    Pointing PoracleJS at the migrated database may appear to work, but it is untested and unsupported. Restore your backup instead — any tracking changes made while on PoracleNG will be lost.
 
 ## Troubleshooting
 
 ### Processor won't start
 
-- Check that Go 1.25+ is installed: `go version`
+- Check your Go version: `go version` — 1.25+ for 5.2.x, 1.27+ for 5.3 (`develop`)
 - Check `logs/processor.log` for errors
 - Verify database credentials in `config/config.toml`
 - Confirm `config/config.toml` exists (the start script refuses to run without it)

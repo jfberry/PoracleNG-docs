@@ -13,7 +13,7 @@ Weather change alerts and AccuWeather forecast integration for predicting boost 
 | `enable_inference` | bool | `true` | Infer cell weather from observed pokemon boosts. |
 | `enable_forecast` | bool | `false` | Enable AccuWeather forecast lookups. |
 | `accuweather_api_keys` | array(string) | `[]` | AccuWeather keys; Poracle rotates through them. |
-| `accuweather_day_quota` | int | `50` | Max API calls per key per day. |
+| `accuweather_day_quota` | int | `500` | Max API calls per key per day. Set this to match your AccuWeather plan. |
 | `forecast_refresh_interval` | int | `8` | Hours between API calls per cell. |
 | `local_first_fetch_hod` | int | `3` | Local hour-of-day for first fetch (e.g. `3` = 3am). |
 | `smart_forecast` | bool | `false` | Pull forecast on demand if no data exists for a cell. |

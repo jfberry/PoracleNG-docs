@@ -1,6 +1,14 @@
 # Docker Installation
 
-PoracleNG provides a pre-built Docker image that packages both the Go processor and Node.js alerter into a single container.
+PoracleNG provides a pre-built multi-arch (amd64/arm64) Docker image containing the single Go processor binary. There is no Node.js runtime in the image and no second process to run.
+
+| Image tag | Contents |
+|-----------|----------|
+| `ghcr.io/jfberry/poracleng:main` (also `:latest`) | Stable 5.2.x from the `main` branch |
+| `ghcr.io/jfberry/poracleng:develop` | 5.3 development builds from the `develop` branch |
+| `ghcr.io/jfberry/poracleng:<sha>` | A specific commit (short SHA) |
+
+Images are rebuilt on every push to a branch, so pulling `:main` or `:develop` always gets the latest commit on that branch.
 
 ## Prerequisites
 
@@ -31,7 +39,7 @@ Copy the example Compose file:
 cp PoracleNG/docker-compose.yml.example docker-compose.yml
 ```
 
-The default `docker-compose.yml` defines two services:
+The default `docker-compose.yml` defines two services — the database and PoracleNG:
 
 ```yaml
 services:
@@ -48,13 +56,10 @@ services:
       - ./poracledb:/var/lib/mysql
 
   poracle:
-    image: ghcr.io/jfberry/poracleng:latest
+    image: ghcr.io/jfberry/poracleng:main     # or :develop for 5.3
     restart: always
     ports:
-      - "127.0.0.1:3030:3030"   # Processor (webhook receiver + API)
-      # Alerter port only needed if scraping alerter Prometheus metrics directly.
-      # All API calls are proxied via the processor.
-      #- "127.0.0.1:3031:3031"
+      - "127.0.0.1:3030:3030"   # Processor (webhook receiver + API + metrics)
     depends_on:
       - poracle_db
     volumes:
@@ -83,25 +88,20 @@ cp PoracleNG/fallbacks/dts.json config/
 
 ### 5. Edit Your Configuration
 
-Edit `config/config.toml`. At minimum you need to configure the internal connections, database credentials, and a bot token.
+Edit `config/config.toml`. At minimum you need to configure the listen address, database credentials, and a bot token.
 
-#### Internal Connections
+#### Listen Address
 
-Both the processor and alerter run inside the same container, so they communicate via `localhost`. The defaults in the example config are already correct for Docker:
+Inside the container the processor must listen on all interfaces so Docker's port mapping can reach it:
 
 ```toml
 [processor]
-host = "0.0.0.0"                        # Listen on all interfaces (required for Docker port mapping)
+host = "0.0.0.0"
 port = 3030
-alerter_url = "http://localhost:3031"    # Alerter is in the same container
-
-[alerter]
-host = "127.0.0.1"                      # Localhost only — not exposed outside the container
-port = 3031
-processor_url = "http://localhost:3030"  # Processor is in the same container
 ```
 
-The processor listens on `0.0.0.0` so that Docker can map its port to the host. The alerter listens on `127.0.0.1` since it only needs to be reached by the processor within the same container.
+!!! warning "Change `host` from the example value"
+    The image sets `PORACLE_HOST=0.0.0.0`, but that only applies when `host` is **absent** from `config.toml`. `config.example.toml` sets `host = "127.0.0.1"` explicitly, which wins — so a copied example config binds to the container's loopback and nothing outside the container can reach port 3030. Set `host = "0.0.0.0"` (or delete the line). The Compose file's `127.0.0.1:3030:3030` mapping still keeps the port private to the Docker host.
 
 #### Database
 
@@ -144,7 +144,7 @@ Check the logs to confirm everything started:
 docker compose logs -f poracle
 ```
 
-You should see output from both `[processor]` and `[alerter]` components.
+You should see `[start] Starting processor...` followed by the processor's own log lines (database migration status, game data loaded, bot connections). The same output is written to `logs/processor.log`.
 
 ### 7. Point Your Scanner
 
@@ -156,19 +156,18 @@ http://<your-host>:3030/
 
 ## Ports
 
-| Port | Component | Purpose |
-|------|-----------|---------|
-| 3030 | Processor | Webhook receiver, API, Prometheus metrics |
-| 3031 | Alerter | Internal — only expose if scraping alerter metrics directly |
+| Port | Purpose |
+|------|---------|
+| 3030 | Webhook receiver, REST API (used by PoracleWeb), `/health`, Prometheus `/metrics` |
 
-All API requests (including those used by PoracleWeb) go through port 3030 — the processor proxies `/api/` requests to the alerter.
+That is the only port. Older Poracle releases also used 3031 for a Node.js alerter; that component no longer exists.
 
 ## Volumes
 
 | Mount | Container Path | Purpose |
 |-------|----------------|---------|
 | `./config` | `/app/config` | Configuration files (`config.toml`, `dts.json`, geofences, etc.) |
-| `./logs` | `/app/logs` | Log files from both components |
+| `./logs` | `/app/logs` | `processor.log` (and `webhooks.log` if `[webhookLogging]` is enabled) |
 | `./poracledb` | `/var/lib/mysql` | MariaDB data (if using the bundled database) |
 
 ## Health Check
@@ -181,7 +180,10 @@ docker inspect --format='{{.State.Health.Status}}' poracleng-poracle-1
 
 ## Updating
 
+Back up the database first — migrations run automatically on startup and some cannot be reversed. See [Upgrading & Release Notes](../operation/upgrading.md).
+
 ```sh
+docker compose exec -T poracle_db sh -c 'mariadb-dump -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' > poracle-backup-$(date +%F).sql
 docker compose pull
 docker compose up -d
 ```
@@ -205,7 +207,13 @@ If you want to build the image yourself instead of using the pre-built one:
 
 ```sh
 cd PoracleNG
-docker build -t poracleng .
+docker build -t poracleng \
+  --build-arg VERSION_COMMIT=$(git rev-parse --short=8 HEAD) \
+  --build-arg VERSION_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
+  --build-arg VERSION_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  .
 ```
 
-Then replace `image: ghcr.io/jfberry/poracleng:latest` with `image: poracleng` in your `docker-compose.yml`.
+The `.git` directory isn't part of the Docker build context, so the commit, branch and date shown by `!version` are passed in as build args. They are optional — a bare `docker build -t poracleng .` works, and `!version` then reports the commit and date as `unknown`.
+
+Then replace the `image:` line with `image: poracleng` in your `docker-compose.yml`.
