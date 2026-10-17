@@ -3,7 +3,7 @@
 Track Team Rocket invasions and other pokestop incidents (Kecleon, Gold Pokéstops, Showcases).
 
 !!! note
-    The command is named `!incident` (Discord) / `/incident` (Telegram) — "incident" is the in-game term. `!invasion` is still accepted as an alias for Team Rocket grunts specifically.
+    `!incident` (Discord) / `/incident` (Telegram) and `!invasion` / `/invasion` are the same command — both track grunts, leaders and pokestop events.
 
 !!! tip "Filter syntax"
     Filters use `key:value` form — `d:500`, `area:downtown`, `template:2`. Legacy `d500` is still accepted. See [Pokemon Tracking — Filter Syntax](pokemon.md#filter-syntax).
@@ -31,6 +31,7 @@ Track Team Rocket invasions and other pokestop incidents (Kecleon, Gold Pokésto
     !incident water                     # Water-type grunts
     !incident fire                      # Fire-type grunts
     !incident everything                # All invasion types
+    !incident d:500                     # No type given = everything (within 500m)
     ```
 
 === "Telegram"
@@ -58,9 +59,17 @@ Track Team Rocket invasions and other pokestop incidents (Kecleon, Gold Pokésto
     /incident cliff sierra arlo
     ```
 
+Use `boss` to track every leader at once (Giovanni, Arlo, Cliff and Sierra, including event variants):
+
+```
+!incident boss
+```
+
+Other grunt names from the game data (for example `mixed`, or the `npc_*` / `player_team_leader` event grunts) can be typed with underscores; they are matched with or without them.
+
 ## Track Events
 
-Non-grunt incidents — Gold Pokéstops, Kecleon, Showcases — fire the `incident` template:
+Non-grunt pokestop events — Gold Pokéstops, Kecleon, Showcases. Gold-Stop and Kecleon alerts use the `incident` template; Showcases use their own `showcase` template (leaderboard and featured pokemon):
 
 === "Discord"
 
@@ -77,6 +86,9 @@ Non-grunt incidents — Gold Pokéstops, Kecleon, Showcases — fire the `incide
     /incident gold-stop
     /incident showcase
     ```
+
+!!! note "Showcase leaderboard updates"
+    A Showcase fires when it starts and again as the top entry changes. If the rule has the edit bit, those updates edit one message in place instead of sending new ones. `!incident` does not accept the `edit` keyword; in 5.3+ the admin can turn edit-in-place on for every incident rule with `default_edit = ["incident"]` in `[tracking]`. Showcase alerts can be switched off entirely with `disable_showcase`.
 
 ## Track by Gender
 
@@ -116,6 +128,7 @@ Non-grunt incidents — Gold Pokéstops, Kecleon, Showcases — fire the `incide
 |--------|-------------|---------|
 | `<grunt_type>` | Grunt type (dragon, water, fire, etc.) | `dragon` |
 | `<leader_name>` | Leader name | `giovanni` |
+| `boss` | All leaders (Giovanni, Arlo, Cliff, Sierra) | `boss` |
 | `<event>` | Event name (`kecleon`, `gold-stop`, `showcase`) | `kecleon` |
 | `male` | Male grunts only | `male` |
 | `female` | Female grunts only | `female` |
@@ -124,10 +137,10 @@ Non-grunt incidents — Gold Pokéstops, Kecleon, Showcases — fire the `incide
 | `area:<name>[,<name>]` | Restrict to specific areas | `area:downtown` |
 | `template:<n>` | Alert template | `template:2` |
 | `clean` | Auto-delete expired alerts | `clean` |
-| `everything` | All invasion types | `everything` |
+| `everything` | All invasion types (also the default when no type is given) | `everything` |
 | `remove` | Remove tracking | `remove` |
 
-Legacy no-colon forms (`d500`) still work.
+Legacy no-colon forms (`d500`) still work. `edit` is not accepted on `!incident` / `!invasion`.
 
 ## Removing Tracks
 
@@ -136,6 +149,8 @@ Legacy no-colon forms (`d500`) still work.
     ```
     !incident remove dragon             # Stop tracking dragon grunts
     !incident remove everything         # Remove all invasion tracking
+    !incident remove id:12              # One rule by ID (see !tracked)
+    !untrack incident id:12             # Same as !incident remove id:12
     ```
 
 === "Telegram"
@@ -144,3 +159,6 @@ Legacy no-colon forms (`d500`) still work.
     /incident remove dragon
     /incident remove everything
     ```
+
+!!! warning
+    `!incident remove` with no recognised type removes **all** your incident rules — check the spelling of the type before running it.

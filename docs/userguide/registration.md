@@ -34,6 +34,8 @@ Or set a specific location:
 
 You're now ready to start tracking! See [Areas & Location](areas.md) for more details.
 
+New users start on [profile](profiles.md) 1.
+
 ## Telegram
 
 ### Step 1: Register in the Group

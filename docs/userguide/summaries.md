@@ -47,6 +47,31 @@ To stop using summary delivery for a rule, recreate the rule without `summary`, 
     /summary quest settime every08:00
     ```
 
+Specs can be separated by spaces or commas (`mon07:30,weekend10:00`). If any spec is invalid nothing is saved, and the reply names the spec that failed.
+
+### Time Spec Grammar
+
+```
+[day[:]]HH[:MM]                  single time       e.g. mon07:30, weekday:7, 8:30
+[day[:]]HH[:MM]-HH[:MM][/step]   range + step      e.g. weekday:9-17/2, every08:00-20:00/4
+```
+
+- The day prefix is optional — without one the time applies every day.
+- A range fires at the start time and then every `step` hours (default 1, max 23) up to and including the end time. `weekday:9-17/2` flushes at 09:00, 11:00, 13:00, 15:00 and 17:00 Monday–Friday.
+- Ranges can't cross midnight (the end must be after the start).
+
+=== "Discord"
+
+    ```
+    !summary quest settime weekday:9-17/2 weekend10:00
+    ```
+
+=== "Telegram"
+
+    ```
+    /summary quest settime weekday:9-17/2 weekend10:00
+    ```
+
 ### Day Prefixes
 
 | Prefix | Days |
@@ -56,9 +81,11 @@ To stop using summary delivery for a rule, recreate the rule without `summary`, 
 | `weekend` | Sat – Sun |
 | `every` (or `everyday`) | All seven days |
 
-**Format:** `<prefix><HH>:<MM>` — e.g. `mon09:00`, `weekday07:30`, `every08:00`. The colon and minutes are optional: `mon9` is treated as `mon09:00`.
-
 List as many times as you like in one command; together they describe the full week's schedule.
+
+### Timezone
+
+Times are evaluated in the timezone of your **location** (`!location`). With no location set, the operator's `default_timezone` is used, falling back to the server's local time. `!summary quest` shows which timezone applies and the current time there.
 
 ## Checking Your Schedule
 
@@ -75,6 +102,8 @@ List as many times as you like in one command; together they describe the full w
     ```
     /summary quest
     ```
+
+On Discord slash commands this is `/summary quest show`.
 
 ## Clearing the Schedule
 
@@ -129,4 +158,4 @@ The buffer is snapshotted to disk when the bot shuts down and reloaded on startu
 ## Related Commands
 
 - [`!quest`](quests.md) — quest tracking, including the `summary` keyword.
-- [`!profile settime`](profiles.md) — profile auto-switching uses the same day-prefix syntax (`mon`, `weekday`, `every`, etc.).
+- [`!profile settime`](profiles.md#auto-switching) — profile auto-switching uses the same time-spec syntax.

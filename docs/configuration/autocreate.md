@@ -115,6 +115,8 @@ When commands run:
 
 Each command echoes a `>>> Executing <expanded text>` line followed by the bot's normal reply. For threads, the echo reads `>>> [<threadName>] <expanded text>`.
 
+If a template command fails (a typo, an unrecognised filter, an unknown area, …) it is reported in the auto-create output as a warning line carrying the expanded command text and the command's error, e.g. `❌ lure normal glacial: Unrecognized: …`. This applies to both interactive `!autocreate` runs and bulk sync (where it appears in the sync report). Unknown command names are reported as `Unknown command: …`. Previously a failing template command ran silently.
+
 ### Threads
 
 Optional. Each entry is one private thread under the parent channel.
@@ -322,7 +324,7 @@ Top-level guard against catastrophic removals. When a sync is told to remove orp
 - Only engages when the cache has ≥10 entries (below that, the percentage is too noisy).
 - If `(orphan count) / (cache count) > maxPercent`, the removal phase is aborted for that rule. Creates and reuses still run normally.
 - `removal_safety_max_percent = 0` disables the safety check entirely.
-- Default is 20%. Reasonable for "I changed my filter and now half my channels look orphaned" mistakes.
+- The example config ships `20`, which is reasonable for "I changed my filter and now half my channels look orphaned" mistakes. If the key is omitted entirely the built-in default is `0` (check disabled), so set it explicitly.
 - Dry-run never enforces the threshold — a preview always shows what would happen.
 
 ### remove_missing vs Trigger Removals
@@ -411,7 +413,7 @@ Response:
     - Filter or params render error → `skipped`
 5. **Apply create + reuse** for each candidate. Each application:
     - Creates / reuses the category
-    - Creates / reuses / moves each channel (if a channel with the right name exists under a different category, it gets moved instead of duplicated)
+    - Creates / reuses each channel. A channel is only reused if a channel with that name already exists **under the target category**; a same-named channel in a different category is left alone and a new one is created (so `City 1/100` and `City 2/100` can coexist).
     - Creates / reuses each thread
     - Posts / refreshes the picker
     - Runs the template's commands (subject to reset semantics — see above)
@@ -554,7 +556,7 @@ You can also test the template interactively without `[[autocreate.rules]]`:
 
 Creates and reuses already ran successfully; only removals were skipped.
 
-**Threads created, commands didn't run for them** — the bot needs **Create Private Threads** + **Manage Threads** on the parent channel. Check guild permissions. Look for `>>> [<threadName>] <command>` lines in the channel where you ran `!autocreate`. If they're absent, the command parser failed — check the bot logs for `Unknown command: …`. If they're present but the command's reply is missing, the command itself failed — the bot logs the underlying error at `Errorf` level.
+**Threads created, commands didn't run for them** — the bot needs **Create Private Threads** + **Manage Threads** on the parent channel. Check guild permissions. Look for `>>> [<threadName>] <command>` lines in the channel where you ran `!autocreate`, and for `❌ <command>: <error>` warning lines — a command that was parsed but failed (bad filter, unknown area, …) is reported there with its error.
 
 **Picker buttons don't do anything when clicked** — the bot needs to be online to handle the interaction. Button `custom_id`s are stateless, so clicks survive bot restarts but only resolve once the bot reconnects. Check that the bot has **Send Messages** + **Embed Links** on the master channel (the picker emit is logged at warn level if it fails; threads are still created and registered).
 
@@ -562,7 +564,7 @@ Creates and reuses already ran successfully; only removals were skipped.
 
 **`!tracked` from inside a thread shows "You're not tracking any pokemon" but the autocreate said it added them** — pre-fix, the autocreated human's `current_profile_no` defaulted to 0 while the autocreate-time inserts went to profile 1. Fixed: the autocreate path now explicitly sets `current_profile_no = 1` for both channel and thread targets. If you have legacy `humans` rows from before that fix, run `UPDATE humans SET current_profile_no = 1 WHERE current_profile_no = 0` against the affected IDs.
 
-**A re-run of sync recreated channels I already had under a different category** — auto-create now detects channels with the same name across categories and moves them into the canonical category instead of duplicating. If your existing channels are in unexpected categories (e.g. from a previous buggy run), the next sync will consolidate them. Empty leftover categories will need to be deleted by hand on the first reconciliation; subsequent orphan-removal runs delete cached empty categories automatically.
+**A re-run of sync created new channels even though I already had same-named channels under a different category** — this is intentional. Auto-create only reuses a channel that already lives under the template's target category; it never adopts or moves a same-named channel from another category, because layouts like `City 1/100` and `City 2/100` are normal. (Earlier versions moved such channels across categories, which could relocate one city's channels into another.) If you have stray channels in unexpected categories from an older run, move them under the correct category by hand before syncing, or delete them and let sync recreate them.
 
 ### Cache Files
 

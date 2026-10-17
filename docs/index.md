@@ -45,13 +45,15 @@ The processor handles webhook ingestion, in-memory matching, alert template rend
 - **Migrating from PoracleJS?** — Follow the [Migration Guide](migration/guide.md) to convert your existing setup.
 - **New Installation** — Start with the [Installation Guide](installation/index.md).
 - **Configuration** — See the [Config File Reference](configuration/config_file.md), the per-section [Config Reference](config/general.md), or use the [Poracle Config UI](https://jfberry.github.io/poracle-config/) to build your config visually.
+- **Upgrading?** — Read [Upgrading & Release Notes](operation/upgrading.md) and back up your database first.
 - **User Guide** — Learn how to [set up tracking](userguide/index.md) as an end user.
 
 ## Quick Start
 
 ### Prerequisites
 
-- Go 1.25+
+- Go 1.25+ for 5.2.x (`main`), Go 1.27+ for 5.3 (`develop`) — or use [Docker](installation/docker.md) and skip Go entirely
+- `bash` and `git` — `make build` runs `scripts/goldflags.sh`, which stamps the commit, branch and build date from your git checkout into the binary (shown by `!version`)
 - MySQL 8.0+ or MariaDB 10.6+
 - A Golbat instance sending webhooks
 

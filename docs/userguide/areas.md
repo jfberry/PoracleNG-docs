@@ -44,22 +44,28 @@ Lists every area configured by the admin that you're allowed to use.
 
     ```
     !area remove downtown               # Remove one
-    !area clear                         # Remove all
+    !area remove downtown uptown        # Remove several
     ```
 
 === "Telegram"
 
     ```
     /area remove downtown
-    /area clear
+    /area remove downtown uptown
     ```
+
+!!! note
+    There is no `!area clear` — `clear` would be treated as an area name. To drop every area, list them all after `!area remove`.
+
+Area names with spaces can be typed with underscores (`!area add city_centre`) or quotes (`!area add "city centre"`). Bare `!area <names>` with no subcommand also adds areas, so `!area downtown uptown` is the same as `!area add downtown uptown`.
 
 ### View Your Areas
 
 === "Discord"
 
     ```
-    !area                               # Show your current areas
+    !area                               # Show your current areas (plus usage)
+    !tracked area                       # Just your current areas
     !tracked                            # Areas + every tracking rule + active mutes
     ```
 
@@ -67,7 +73,32 @@ Lists every area configured by the admin that you're allowed to use.
 
     ```
     /area
+    /tracked area
     /tracked
+    ```
+
+### Show Areas on a Map
+
+If the operator has a static map provider configured, Poracle can draw your areas:
+
+=== "Discord"
+
+    ```
+    !area show                          # One map per area you have selected
+    !area show downtown uptown          # Map of specific areas
+    !area show d500                     # A 500m circle around your location
+    !area overview                      # All your areas on one colour-coded map
+    !area overview downtown uptown      # Overview of specific areas
+    ```
+
+=== "Telegram"
+
+    ```
+    /area show
+    /area show downtown uptown
+    /area show d500
+    /area overview
+    /area overview downtown uptown
     ```
 
 ## Location
@@ -80,6 +111,7 @@ Your **default location** is a single latitude/longitude used by any tracking ru
 
     ```
     !location 40.7128,-74.0060          # By coordinates
+    !location 40.7128, -74.0060         # Spaces around the comma are fine (Google Maps copy/paste)
     !location 10 Downing Street, London # By address (requires the operator to have a geocoder configured)
     ```
 
@@ -87,6 +119,7 @@ Your **default location** is a single latitude/longitude used by any tracking ru
 
     ```
     /location 40.7128,-74.0060
+    /location 40.7128, -74.0060
     /location 10 Downing Street, London
     ```
 
@@ -177,7 +210,7 @@ Use a named location as the centre point for this rule's distance check. Require
 
 ### `area:<name>[,<name>...]`
 
-Restrict this rule to one or more specific areas, overriding your default `!area add` set.
+Restrict this rule to one or more specific areas, overriding your default `!area add` set. The areas must be ones you are allowed to select (the same list as `!area list`). Repeating an area (`area:london area:paris,london`) is harmless — each area is stored once.
 
 === "Discord"
 
@@ -205,6 +238,8 @@ The four override params interact with strict rules:
 | `d:` + `area:` | **rejected** — distance and area filters are mutually exclusive |
 | `area:` + `location:` | **rejected** — one or the other |
 | `location:` alone (no `d:`) | **rejected** — `location:` requires `d:` |
+
+If the operator has set a `default_distance`, it is applied to rules that have no `d:` — but never to rules with `area:`, so `area:` rules are not rejected by the distance/area rule above.
 
 ### Seeing the Overrides on `!tracked`
 

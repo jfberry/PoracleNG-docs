@@ -14,13 +14,13 @@ show_altered_pokemon_static_map = false  # Show affected pokemon on the map
 show_altered_pokemon_max_count = 10      # Max pokemon to show per alert
 ```
 
-When `change_alert` is enabled, users who track weather changes will receive alerts when the weather shifts in their areas.
+When `change_alert` is enabled, a user who received a pokemon alert in a weather cell gets a weather change alert if the weather in that cell changes before the pokemon despawns. No separate subscription is needed.
 
 When `show_altered_pokemon` is enabled, the alert includes a list of tracked pokemon that are affected by the weather change (e.g. pokemon that gain or lose weather boost).
 
 ## Weather Inference
 
-The processor can infer current weather conditions from pokemon spawn data by analyzing which pokemon are weather-boosted. This happens automatically and does not require any configuration.
+The processor can infer current weather conditions from pokemon spawn data by analyzing which pokemon are weather-boosted. This is on by default; set `enable_inference = false` under `[weather]` to turn it off.
 
 Weather inference provides weather data even when the scanner doesn't send weather webhooks directly.
 
@@ -32,7 +32,7 @@ PoracleNG can predict the next hour's weather using AccuWeather forecasts. This 
 [weather]
 enable_forecast = false
 accuweather_api_keys = ["key1", "key2"]  # API keys (rotated)
-accuweather_day_quota = 50               # Max API calls per key per day
+accuweather_day_quota = 500              # Max API calls per key per day
 forecast_refresh_interval = 8            # Hours between API calls per cell
 local_first_fetch_hod = 3               # First fetch hour (local time)
 smart_forecast = false                   # Fetch on demand for missing cells
@@ -44,7 +44,7 @@ AccuWeather has daily API call limits. Provide multiple keys to increase your qu
 
 ```toml
 accuweather_api_keys = ["key1", "key2", "key3"]
-accuweather_day_quota = 50               # Calls per key per day
+accuweather_day_quota = 500              # Calls per key per day (match your plan)
 ```
 
 ### Smart Forecast
@@ -53,18 +53,4 @@ When `smart_forecast = true`, the processor will fetch weather data on demand wh
 
 ## User Commands
 
-Users track weather changes with:
-
-=== "Discord"
-
-    ```
-    !weather
-    ```
-
-=== "Telegram"
-
-    ```
-    /weather
-    ```
-
-This subscribes the user to weather change alerts in their tracked areas.
+There is no user command for weather tracking yet. `!weather` (`/weather` on Telegram) exists but only replies that weather tracking is not yet available. Weather change alerts are sent automatically as described in [Weather Change Alerts](#weather-change-alerts).

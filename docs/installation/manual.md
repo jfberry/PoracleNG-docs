@@ -6,9 +6,10 @@ Install the following before proceeding:
 
 | Requirement | Version | Notes |
 |------------|---------|-------|
-| **Go** | 1.25+ | [golang.org/dl](https://golang.org/dl/) |
+| **Go** | 1.25+ (5.2.x, `main`) / 1.27+ (5.3, `develop`) | [go.dev/dl](https://go.dev/dl/) — the required version is the `go` line in `processor/go.mod` |
 | **MySQL** or **MariaDB** | 8.0+ / 10.6+ | Used for user data and tracking rules |
-| **Git** | Any recent | For cloning the repository |
+| **Git** | Any recent | For cloning the repository; also read at build time to stamp version info |
+| **bash** | Any recent | `make build` and `start.sh` run `scripts/goldflags.sh` |
 
 ## Step 1: Create the Database
 
@@ -78,7 +79,7 @@ See the [Config File Reference](../configuration/config_file.md) for all availab
 make build
 ```
 
-This builds the Go processor binary at `processor/poracle-processor`.
+This builds the Go processor binary at `processor/poracle-processor`. The build runs `scripts/goldflags.sh`, which reads your git checkout and stamps the commit, branch and build date into the binary — `!version` then reports something like `5.3.0-develop` with the commit and date. Outside a git checkout these show as `unknown`, which is harmless.
 
 ## Step 5: Start
 
@@ -124,21 +125,25 @@ PoracleNG/
   examples/                # Reference files and community DTS templates
   processor/               # Go processor source and built binary
   resources/               # Downloaded game data (auto-managed)
-  logs/                    # Processor log files
+  logs/                    # processor.log (and webhooks.log if enabled)
   scripts/                 # Migration and utility scripts
 ```
 
 ## Updating
 
+!!! warning "Back up your database first"
+    The processor applies pending database migrations automatically on startup, and some (for example migration 000009 in 5.3) rewrite data and cannot be undone. Take a `mysqldump` before every upgrade, and read [Upgrading & Release Notes](../operation/upgrading.md).
+
 To update PoracleNG:
 
 ```sh
+mysqldump poracle > poracle-backup-$(date +%F).sql
 git pull
 make build
-./start.sh
+pm2 restart poracle      # or ./start.sh / your service manager
 ```
 
-The processor will apply any pending database migrations automatically on startup.
+`start.sh` only builds the binary when it is missing, so always run `make build` after `git pull`.
 
 ## Running as a Service
 

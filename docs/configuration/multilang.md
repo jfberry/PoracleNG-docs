@@ -72,5 +72,5 @@ Control date and time display format:
 timeformat = "en-gb"                     # Locale for date/time formatting
 time = "LTS"                             # Time format
 date = "L"                               # Date format
-address_format = "{{{streetName}}} {{streetNumber}}"
+address_format = ""                      # Empty = country-idiomatic address; see [locale] reference
 ```

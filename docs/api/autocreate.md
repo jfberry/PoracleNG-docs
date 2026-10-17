@@ -2,7 +2,7 @@
 
 The auto-create API exposes the channel-template store and the bulk sync runner. All endpoints sit under `/api/autocreate/` and require the `X-Poracle-Secret` header (see [API authentication](index.md#authentication)).
 
-For full request/response shapes, parameter detail, and error codes, see the upstream API reference: [`api.md` in the PoracleNG repository](https://github.com/jfberry/PoracleNG/blob/main/api.md). This page is a capability outline.
+For full request/response shapes, parameter detail, and error codes, see `/docs` on your processor or the upstream [`API.md`](https://github.com/jfberry/PoracleNG/blob/main/API.md#autocreate). This page is a capability outline. Errors are returned as `application/problem+json`; template validation failures list each problem in `errors[]`.
 
 ## What you can do over HTTP
 

@@ -7,7 +7,10 @@ Profiles let you save different sets of tracking subscriptions and switch betwee
 - Each profile has its own set of areas, location, and tracking subscriptions
 - You can create multiple named profiles
 - Switching profiles changes which tracking rules are active
-- The default profile is profile 1
+- Profile 1 is the default profile — every user starts on it, and it can't be deleted
+
+!!! note "5.3+: profile 0 is gone"
+    Older builds created some users (via `!poracle`, role reconciliation, `!channel add`, `!webhook add`) on a hidden "profile 0". From 5.3 new users always start on profile 1, and the upgrade moves existing users and their rules from profile 0 onto profile 1.
 
 ## Managing Profiles
 
@@ -16,77 +19,93 @@ Profiles let you save different sets of tracking subscriptions and switch betwee
 === "Discord"
 
     ```
+    !profile                            # List profiles (plus usage)
     !profile list
     ```
 
 === "Telegram"
 
     ```
+    /profile
     /profile list
     ```
 
-### Create/Switch to a Profile
+The active profile is marked with `*`. Each profile's areas, location and auto-switch schedule are shown, followed by the timezone the schedule is evaluated in.
+
+### Create a Profile
 
 === "Discord"
 
     ```
-    !profile 2                          # Switch to profile 2
-    !profile 3                          # Switch to profile 3
+    !profile add work                   # Create a profile called "work"
+    !profile add holiday home           # Names can contain spaces
+    ```
+
+=== "Telegram"
+
+    ```
+    /profile add work
+    ```
+
+The new profile gets the lowest free number. Creating a profile does **not** switch to it.
+
+### Switch Profile
+
+=== "Discord"
+
+    ```
+    !profile 2                          # Switch by number
+    !profile work                       # Switch by name
+    !profile switch work                # Same thing, explicit
     ```
 
 === "Telegram"
 
     ```
     /profile 2
-    /profile 3
+    /profile work
     ```
 
-If the profile doesn't exist, it will be created.
+Switching to a profile that doesn't exist replies "not found" — use `!profile add` to create it first.
 
-### Name a Profile
+### Copy Tracking to Other Profiles
+
+Copy every tracking rule on your **current** profile to other profiles, by name:
 
 === "Discord"
 
     ```
-    !profile name home                  # Name current profile "home"
-    !profile name work                  # Name it "work"
+    !profile copyto work                # Copy current profile's tracking to "work"
+    !profile copyto work weekend        # ...to several profiles
+    !profile copyto all                 # ...to every other profile
     ```
 
 === "Telegram"
 
     ```
-    /profile name home
+    /profile copyto work
+    /profile copyto all
     ```
 
-### Copy a Profile
-
-Copy all tracking from one profile to another:
-
-=== "Discord"
-
-    ```
-    !profile copy 2                     # Copy current profile to profile 2
-    ```
-
-=== "Telegram"
-
-    ```
-    /profile copy 2
-    ```
+!!! warning
+    `copyto` **replaces** the tracking on the target profiles — their existing rules are deleted first. Targets are matched by profile name (not number); unknown names are reported back.
 
 ### Delete a Profile
 
 === "Discord"
 
     ```
-    !profile delete 3                   # Delete profile 3
+    !profile remove 3                   # By number
+    !profile delete work                # By name (delete = remove)
     ```
 
 === "Telegram"
 
     ```
-    /profile delete 3
+    /profile remove 3
     ```
+
+Profile 1 can't be deleted.
 
 ## Auto-Switching
 
@@ -94,11 +113,15 @@ Profiles can switch automatically based on day of week and time of day. The proc
 
 ### Setting Times
 
+`!profile settime` (alias `!profile hours`) sets the schedule on your **current** profile:
+
 === "Discord"
 
     ```
     !profile settime mon09:00 tue18:30 weekday09:00 weekend10:00
     !profile settime every08:00          # Switch to this profile at 08:00 every day
+    !profile settime mon09:00,fri17:30   # Comma-separated specs also work
+    !profile cleartime                   # Remove this profile's schedule
     ```
 
 === "Telegram"
@@ -106,9 +129,21 @@ Profiles can switch automatically based on day of week and time of day. The proc
     ```
     /profile settime mon09:00 weekday09:00 weekend10:00
     /profile settime every08:00
+    /profile cleartime
     ```
 
-Times mark **when this profile becomes active**. List as many as you like — they replace any existing schedule on this profile.
+Times mark **when this profile becomes active**. List as many as you like (separated by spaces or commas) — they replace any existing schedule on this profile. If any spec is invalid, nothing is saved and the reply names the offending spec.
+
+### Time Spec Grammar
+
+```
+[day[:]]HH[:MM]                  single time       e.g. mon09:00, mon:9, 8:30
+[day[:]]HH[:MM]-HH[:MM][/step]   range + step      e.g. weekday:9-17/2, mon07:30-18:00
+```
+
+- The day prefix is optional — without one the time applies every day.
+- A range fires at the start time and then every `step` hours (default 1, max 23) up to and including the end time. `weekday:9-17/2` fires at 09:00, 11:00, 13:00, 15:00 and 17:00 Monday–Friday.
+- Ranges can't cross midnight (the end must be after the start).
 
 ### Day Prefixes
 
@@ -119,26 +154,29 @@ Times mark **when this profile becomes active**. List as many as you like — th
 | `weekend` | Sat – Sun |
 | `every` (or `everyday`) | All seven days |
 
-**Format:** `<prefix><HH>:<MM>` — e.g. `mon09:00`, `every08:30`. The colon and minutes are optional: `mon9` is treated as `mon09:00`.
+English prefixes are always accepted; translated prefixes for your language work too.
+
+### Timezone
+
+Schedules are evaluated in the timezone of your **location** (`!location`). If you have no location set, the operator's `default_timezone` is used, falling back to the server's local time. `!profile list` shows which timezone applies and the current time there.
 
 !!! tip
-    The same day-prefix syntax (`mon`, `weekday`, `every`, etc.) is used by `!summary settime` for [scheduled alert summaries](summaries.md#setting-a-delivery-schedule).
+    The same time-spec syntax is used by `!summary quest settime` for [scheduled alert summaries](summaries.md#setting-a-delivery-schedule).
 
 ## Example: Home and Work Setup
 
 === "Discord"
 
     ```
-    # Set up home profile (profile 1)
+    # Profile 1 is your default — use it for home
     !profile 1
-    !profile name home
     !location 40.7128,-74.0060
     !area add queens brooklyn
     !track pikachu iv90
 
-    # Set up work profile (profile 2)
-    !profile 2
-    !profile name work
+    # Create and set up a work profile (profile 2)
+    !profile add work
+    !profile work
     !location 40.7580,-73.9855
     !area add manhattan
     !track pikachu iv100 d500

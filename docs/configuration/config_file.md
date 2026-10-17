@@ -1,29 +1,32 @@
 # Config File Reference
 
-Complete reference for `config/config.toml`. All settings are shown with their default values.
+Overview of `config/config.toml`. Each section below shows common settings with their default values and links to the full field reference under **Config Reference**.
 
 !!! tip
-    You only need to include settings you want to override. See `config/config.example.toml` in the PoracleNG repository for the full annotated reference, or use the **[Poracle Config UI](https://jfberry.github.io/poracle-config/)** to build your config visually.
+    You only need to include settings you want to override; defaults are built in. See `config/config.example.toml` in the PoracleNG repository for an annotated example, or use the **[Poracle Config UI](config-ui.md)** to edit your config in a browser.
+
+!!! note "`overrides.json` is gone"
+    Older installs stored web-editor changes in `config/overrides.json`. On startup PoracleNG merges that file into `config.toml` once and then stops using it. `config.toml` is the only config file.
 
 ## Processor
 
-Network settings for the processor binary. PoracleNG is a single Go binary — there is no separate alerter component, so this is the only network section.
+HTTP listener for scanner webhooks and the API. PoracleNG is a single Go binary, so this is the only network section. Full reference: [`[processor]`](../config/processor.md).
 
 ```toml
 [processor]
-host = "0.0.0.0"                        # Listen address (0.0.0.0 = all interfaces)
-port = 3030                              # Listen port (receives webhooks and serves the API)
-ip_whitelist = []                        # Restrict webhook sources (empty = allow all)
-ip_blacklist = []                        # Block specific IPs
-api_secret = ""                          # API secret for /api/* (blank = authenticated API disabled)
+host = "127.0.0.1"                       # 127.0.0.1 = this machine only; 0.0.0.0 = all interfaces (Docker sets 0.0.0.0 via PORACLE_HOST)
+port = 3030                              # Receives webhooks and serves the API
+ip_whitelist = []                        # Exact IPs allowed on ALL routes (empty = allow all)
+ip_blacklist = []                        # Exact IPs refused on all routes
+api_secret = ""                          # X-Poracle-Secret for /api/* — blank = NO AUTHENTICATION
 ```
 
-!!! note
-    The `api_secret` is required for external API access (e.g. PoracleWeb). The public endpoints (`POST /`, `GET /health`, `GET /metrics`) remain accessible regardless. Older configs that placed `api_secret` under `[alerter]` are still read for backward compatibility but should be migrated to `[processor]`.
+!!! danger "Blank `api_secret` means an open API"
+    If `api_secret` is empty, `/api/*` accepts requests **without any authentication**. Anyone who can reach the port can read and change users, tracking rules, config and templates. Always set a long random secret, which PoracleWeb and the Config UI also need. `POST /`, `GET /health`, `GET /metrics` and `/debug/pprof` are never authenticated. Older configs that set `api_secret` under `[alerter]` are still read as a fallback; move it to `[processor]`.
 
 ## Database
 
-Database connection for PoracleNG's own data (users, tracking rules, etc.).
+PoracleNG's own database, plus an optional scanner database connection. Full reference: [`[database]`](../config/database.md).
 
 ```toml
 [database]
@@ -32,14 +35,8 @@ port = 3306
 user = "poracleuser"
 password = "poraclepassword"
 database = "poracle"
-```
 
-### Scanner Database
-
-If using RDM for quest/pokestop name lookups, configure the scanner database. The scanner type (`golbat` or `rdm`) lives here under the `type` key:
-
-```toml
-[database.scanner]
+[database.scanner]                       # optional: nearby stops on maps, gym/stop names, gym: lookups
 host = "127.0.0.1"
 port = 3306
 user = "scanneruser"
@@ -48,41 +45,34 @@ database = "scannerdb"
 type = "golbat"                          # "golbat" (default) or "rdm"
 ```
 
-!!! note
-    Older configs may set `scanner_type` directly under `[database]`. That spelling is still accepted as a back-compat alias, but the canonical location is `[database.scanner].type`.
-
 ## Geofence
 
-See [Geofences](geofence.md) for detailed configuration.
+See [Geofences](geofence.md) and [`[geofence]`](../config/geofence.md).
 
 ```toml
 [geofence]
-paths = ["geofences/geofence.json"]     # Geofence file paths
-default_name = "city"                    # Default fence name
+paths = ["geofences/geofence.json"]     # Geofence files or URLs
+default_name = "city"                    # Prefix for unnamed fences (city1, city2, ...)
 
 [geofence.koji]
 bearer_token = ""                        # Koji API token for geofence downloads
-cache_dir = ".cache/geofences"           # Cache directory for downloaded geofences
+cache_dir = ".cache/geofences"           # Cache for downloaded geofences (relative to config/)
 ```
 
 ## PVP
 
-PVP ranking calculation settings.
+Full reference: [`[pvp]`](../config/pvp.md).
 
 ```toml
 [pvp]
-level_caps = [50]                        # Level caps for rank calculations (e.g. [50, 51])
-include_mega_evolution = false           # Include mega evolutions in rankings
-evolution_direct_tracking = false        # Track PVP evolutions directly (e.g. Vaporeon matches Eevee)
-filter_by_track = false                  # Auto-filter PVP listings by user's track requirements
-
-# Minimums on track command to prevent overly broad tracking
-filter_max_rank = 10
+level_caps = [50]                        # Must match Golbat's PVP level caps
+include_mega_evolution = false           # Default for rules without a mega keyword
+evolution_direct_tracking = false
+filter_by_track = false
+filter_max_rank = 10                     # Worst rank a user may track (built-in default 100)
 filter_great_min_cp = 1400
 filter_ultra_min_cp = 2350
 filter_little_min_cp = 450
-
-# Display thresholds passed into DTS
 display_max_rank = 10
 display_great_min_cp = 1400
 display_ultra_min_cp = 2350
@@ -91,91 +81,78 @@ display_little_min_cp = 450
 
 ## Weather
 
-See [Weather](weather.md) for detailed configuration.
+See [Weather](weather.md) and [`[weather]`](../config/weather.md).
 
 ```toml
 [weather]
-change_alert = false                     # Enable weather change alerts
-show_altered_pokemon = false             # Show weather-affected pokemon in alerts
+change_alert = false
+show_altered_pokemon = false
 show_altered_pokemon_static_map = false
 show_altered_pokemon_max_count = 10
+enable_inference = true
 
-# AccuWeather forecast
 enable_forecast = false
 accuweather_api_keys = []
-accuweather_day_quota = 50
-forecast_refresh_interval = 8            # Hours between API calls per cell
-local_first_fetch_hod = 3               # First fetch hour of day (local time)
-smart_forecast = false                   # Pull on demand for missing cells
+accuweather_day_quota = 500              # Calls per key per day
+forecast_refresh_interval = 8
+local_first_fetch_hod = 3
+smart_forecast = false
 ```
 
 ## Area Security
 
-See [Area Security](areasecurity.md) for detailed configuration.
+See [Area Security](areasecurity.md) and [`[area_security]`](../config/area_security.md).
 
 ```toml
 [area_security]
 enabled = false
-strict_locations = false                 # Check alerts against location_fence
+strict_locations = false
 ```
 
 ## Locale
 
-Date, time, and language formatting.
+Full reference: [`[locale]`](../config/locale.md).
 
 ```toml
 [locale]
 timeformat = "en-gb"
 time = "LTS"
 date = "L"
-address_format = "{{{streetName}}} {{streetNumber}}"
+address_format = ""                      # Empty = country-idiomatic formattedAddress
+address_include_country = false
 language = "en"                          # Secondary language for 'alt' translations in DTS
 ```
 
 ## General
 
-General application settings.
+Full reference: [`[general]`](../config/general.md).
 
 ```toml
 [general]
-environment = "production"
-alert_minimum_time = 120                 # Seconds before expiry to suppress alerts
-ignore_long_raids = false                # Ignore raids > 47min (reduce event spam)
+locale = "en"
+#default_timezone = "Europe/London"      # For users with no location set
+alert_minimum_time = 120
+ignore_long_raids = false
 img_url = "https://raw.githubusercontent.com/nileplumb/PkmnShuffleMap/master/UICONS"
 img_url_alt = ""
 sticker_url = "https://raw.githubusercontent.com/bbdoc/tgUICONS/main/Shuffle"
 request_shiny_images = false
-populate_pokestop_name = false           # [RDM] Lookup pokestop names in scanner DB
-locale = "en"                            # Default locale (en, fr, de, it, ru, etc.)
-default_template_name = "1"              # Default DTS template for new trackings
-shortlink_provider = "hideuri"           # hideuri, shlink, or yourls
+populate_pokestop_name = false           # Needs [database.scanner]
+default_template_name = "1"
+role_check_mode = "ignore"               # ignore, delete, disable-user
+shortlink_provider = ""                  # Only "shlink" is implemented
 shortlink_provider_url = ""
 shortlink_provider_key = ""
 shortlink_provider_domain = ""
-rdm_url = ""                             # URL for RDM map links in DTS
-react_map_url = ""                       # URL for ReactMap links in DTS
-rocket_mad_url = ""                      # URL for RocketMAD links in DTS
-```
+react_map_url = ""
+diadem_url = ""
+rdm_url = ""
+rocket_mad_url = ""
+# disabled_commands = ["lure", "nest"]
 
-### Role Check Mode
-
-Controls what happens when a user loses their Discord role or Telegram group membership:
-
-```toml
-role_check_mode = "ignore"
-# "ignore"       - Log and don't take action
-# "delete"       - Delete user and all trackings
-# "disable-user" - Disable user (re-enable when restored), trackings preserved
-```
-
-### Disable Webhook Types
-
-Selectively disable processing of specific webhook types:
-
-```toml
+# Webhook type switches
 disable_pokemon = false
 disable_raid = false
-disable_pokestop = false                 # Also disables invasions for RDM/Golbat
 disable_invasion = false
 disable_lure = false
 disable_quest = false
@@ -183,128 +160,157 @@ disable_weather = false
 disable_nest = false
 disable_gym = false
 disable_fort_update = false
-process_confirmed_invasion_lineups = false
-disable_unconfirmed_invasion = false
+disable_max_battle = false
+disable_showcase = false
 ```
 
-### Disabled Commands
+`environment`, `disable_pokestop`, `process_confirmed_invasion_lineups`, `disable_unconfirmed_invasion`, `[general.images]` and `[general.stickers]` have no effect and can be removed.
 
-Prevent specific commands from being used:
+## Discord
+
+See [Discord](discord.md) and [`[discord]`](../config/discord.md).
 
 ```toml
-# disabled_commands = ["track", "Pokemon"]
+[discord]
+enabled = true
+token = "bot-token"                      # Delivery bot (only the first token is used)
+#command_token = ""                      # Optional separate command bot
+guilds = ["guild-id"]
+channels = ["channel-id"]
+user_role = []
+admins = ["user-id"]
+prefix = "!"
+admin_channel_id = ""                    # Operator notices
+thread_keep_alive_interval_hours = 24
+
+# All [discord.*] sub-tables must come AFTER the plain [discord] keys
+[discord.slash_commands]
+enabled = false
+register_globally = false
+guilds = []
 ```
 
-### Available Languages
+## Telegram
 
-Configure languages users can switch between:
+See [Telegram](telegram.md) and [`[telegram]`](../config/telegram.md).
 
 ```toml
-# [general.available_languages.en]
-# poracle = "poracle"
-# help = "help"
-# [general.available_languages.de]
-# poracle = "dasporacle"
-# help = "hilfe"
+[telegram]
+enabled = false
+token = ""
+admins = []
+channels = []
 ```
 
 ## Geocoding
 
-See [Geocoding](geocoding.md) and [Static Maps](staticmaps.md) for detailed configuration.
+See [Geocoding](geocoding.md), [Static Maps](staticmaps.md) and [`[geocoding]`](../config/geocoding.md).
 
 ```toml
 [geocoding]
-provider = "none"                        # none, nominatim, or google
-provider_url = ""
+provider = "none"                        # none, nominatim, photon, google
+provider_url = ""                        # Nominatim/Photon URL
+geocoding_key = []                       # Google keys
 forward_only = false
 cache_detail = 3
-static_provider = "none"                 # none, tileservercache, google, osm, or mapbox
+intersection_users = []                  # GeoNames usernames for {{intersection}}
+static_provider = "none"                 # none, tileservercache, rampardos, google, osm, mapbox
 static_provider_url = ""
-geocoding_key = [""]                     # Google API keys (array, rotated)
-static_key = [""]                        # Map tile keys (array, rotated)
-width = 320
-height = 200
-zoom = 15
+static_internal_url = ""                 # Optional private tileserver URL
+static_key = []
 ```
 
 ## Tuning
 
-Performance tuning parameters.
-
 !!! warning
     Do not change these settings without consulting the Poracle community on Discord.
 
-See the [`[tuning]`](../config/tuning.md) reference page for the full field list and the tileserver section.
+Full reference: [`[tuning]`](../config/tuning.md).
 
 ```toml
 [tuning]
-# Processor
-reload_interval_secs = 60               # How often to reload tracking data from DB
-encounter_cache_ttl = 3600               # Seconds to cache encounter data
-worker_pool_size = 4                     # Number of matching worker goroutines
-batch_size = 50                          # Items per batch
-flush_interval_millis = 100              # Max time before flushing partial batch
-
-# Alerter
-max_database_connections = 15            # Max DB connections per worker
-concurrent_matched_processors = 10       # Concurrent matched payload processors
-matched_max_queue_size = 5000            # Max buffered items before backpressure
-concurrent_discord_destinations = 10     # Concurrent Discord sends per bot
-concurrent_telegram_destinations = 10    # Concurrent Telegram sends per bot
-concurrent_discord_webhooks = 10         # Concurrent Discord webhook sends
+reload_interval_secs = 60
+worker_pool_size = 4
+render_pool_size = 8
+render_queue_size = 100
+tileserver_concurrency = 2
+tileserver_timeout = 10000
+tileserver_queue_size = 100
+tileserver_deadline = 10000
+tileserver_failure_threshold = 5
+tileserver_cooldown_ms = 30000
+tileserver_pregen_ttl = 86400
+delivery_queue_size = 200                # Per destination
+concurrent_discord_destinations = 10
+concurrent_telegram_destinations = 10
+concurrent_discord_webhooks = 10
 ```
-
-The "Alerter" subheading above is historical — these are sender-side concurrency limits inside the single processor binary.
 
 ## Alert Limits
 
-Rate limiting to prevent individual users or channels from overwhelming the system.
+Full reference: [`[alert_limits]`](../config/alert_limits.md).
 
 ```toml
 [alert_limits]
-timing_period = 240                      # Seconds over which limits are calculated
-dm_limit = 20                            # Max messages per user per period
-channel_limit = 40                       # Max messages per channel per period
-max_limits_before_stop = 10              # Times hitting limit before user is stopped
-disable_on_stop = false                  # Admin disable (vs just stop)
-shame_channel = ""                       # Discord channel to report stopped users
-```
+timing_period = 240
+dm_limit = 20
+channel_limit = 40
+dm_summary_limit = 10                    # Separate bucket for summaries
+channel_summary_limit = 40
+max_limits_before_stop = 10
+disable_on_stop = false
+shame_channel = ""                       # Discord channel ID
 
-### Limit Overrides
-
-Override limits for specific channels, users, or webhooks:
-
-```toml
 # [[alert_limits.overrides]]
 # target = "channel_or_user_id"
 # limit = 100
-
-# [[alert_limits.overrides]]
-# target = "webhook_name"
-# limit = 200
 ```
 
 ## Tracking
 
-Restrictions on user tracking commands.
+Full reference: [`[tracking]`](../config/tracking.md).
 
 ```toml
 [tracking]
 everything_flag_permissions = "allow-any"
-# "allow-any"                     - Unrestricted, recorded as wildcard
-# "allow-and-always-individually" - Unrestricted, recorded as individual rows
-# "allow-and-ignore-individually" - Unrestricted, users can't opt for individual rows
-# "deny"                          - Users must track individual pokemon
-
-default_distance = 0                     # Default distance for distance-only tracking
-max_distance = 0                         # Max tracking circle radius (0 = no limit)
-enable_gym_battle = false                # Allow battle_changes option in !gym
-default_user_tracking_level_cap = 0      # Default PVP level cap (0 = all)
+default_distance = 0
+max_distance = 0
+enable_gym_battle = false
+default_user_tracking_level_cap = 0
+pokemon_change_tracking = true
+pokemon_edit = true                      # 5.3+
+pokemon_edit_window_mins = 5             # 5.3+
+default_edit = []                        # 5.3+
+quest_summary_enabled = true
+quest_summary_buffer_ttl_hours = 24
 ```
+
+## Summaries, snapshots, validation, autocreate, AI
+
+```toml
+[summariser]
+max_per_message = 25
+
+[snapshots]
+enabled = false                          # Required for interactive buttons
+
+[validation]
+url = ""                                 # Empty = off
+fail_mode = "open"
+
+[autocreate]
+removal_safety_max_percent = 20          # Built-in default is 0 (off) if omitted
+
+[ai]
+enabled = false
+suggest_on_dm = false
+```
+
+References: [`[summariser]`](../config/summariser.md), [`[snapshots]`](../config/snapshots.md), [`[validation]`](../config/validation.md), [`[autocreate]`](../config/autocreate.md), [`[ai]`](../config/ai.md).
 
 ## Reconciliation
 
-Automated user and channel sync settings.
+See [`[reconciliation.discord]`](../config/reconciliation-discord.md) and [`[reconciliation.telegram]`](../config/reconciliation-telegram.md).
 
 ```toml
 [reconciliation.discord]
@@ -322,53 +328,54 @@ remove_invalid_users = true
 
 ## Stats
 
-Rarity and shiny statistics calculation.
+Full reference: [`[stats]`](../config/stats.md).
 
 ```toml
 [stats]
-min_sample_size = 10000                  # Min sightings before calculating rarity
-window_hours = 8                         # Rolling window for stats
-refresh_interval_mins = 5                # Recalculation interval
-rarity_group_2_uncommon = 1.0            # % threshold for uncommon
-rarity_group_3_rare = 0.5               # % threshold for rare
-rarity_group_4_very_rare = 0.03          # % threshold for very rare
-rarity_group_5_ultra_rare = 0.01         # % threshold for ultra rare
+min_sample_size = 10000
+window_hours = 8
+refresh_interval_mins = 5
+rarity_group_2_uncommon = 1.0
+rarity_group_3_rare = 0.5
+rarity_group_4_very_rare = 0.03
+rarity_group_5_ultra_rare = 0.01
 ```
 
 ## Fallbacks
 
-Fallback image URLs used when normal image sources fail.
+Full reference: [`[fallbacks]`](../config/fallbacks.md).
 
 ```toml
 [fallbacks]
-static_map = "https://raw.githubusercontent.com/KartulUdus/PoracleJS/images/fallback/staticMap.png"
-img_url = "https://raw.githubusercontent.com/KartulUdus/PoracleJS/images/fallback/mon.png"
-img_url_weather = "https://raw.githubusercontent.com/KartulUdus/PoracleJS/images/fallback/weather.png"
-img_url_egg = "https://raw.githubusercontent.com/KartulUdus/PoracleJS/images/fallback/uni.png"
-img_url_gym = "https://raw.githubusercontent.com/KartulUdus/PoracleJS/images/fallback/gym.png"
-img_url_pokestop = "https://raw.githubusercontent.com/KartulUdus/PoracleJS/images/fallback/pokestop.png"
-pokestop_url = "https://raw.githubusercontent.com/KartulUdus/PoracleJS/images/fallback/pokestop.png"
+static_map = "https://raw.githubusercontent.com/jfberry/PoracleNG/images/fallback/staticMap.png"
+img_url = "https://raw.githubusercontent.com/jfberry/PoracleNG/images/fallback/mon.png"
+img_url_weather = "https://raw.githubusercontent.com/jfberry/PoracleNG/images/fallback/weather.png"
+img_url_egg = "https://raw.githubusercontent.com/jfberry/PoracleNG/images/fallback/uni.png"
+img_url_gym = "https://raw.githubusercontent.com/jfberry/PoracleNG/images/fallback/gym.png"
+img_url_pokestop = "https://raw.githubusercontent.com/jfberry/PoracleNG/images/fallback/pokestop.png"
+pokestop_url = "https://raw.githubusercontent.com/jfberry/PoracleNG/images/fallback/pokestop.png"
 ```
 
 ## Logging
 
+Full reference: [`[logging]`](../config/logging.md) and [`[webhookLogging]`](../config/webhookLogging.md).
+
 ```toml
 [logging]
-level = "verbose"                        # silly, debug, verbose, info, warn
-file_logging_enabled = true              # Write logs to file
-filename = "logs/processor.log"          # Log file path
-max_size = 50                            # Max log file size in MB
-max_age = 7                              # Days to keep log files
-max_backups = 5                          # Old log files to keep
-compress = true                          # Gzip compress rotated logs
+level = "info"                           # trace, debug, info, warn ("verbose" = info, "silly" = trace)
+file_logging_enabled = true
+filename = "logs/processor.log"
+max_size = 50
+max_age = 7
+max_backups = 5
+compress = true
 
-# Raw webhook logging
 [webhookLogging]
 enabled = false
 filename = "logs/webhooks.log"
-max_size = 100                           # MB (also rotates on rotate_interval)
-max_age = 1                              # Days
+max_size = 100
+max_age = 1
 max_backups = 12
 compress = true
-rotate_interval = 60                     # Minutes between forced rotations (0 = size-based only)
+rotate_interval = 60
 ```

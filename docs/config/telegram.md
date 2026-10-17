@@ -6,8 +6,8 @@ Telegram bot configuration: token, registration groups, admin permissions and we
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `enabled` | bool | `false` | Enable the Telegram controller. |
-| `token` | string | `""` | Bot token from BotFather. |
+| `enabled` | bool | `true` | Enable the Telegram bot. It only starts when `token` is also set. (`config.example.toml` ships `enabled = false`.) |
+| `token` | string | `""` | Bot token from BotFather. An array is accepted, but only the first token is used. |
 | `admins` | array | `[""]` | Admin user IDs. |
 | `user_tracking_admins` | array | `[]` | User IDs that may manage other users' tracking. |
 | `channels` | array | `[""]` | Group IDs allowed for registration. IDs that don't start with `-100` may not be supergroups yet. Use `/identify` to discover group/user IDs. (Not used in area-security mode.) |
@@ -19,6 +19,7 @@ Telegram bot configuration: token, registration groups, admin permissions and we
 | `check_role` | bool | `false` | Periodically verify users still belong to a registration group. |
 | `check_role_interval` | int | `6` | Hours between checks. |
 | `register_on_start` | bool | `false` | Attempt auto-registration when a user sends `/start`. |
+| `disable_auto_greetings` | bool | `false` | Skip the `greeting` DTS message when reconciliation registers a user automatically. |
 
 !!! note
     `check_role` only schedules the check. Actual deletion or disabling depends on `general.role_check_mode`.

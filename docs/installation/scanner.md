@@ -30,11 +30,16 @@ Golbat can filter which webhook types it sends. PoracleNG processes these:
 | `pokemon_no_iv` | Only nearby pokemon without encounter data |
 | `raid` | Raids and eggs |
 | `quest` | Field research quests |
-| `invasion` | Team Rocket invasions |
-| `pokestop` | Pokestop updates (lures) |
-| `gym` | Gym team/details changes |
+| `invasion` | Team Rocket invasions and other pokestop incidents |
+| `pokestop` | Pokestop state — drives **lures**, **Showcases**, and invasions/incidents carried on the stop |
+| `gym` / `gym_details` | Gym team/slot/battle changes |
 | `weather` | In-game weather changes |
-| `fort_update` | Fort (gym/pokestop) metadata changes |
+| `fort_update` | Fort (gym/pokestop/station) additions, removals and edits |
+| `max_battle` | MAX Battles at Power Spots |
+| `nest` | Nest updates |
+
+!!! note "Showcases need the `pokestop` type"
+    Showcase (pokestop contest) alerts are built from the `showcase_*` fields on the `pokestop` webhook — there is no separate showcase webhook type. If you filter Golbat's `types`, keep `pokestop` if you want lure or Showcase alerts.
 
 By default Golbat sends all of these; restrict with a `types = [...]` filter in the `[[webhooks]]` entry if you want to narrow the stream. Refer to Golbat's docs for the exact syntax and any additional filters they've added.
 
@@ -83,12 +88,18 @@ If you want to disable processing of specific webhook types on the PoracleNG sid
 [general]
 disable_pokemon = false
 disable_raid = false
-disable_pokestop = false
 disable_invasion = false
 disable_lure = false
 disable_quest = false
+disable_showcase = false
 disable_weather = false
 disable_nest = false
 disable_gym = false
 disable_fort_update = false
+disable_max_battle = false
 ```
+
+The `pokestop` webhook is split by content, so use `disable_lure`, `disable_invasion` and `disable_showcase` to turn off the alert types it carries individually.
+
+!!! warning "`disable_pokestop` is deprecated"
+    `disable_pokestop` is still accepted so old configs load, but it does nothing. Replace it with `disable_lure`, `disable_invasion`, `disable_quest` and/or `disable_showcase`.

@@ -158,23 +158,36 @@ You can use either the pokemon name or its Pokedex number.
 !!! warning
     `!track everything` without filters is not allowed for non-admin users to prevent alert floods.
 
+    The check looks for a filter that genuinely narrows the set: IV, CP, level, ATK/DEF/STA, PVP league, type, generation, gender, distance, time or `costume:` all count. These do **not** count on their own:
+
+    - `shiny` — almost every species can be shiny (see the note on `shiny` below)
+    - `form:`, `template:`, `clean` / `edit`
+    - `size:m` / `rarity:common` (or a range that still includes them) — these classes cover most spawns. A size or rarity filter that *excludes* the common class (e.g. `size:xxl`, `rarity:3-5`) does count.
+
 ### Track by Type
+
+Type names narrow `everything` or a list of named pokemon — they are **not** a pokemon selector on their own. `!track dragon iv:90` (no pokemon, no `everything`) matches nothing and replies with an error.
 
 === "Discord"
 
     ```
-    !track dragon iv:90                  # All dragon-type pokemon with 90%+ IV
-    !track water fire iv:100             # All water and fire types with 100% IV
+    !track everything dragon iv:90             # All dragon-type pokemon with 90%+ IV
+    !track everything water fire iv:100        # All water and fire types with 100% IV
+    !track dratini+ charmander+ dragon iv:90   # Only the dragon types from these lines
     ```
 
 === "Telegram"
 
     ```
-    /track dragon iv:90
-    /track water fire iv:100
+    /track everything dragon iv:90
+    /track everything water fire iv:100
     ```
 
+Using a type (or `gen:`) with `everything` stores one rule per matching species rather than a single catch-all rule.
+
 ### Track by Generation
+
+Like types, `gen:` narrows `everything` (or a list of named pokemon); it is not a selector on its own.
 
 === "Discord"
 
@@ -205,6 +218,28 @@ You can use either the pokemon name or its Pokedex number.
     /track pikachu form:libre
     ```
 
+`form:` works with `everything` too — `!track everything form:alola iv:90` creates one rule for every species that has an Alola form. Multi-word form names can be typed with spaces or underscores. Use `!info <pokemon>` (or `!info <pokemon> forms` for the full list) to see form names — recently-seen forms are listed first. An unknown form name is rejected rather than silently ignored.
+
+### Track by Costume
+
+=== "Discord"
+
+    ```
+    !track pikachu costume:holiday_2016  # Only that costume
+    !track pikachu costume:5             # Costume by ID
+    !track pikachu costume:0             # Only pokemon with NO costume
+    !track everything costume:5 iv:90    # Any species wearing costume 5
+    ```
+
+=== "Telegram"
+
+    ```
+    /track pikachu costume:holiday_2016
+    /track pikachu costume:0
+    ```
+
+Without `costume:` a rule matches any costume (or none). `costume:0` means "no costume". Use `!info costumes` for the full id/name list, or `!info <pokemon> costumes` for costumes recently seen on that species. An unknown costume name is rejected.
+
 ### Track by Rarity
 
 === "Discord"
@@ -221,36 +256,38 @@ You can use either the pokemon name or its Pokedex number.
     /track everything rarity:4
     ```
 
-Rarity levels: 1 (Common), 2 (Uncommon), 3 (Rare), 4 (Very Rare), 5 (Ultra Rare). Use `!info rarity` to see which species are in each tier.
+Rarity levels: 1 `common`, 2 `uncommon`, 3 `rare`, 4 `very-rare`, 5 `ultra-rare`, 6 `unseen`. Rarity is calculated from what your server's scanner has seen recently; use `!info rarity` to see which species are in each tier.
+
+!!! note "Single value = exact match"
+    A single rarity or size value is an **exact** match: `rarity:4` means Very Rare only, *not* "Very Rare or rarer". Use a range (`rarity:4-5`) or `maxrarity:` to cover several tiers.
+
+Names work as well as numbers — `rarity:rare`, `rarity:uncommon-rare`, `rarity:rare-ultra-rare`, `maxrarity:very-rare`. Because `-` separates a range, the hyphenated names `very-rare` / `ultra-rare` only work in `maxrarity:` or as the *second* half of a range: `rarity:very-rare` on its own is not recognised, so use `rarity:4` / `rarity:5` instead.
+
+!!! note
+    Tier 6 (`unseen`) is accepted, but the server never currently assigns it — species with no recent sightings have no rarity tier — so a `rarity:6` rule won't match anything.
 
 ### Track by Size
 
 === "Discord"
 
     ```
-    !track pikachu size:1                # Tiny size
-    !track pikachu size:5                # XXL size
+    !track pikachu size:xxs              # XXS only
+    !track pikachu size:xxl              # XXL only
+    !track pikachu size:xl-xxl           # XL or XXL
+    !track everything size:5 iv:90       # XXL anything with 90%+ IV
     ```
 
 === "Telegram"
 
     ```
-    /track pikachu size:1
+    /track pikachu size:xxs
+    /track pikachu size:xl-xxl
     ```
 
-### Track by Weight
+Sizes: 1 `xxs`, 2 `xs`, 3 `m`, 4 `xl`, 5 `xxl`. As with rarity, a single value is an exact match.
 
-=== "Discord"
-
-    ```
-    !track pikachu weight:0-1            # Lightweight pikachu
-    ```
-
-=== "Telegram"
-
-    ```
-    /track pikachu weight:0-1
-    ```
+!!! note "Weight filters removed"
+    `weight:` / `maxweight:` are no longer accepted — the scanner's weight value is unreliable (it is reset whenever the pokemon's display changes). Existing rules that already had a weight filter keep it.
 
 ### Track Evolutions
 
@@ -302,6 +339,45 @@ See [PVP Tracking](pvp.md) for the full PVP surface.
     /track pikachu great:1-5
     ```
 
+### Ping someone with the alert
+
+On Discord, @mentioning a user or role in a `!track` command stores the mention with the rule. When the rule fires, the mention is added to the alert so it actually pings — useful in shared channels.
+
+```
+!track dratini iv:100 @Rare-Hunters
+```
+
+### Shiny
+
+`shiny` is accepted by `!track` for compatibility but currently has no effect on matching — the rule is stored exactly as if `shiny` had not been typed.
+
+### Clean and Edit
+
+`clean` deletes the alert when the pokemon despawns. `edit` controls what happens when the scanner sends an update for a pokemon you have already been alerted about (for example IVs arriving after an initial no-IV sighting, or a weather-boost change):
+
+| Rule has `edit` | What you get on an update |
+|-----------------|---------------------------|
+| No | A new alert posted as a **threaded reply** to the original |
+| Yes | The original alert is **edited in place** |
+
+If the pokemon changes so that it **no longer matches** your rule (for example a Ditto reveal, a form/gender change, or a weather change that drops the boost), you receive a `monsterChanged` follow-up — again as a threaded reply, or an in-place edit with `edit` — so you know the original alert is no longer accurate. Your admin can turn change tracking off (`pokemon_change_tracking`), in which case updates arrive as ordinary new alerts.
+
+=== "Discord"
+
+    ```
+    !track dratini iv:90 edit
+    !track dratini iv:90 clean edit
+    ```
+
+=== "Telegram"
+
+    ```
+    /track dratini iv:90 edit
+    ```
+
+!!! note "5.3+"
+    On 5.2.x `edit` is accepted on `!track` but pokemon alerts are not edited. From 5.3, pokemon edits happen only while the original alert is recent (default 5 minutes, `pokemon_edit_window_mins`) — older alerts get a threaded reply instead so the update isn't lost up a busy channel. Admins can also make editing the default for an alert type (`[tracking] default_edit`); `!tracked` then shows those rules as editing even without the `edit` keyword.
+
 ## All Options
 
 | Option | Description | Example |
@@ -312,37 +388,53 @@ See [PVP Tracking](pvp.md) for the full PVP surface.
 | `cp:<low>-<high>` | CP range | `cp:2000-3000` |
 | `level:<n>` | Minimum pokemon level | `level:35` |
 | `level:<low>-<high>` | Pokemon level range | `level:30-35` |
+| `miniv:<n>`, `maxiv:<n>` | Single-sided IV bound | `maxiv:0` |
+| `mincp:<n>`, `maxcp:<n>` | Single-sided CP bound | `maxcp:1500` |
+| `maxlevel:<n>` | Maximum level | `maxlevel:30` |
 | `atk:<n>`, `def:<n>`, `sta:<n>` | Minimum individual IV (0-15) | `atk:15` |
 | `atk:<low>-<high>` etc. | Individual IV range | `atk:13-15` |
+| `maxatk:<n>`, `maxdef:<n>`, `maxsta:<n>` | Maximum individual IV | `maxatk:0` |
 | `d:<n>` | Distance in metres from your location | `d:500` |
 | `location:<name>` | Distance from a named location (requires `d:`) | `location:Home` |
 | `area:<name>[,<name>]` | Restrict to specific areas | `area:downtown` |
 | `t:<n>` | Minimum time remaining (seconds) | `t:300` |
 | `form:<name>` | Specific form name | `form:alolan` |
-| `gen:<n>` | Pokemon generation | `gen:1` |
-| `rarity:<n>` or `rarity:<low>-<high>` | Rarity tier (1-5) | `rarity:3-5` |
-| `size:<n>` or `size:<low>-<high>` | Size category (1-5) | `size:5` |
-| `weight:<low>-<high>` | Weight range | `weight:0-1` |
+| `costume:<name\|id>` | Specific costume (`0` = no costume) | `costume:0` |
+| `<type>` | Narrow `everything`/named pokemon by type | `dragon` |
+| `gen:<n>` | Narrow `everything`/named pokemon by generation | `gen:1` |
+| `rarity:<n>` or `rarity:<low>-<high>` | Rarity tier (1-6); single value = exact | `rarity:3-5` |
+| `maxrarity:<n\|name>` | Maximum rarity tier | `maxrarity:ultra-rare` |
+| `size:<n>` or `size:<low>-<high>` | Size (1-5 or `xxs`..`xxl`); single value = exact | `size:xxl` |
+| `maxsize:<n\|name>` | Maximum size | `maxsize:xs` |
 | `great:<n>`, `ultra:<n>`, `little:<n>` | PVP league rank (single or range) | `great:1-10` |
+| `greathigh:<n>`, `ultrahigh:<n>`, `littlehigh:<n>` | Best (lowest) PVP rank to accept | `greathigh:3` |
 | `greatcp:<n>`, `ultracp:<n>`, `littlecp:<n>` | Minimum league CP | `greatcp:1400` |
 | `cap:<n>` | PVP level cap | `cap:50` |
+| `mega`, `mega:x`, `mega:y` | PVP rank as a mega evolution (with a league filter) | `mega:x` |
 | `male` / `female` / `genderless` | Gender filter | `male` |
 | `template:<n>` | Alert template (see `!info templates`) | `template:2` |
 | `clean` | Auto-delete expired alerts | `clean` |
-| `edit` | Single message, edited in place | `edit` |
+| `edit` | Edit the original alert on updates instead of replying (5.3+) | `edit` |
+| `@mention` | Discord: ping this user/role with the alert | `@Hunters` |
 | `everything` | All pokemon | `everything` |
 | `individually` | Track as individual rows | `individually` |
 
-Legacy no-colon forms (`iv90`, `cp2000`, `d500`, `maxiv50`) and the explicit `maxiv:N`/`maxcp:N`/etc. forms are still accepted, but the colon and range forms are recommended.
+Legacy no-colon forms (`iv90`, `cp2000`, `d500`, `maxiv50`) are still accepted, but the colon and range forms are recommended.
+
+PVP ranks are limited by your admin's configuration: the worst rank you can ask for is capped at `[pvp] filter_max_rank`, and the minimum league CP is raised to at least `filter_great_min_cp` / `filter_ultra_min_cp` / `filter_little_min_cp`. See [PVP Tracking](pvp.md).
 
 ## Removing Tracks
 
 === "Discord"
 
     ```
-    !untrack pikachu                     # Stop tracking pikachu
+    !untrack pikachu                     # Remove every pikachu rule (all forms/leagues)
+    !untrack pikachu costume:5           # Only pikachu rules for costume 5
+    !untrack gen:1                       # Every rule for a gen 1 species
+    !untrack dragon                      # Every rule for a dragon-type species
     !untrack everything                  # Remove all pokemon tracking
     !untrack id:45                       # Remove one specific rule by UID (see !tracked)
+    !track remove pikachu                # Same as !untrack pikachu
     ```
 
 === "Telegram"
@@ -352,6 +444,19 @@ Legacy no-colon forms (`iv90`, `cp2000`, `d500`, `maxiv50`) and the explicit `ma
     /untrack everything
     /untrack id:45
     ```
+
+`form:` is not accepted when removing — `!untrack <pokemon>` removes all forms; use `id:` to remove a single rule. `!untrack gen:N` and `!untrack <type>` remove rules for individual species only; they don't touch an `everything` catch-all rule.
+
+### Removing other alert types
+
+If the first word after `!untrack` is another alert type, the command is passed to that type's command as a removal:
+
+```
+!untrack raid id:12                  # Same as !raid remove id:12
+!untrack quest everything            # Same as !quest remove everything
+```
+
+Recognised types: `raid`, `egg`, `quest`, `invasion`, `incident`, `lure`, `nest`, `gym`, `fort`, `maxbattle`.
 
 ## Viewing Your Tracks
 
